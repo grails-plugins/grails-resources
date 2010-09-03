@@ -1,0 +1,19 @@
+<plugin name='resources' version='1.0-test1' grailsVersion='1.2 &gt; *'>
+  <author>Marc Palmer</author>
+  <authorEmail>marc@grailsrocks.com</authorEmail>
+  <title>Resource</title>
+  <description>\
+HTML resource management enhancements to replace g.resource etc.
+</description>
+  <documentation>http://grails.org/plugin/resources</documentation>
+  <resources>
+    <resource>BootStrap</resource>
+    <resource>BuildConfig</resource>
+    <resource>DataSource</resource>
+    <resource>UrlMappings</resource>
+    <resource>org.grails.plugin.resource.ResourceService</resource>
+    <resource>org.grails.plugin.resource.ResourceTagLib</resource>
+  </resources>
+  <dependencies />
+  <behavior />
+</plugin>
