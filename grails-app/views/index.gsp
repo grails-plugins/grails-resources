@@ -1,6 +1,7 @@
 <html>
 <head>
 <g:set var="output">
+<%-- Here we pull in our smart links, and capture them just for sake of demo page output --%>
 <r:module name="jquery-ui"/>
 <r:module name="blueprint"/>
 <r:module name="main"/>

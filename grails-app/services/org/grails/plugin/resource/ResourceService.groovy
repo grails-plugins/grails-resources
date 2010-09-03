@@ -14,6 +14,13 @@ class ResourceService {
     
     List<Closure> resourceMappers = []
         
+    /**
+     * Resource mappers can mutate URLs any way they like. They are exeecuted in the order
+     * registered, so plugins must use dependsOn & loadAfter to set their ordering correctly before
+     * they register with us
+     * The closure must take 3 args - the current resource url, the original type of the resource 
+     * (js/css/img) and any attributes declared on the resource
+     */    
     void addResourceMapper(Closure mapper) {
         resourceMappers << mapper
     }

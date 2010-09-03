@@ -46,7 +46,6 @@ class ResourceModule {
                 if (args.url instanceof Map) {
                     args.url = getResourceUrl(args.url)
                 }
-                println "Making resource: $args from $i"
                 def r = newResourceFromArgs(args)
                 this.resources << r
             } else if (i instanceof String) {
@@ -68,7 +67,7 @@ class ResourceModule {
     void applyMappings(List<Closure> mappers) {
         resources.each { r ->
             mappers.each { m ->
-                r.actualUrl = m(r.actualUrl)
+                r.actualUrl = m(r.actualUrl, r.sourceType, r.attributes)
             }
         }
     }
