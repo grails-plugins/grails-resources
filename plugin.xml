@@ -1,4 +1,4 @@
-<plugin name='resources' version='1.0-test2' grailsVersion='1.2 &gt; *'>
+<plugin name='resources' version='1.0-test3' grailsVersion='1.2 &gt; *'>
   <author>Marc Palmer</author>
   <authorEmail>marc@grailsrocks.com</authorEmail>
   <title>Resources</title>
@@ -9,11 +9,15 @@ HTML resource management enhancements to replace g.resource etc.
   <resources>
     <resource>BootStrap</resource>
     <resource>BuildConfig</resource>
+    <resource>Config</resource>
     <resource>DataSource</resource>
     <resource>UrlMappings</resource>
+    <resource>org.grails.plugin.resource.ResourcesFilters</resource>
     <resource>org.grails.plugin.resource.ResourceService</resource>
     <resource>org.grails.plugin.resource.ResourceTagLib</resource>
   </resources>
-  <dependencies />
+  <dependencies>
+    <plugin name='logging' version='1.0 &gt; *' />
+  </dependencies>
   <behavior />
 </plugin>

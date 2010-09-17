@@ -11,9 +11,13 @@ class ResourceModule {
     
     List<ResourceMeta> resources = []
     List<String> dependsOn = []
+
+    ResourceModule(name) {
+        this.name = name
+    }
     
     ResourceModule(name, Map resourceInfo) {
-        this.name = name
+        this(name)
         def args = [:]
         args.putAll(resourceInfo)
         if (args.url instanceof Map) {

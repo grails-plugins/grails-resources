@@ -57,17 +57,19 @@ class ResourceTagLib {
     def resourceService
     
     boolean usingResource(url) {
+        url = url.toString()
         if (log.debugEnabled) {
             log.debug "Checking if this request has already pulled in [$url]"
         }
         def trk = request.resourceTracker
-        if (!trk) {
+        if (trk == null) {
             trk = new HashSet()
             request.resourceTracker = trk
         }
         
         if (!trk.contains(url)) {
             trk.add(url)
+            println "trk is ${trk}"
             if (log.debugEnabled) {
                 log.debug "This request has not already pulled in [$url]"
             }
@@ -96,16 +98,19 @@ class ResourceTagLib {
     }
     
     def resourceLink = { attrs ->
+        if (log.debugEnabled) {
+            log.debug "resourceLink with $attrs"
+        }
 	  	def url = attrs.remove('url')
 	  	if (url == null) {
 	  	    if (attrs.uri) {
 	  	        // Might be app-relative URI
-	  	        url = g.createLink(uri:attrs.remove('uri'))
+	  	        url =  g.createLink(uri:resourceService.staticUrlPrefix+attrs.remove('uri'))
 	  	    } else {
         	    url = r.resource(plugin:attrs.remove('plugin'), dir:attrs.remove('dir'), file:attrs.remove('file')).toString()
     	    }
     	} else if (url instanceof Map) {
-    	    url = g.resource(url).toString()
+    	    url = r.resource(url).toString()
     	}
     	
     	if (usingResource(url)) {
@@ -121,7 +126,7 @@ class ResourceTagLib {
                 log.debug "Resource [${url}] has type [$t]"
             }
             
-            def typeInfo = [:] + LINK_RESOURCE_MAPPINGS[t]
+            def typeInfo = LINK_RESOURCE_MAPPINGS[t]?.clone() 
             if (!typeInfo) {
                 throwTagError "Unknown resourceLink type: ${t}"
             }
@@ -140,7 +145,13 @@ class ResourceTagLib {
     
     def module = { attrs ->
         def name = attrs.name
+        if (log.debugEnabled) {
+            log.debug "Checking if module [${name}] is already loaded..."
+        }
         if (usingModule(name)) {
+            if (log.debugEnabled) {
+                log.debug "Getting info for module [${name}]"
+            }
             def module = resourceService.getModule(name)
             if (!module) {
                 throw new IllegalArgumentException("No module found with name [$name]")
@@ -148,14 +159,26 @@ class ResourceTagLib {
             def s = new StringBuilder()
             // Write out any dependent modules first
             if (module.dependsOn) {
+                if (log.debugEnabled) {
+                    log.debug "Rendering the dependencies of module [${name}]"
+                }
                 module.dependsOn.each { modName ->
                     s << r.module(name:modName)
                 }
             }
+            if (log.debugEnabled) {
+                log.debug "Rendering the resources of module [${name}]"
+            }
             module.resources.each { r ->
+                if (!r.exists()) {
+                    throw new IllegalArgumentException("Module [$name] depends on resource [${r.sourceUrl}] but the file cannot be found")
+                }
                 def args = r.attributes.clone()
                 args.uri = r.actualUrl
                 args.wrapper = r.prePostWrapper
+                if (log.debugEnabled) {
+                    log.debug "Rendering one of the module's resource links: ${args}"
+                }
                 s << resourceLink(args)
                 s << '\n'
             }
@@ -163,8 +186,25 @@ class ResourceTagLib {
         }
     }
 
+    /**
+     *
+     * @todo this currently won't for for absolute="true" invocations
+     */
     def resource = { attrs ->
-        // Resolve against modified resource names
-        out << g.resource(attrs)
+        def ctxPath = request.contextPath
+        def uri = g.resource(attrs).toString()
+        // Chop off context path
+        println "uri: $uri"
+        def reluri = uri[ctxPath.size()..-1]
+        def res = resourceService.getResourceMetaForURI(reluri)
+        if (res) {
+            out << ctxPath+resourceService.staticUrlPrefix+res.actualUrl
+        } else {
+            // We don't know about this, back out and use grails URI
+            if (log.warnEnabled) {
+                log.warn "Invocation of <r:resource> for a resource that apparently doesn't exist: $uri"
+            }
+            out << uri
+        }
     }
 }

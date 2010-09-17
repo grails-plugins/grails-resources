@@ -5,17 +5,25 @@ package org.grails.plugin.resource
  */
 class ResourceMeta {
     String sourceUrl
-    String actualUrl
-    String cachedTagText
-    String sourceType // one of "img", "css" or "js"
+    String minifiedUrl
+    String cdnUrl
 
+    String actualUrl
+    String sourceType // one of "img", "css" or "js"
+    String contentType
+
+    String cachedTagText
+    File processedFile
+    
     // For per-resource options like "minify", 'zip'
     Map attributes = [:]
-    Closure prePostWrapper
-    
-    void setSourceUrl(String s) {
-        sourceUrl = s
-        actualUrl = s
-    }
 
+    Closure prePostWrapper
+
+    // A list of Closures taking request & response. Delegates to resourceMeta
+    List requestProcessors = []
+    
+    boolean exists() {
+        processedFile != null
+    }
 }
