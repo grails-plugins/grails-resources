@@ -2,7 +2,7 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class ResourcesGrailsPlugin {
     // the plugin version
-    def version = "1.0-test3"
+    def version = "1.0-test4"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2 > *"
     // the other plugins this plugin depends on
@@ -46,25 +46,7 @@ HTML resource management enhancements to replace g.resource etc.
         }
         return prf
     }
-    /*
-    def getConfigBaseUrl = {
-        def config = ConfigurationHolder.config
-        def base = config.grails.resources.base.url
-        if (!(base instanceof String)) {
-            println "Base"
-            def serverURL = config.grails.serverURL
-            if (!(serverURL instanceof String)) {
-                println "Oh no! Your grails.serverURL property is not set. You need this, or grails.resources.base.url to be set"
-                serverURL = '/'
-            }
-            def munged = serverURL - '://'
-            println "Base munged: $munged"
-            base = munged[munged.indexOf('/')..-1]
-        }
-        println "Base post munged: $base"
-        return base
-    }
-*/
+
     def doWithWebDescriptor = { webXml ->
         
         def prf = getConfigUriPrefix()
@@ -113,16 +95,12 @@ HTML resource management enhancements to replace g.resource etc.
 
     def doWithApplicationContext = { applicationContext ->
         def prf = getConfigUriPrefix()
-        //def base = getConfigBaseUrl()
         
-        println "Loading with config: prefix = [$prf]"
         applicationContext.resourceService.staticUrlPrefix = '/'+prf
     }
 
     def onChange = { event ->
-        // TODO Implement code that is executed when any artefact that this plugin is
-        // watching is modified and reloaded. The event contains: event.source,
-        // event.application, event.manager, event.ctx, and event.plugin.
+        // @todo monitor the static resources mapped and flush mappings from cache
     }
 
     def onConfigChange = { event ->

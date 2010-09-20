@@ -144,6 +144,11 @@ class ResourceService {
             return // do nothing, 404s
         }
         
+        r.contentType = ServletContextHolder.servletContext.getMimeType(uri)
+        if (log.debugEnabled) {
+            log.debug "Resource [$uri] has content type [${r.contentType}]"
+        }
+
         try {
             def fileSystemDir = uri[0..uri.lastIndexOf('/')-1].replaceAll('/', File.separator)
             def fileSystemFile = uri[uri.lastIndexOf('/')+1..-1].replaceAll('/', File.separator)
