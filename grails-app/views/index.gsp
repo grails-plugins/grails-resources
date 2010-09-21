@@ -17,5 +17,8 @@
     <pre>
         ${output.encodeAsHTML()}
     </pre>
+    <p>Resource cache info:</p>
+    <pre>${grailsApplication.mainContext.resourceService.dumpResources().encodeAsHTML()}</pre>
+    
 </body>
 </html>

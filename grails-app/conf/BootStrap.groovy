@@ -11,8 +11,8 @@ class BootStrap {
         resourceService.with {
             module 'jquery', 'js/jquery/jquery-1.4.2-min.js'
             module 'jquery-ui', [
-                [url:[dir:'js/jquery-ui', file:'jquery-ui-1.8-min.js']],
-                [url:[dir:'js/jquery-ui', file:'jquery-ui-1.8-min.css']]
+                [url:[dir:'js/jquery-ui', file:'jquery-ui-1.8-min.js'], nominify:true],
+                [url:[dir:'js/jquery-ui', file:'jquery-ui-1.8-min.css'], nominify:true]
             ], ['jquery']
 
             module 'blueprint', [

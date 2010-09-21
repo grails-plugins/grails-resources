@@ -2,7 +2,7 @@
 Features:
 
 
-* Creates appropriate link content in <head> section for resource
+* Creates appropriate <link>/<script> content in <head> section for resources
 
 * Allows definition of resource modules, and single tag to render the links to
   all the resources required, even modules they depend on
@@ -39,6 +39,12 @@ Will also soon:
   declared by other plugins (e.g. rebundle plugin files into different bundles)
 
 * Support "flavours" of resources e.g. source, CDN, minified etc
+
+* Support for rendering external JS resources at end of page instead of inline
+  with the CSS, e.g. <r:module loadScripts="false"/> and <r:loadScripts/>
+
+* Support for defining which mappers are to be assigned to each file type -
+  e.g. allow cachability of images but not gzipping of them
 
 * Have a better way (DSL) to define resources
 
@@ -82,15 +88,14 @@ config.resources.modules << {
 
 	// Example of build-time already optimized resources
 	'prepared-statics' {
-		resource uri:'pdfs/2010-catalogue.pdf', actualUri:'pdfs/2010-catalogue.pdf.gz', nogzip: true
+		resource uri:'pdfs/2010-catalogue.pdf', actualUri:'pdfs/2010-catalogue.pdf.gz', nozip: true
 	}
 	
     'main' {
         resource 'css/main.css'
         resource 'js/application.js'
-		// A generated resource that resource plugins can see should never be cached and always needs
-		// to be re-processed for each request
-		resource uri:'generator/user-specific.css', dynamic: true, nominify:true
+		// A generated resource that resource plugins can see should be cached per-user
+		resource uri:'generator/user-specific.css', userSpecific: true, nominify:true
     }
 }
 
@@ -105,3 +110,8 @@ config.resources.modules << {
 
 * Cache the HTML needed to include the JS and CSS resources, so including these becomes very efficient
 
+* Allow app author to control which mappers are applied, in which order, for different resources
+
+* Allow app author to control which URIs are subject to filtering, not just types. E.g. a CMS may not want all its images and CSS processed.
+
+* Detect ?debugResources var in request params of *Referer* and use clean non-processed resources (sourceUrl) for that request
