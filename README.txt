@@ -20,7 +20,8 @@ Features:
   any of the new tags this plugin supplies, so legacy apps can make use of it. The one caveat:
   other plugins that use this plugin to provide long-term caching in the browser will not work
   as a redirect is involved as the resources have no unique name and hence cannot be eternally 
-  cached in the client.
+  cached in the client. Suitable for setups where you have a front-side proxy/cache and don't
+  want to change any code. Instant win!
 
 * Supports flags for resources that other resource processing plugins can use during the processing chain,
 
@@ -62,14 +63,16 @@ Will also soon:
 //      <flavour-name> grouping name for alternative sets of resources to be chosen at build/runtime (?)
 config.resources.modules << {
     'jquery' {
-        resource 'js/jquery/jquery-1.4.2.js', bundle:'jq'
+        resource url:'js/jquery/jquery-1.4.2.js', bundle:'jq'
     }
     'jquery-ui' {
         dependsOn 'jquery'
         
         // Default resources with ids so they can be inherited/reused
-        resource id:'jq-ui-js', url:[dir:'js/jquery-ui', file:'jquery-ui-1.8-min.css'], nominify: true, bundle:'jq'
-        resource id:'jq-ui-css', url:[dir:'js/jquery-ui', file:'jquery-ui-1.8-min.css'], nominify: true, bundle:'jq'
+        resource id:'jq-ui-js', url:[dir:'js/jquery-ui', file:'jquery-ui-1.8-min.css'], 
+			attrs:[media:'screen'], nominify: true, bundle:'jq'
+        resource id:'jq-ui-css', url:[dir:'js/jquery-ui', file:'jquery-ui-1.8-min.css'], 
+			nominify: true, bundle:'jq'
 
         // Alternative resources to use if flavour desired = cdn
         // Set with resources.flavour = 'cdn' in Config
@@ -81,8 +84,12 @@ config.resources.modules << {
     }
 
     'blueprint' {
-        resource url:[dir:'css/blueprint',file:'main.css']
+        resource url:[dir:'css/blueprint',file:'main.css'], 
+			attrs:[media:'screen']
+        resource url:[dir:'css/blueprint',file:'print.css'], 
+			attrs:[media:'print']
         resource url:[dir:'css/blueprint',file:'ie.css'], 
+			attrs:[media:'screen'],
             wrapper: { s -> "<!--[if lt IE 8]>$s<![endif]-->" }
     }
 
@@ -92,10 +99,13 @@ config.resources.modules << {
 	}
 	
     'main' {
-        resource 'css/main.css'
-        resource 'js/application.js'
+		// Pass-through attributes rendered by r:resourceLink
+		resource url:"images/logo.png", attrs:[width:100, height:48]
+		
+        resource url:'css/main.css'
+        resource url:'js/application.js'
 		// A generated resource that resource plugins can see should be cached per-user
-		resource uri:'generator/user-specific.css', userSpecific: true, nominify:true
+		resource url:'generator/user-specific.css', userSpecific: true, nominify:true
     }
 }
 
@@ -115,3 +125,7 @@ config.resources.modules << {
 * Allow app author to control which URIs are subject to filtering, not just types. E.g. a CMS may not want all its images and CSS processed.
 
 * Detect ?debugResources var in request params of *Referer* and use clean non-processed resources (sourceUrl) for that request
+
+* Add option to CachedResources plugin to flatten the directory structure for shorter uris
+
+* Make CachedResources use base62 encoding to shorten hashed url links

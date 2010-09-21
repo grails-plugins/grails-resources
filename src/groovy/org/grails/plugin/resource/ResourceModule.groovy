@@ -38,6 +38,7 @@ class ResourceModule {
         }
         def r = new ResourceMeta(sourceUrl: url)
         r.prePostWrapper = args.remove('wrapper')
+        r.tagAttributes = args.remove('attrs')
         r.attributes.putAll(args)
         return r        
     }

@@ -4,6 +4,9 @@ import java.util.concurrent.ConcurrentHashMap
 
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+
+import org.grails.resources.ResourceModulesBuilder
 
 /**
  * @todo Move all this code out into a standard Groovy bean class and declare the bean in plugin setup
@@ -102,6 +105,9 @@ class ResourceService {
                         log.debug "Running request processors on ${request.requestURI}"
                     }
                     inf.requestProcessors.each { processor ->
+                        if (log.debugEnabled) {
+                            log.debug "Applying request processor on ${request.requestURI}: "+processor.class.name
+                        }
                         def p = processor.clone()
                         p.delegate = inf
                         p(request, response)
@@ -284,27 +290,41 @@ class ResourceService {
         }
     }
     
-    /*
-    def bundle(String name, resourceNames) {
-        def info = []
-        info.addAll(resourceNames)
-        resourceNamesByBundle[name] = info
-    }
-*/
-
     /**
      * Resolve a resource to a URL by resource name
      */
     def getModule(name) {
         modulesByName[name]
     }
-    
-/*
-    def resourcesForBundle(String bundleName) {
         
+    void forgetResources() {
+        modulesByName.clear()
+        processedResourcesByURI.clear()
     }
-*/
-
+    
+    void loadResourcesFromConfig() {
+        forgetResources()
+        
+        // Placeholder code, we might support lists of config closures in future
+        def moduleClosures = [ConfigurationHolder.config.grails.resources.modules]
+        if (log.debugEnabled) {
+            log.debug "Loading resource module definitions from Config... "+moduleClosures
+        }
+        moduleClosures?.each { clo ->
+            def builder = new ResourceModulesBuilder()
+            clo.delegate = builder
+            clo.resolveStrategy = Closure.DELEGATE_FIRST
+            clo()
+            
+            if (log.debugEnabled) {
+                log.debug "Resource module definitions for [${builder._modules}] found in Config..."
+            }
+            builder._modules.each { m ->
+                module(m.name, m.resources, m.depends)
+            }
+        }
+    }
+    
     def dumpResources(toLog = true) {
         def s1 = new StringBuilder()
         modulesByName.keySet().sort().each { moduleName ->
@@ -318,6 +338,7 @@ class ResourceService {
                 s1 << "             -- mime type: ${resource.contentType}\n"
                 s1 << "             -- url for linking: ${resource.actualUrl}\n"
                 s1 << "             -- attributes: ${resource.attributes}\n"
+                s1 << "             -- tag attributes: ${resource.tagAttributes}\n"
             }
         }
         def s2 = new StringBuilder()

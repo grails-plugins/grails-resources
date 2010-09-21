@@ -17,6 +17,9 @@ class ResourceMeta {
     
     // For per-resource options like "minify", 'zip'
     Map attributes = [:]
+    
+    // For per-resource tag resource attributes like "media", 'width', 'height' etc
+    Map tagAttributes = [:]
 
     Closure prePostWrapper
 

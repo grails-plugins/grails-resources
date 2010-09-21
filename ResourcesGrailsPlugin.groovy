@@ -2,7 +2,7 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class ResourcesGrailsPlugin {
     // the plugin version
-    def version = "1.0-test5"
+    def version = "1.0-alpha"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2 > *"
     // the other plugins this plugin depends on
@@ -90,7 +90,6 @@ HTML resource management enhancements to replace g.resource etc.
     }
 
     def doWithDynamicMethods = { ctx ->
-        // TODO Implement registering dynamic methods to classes (optional)
     }
 
     def doWithApplicationContext = { applicationContext ->
@@ -104,7 +103,6 @@ HTML resource management enhancements to replace g.resource etc.
     }
 
     def onConfigChange = { event ->
-        // TODO Implement code that is executed when the project configuration changes.
-        // The event is the same as for 'onChange'.
+        event.application.mainContext.resourceService.loadResourcesFromConfig()
     }
 }

@@ -1,5 +1,7 @@
 package org.grails.plugin.resource
 
+import grails.util.Environment
+
 class ResourceTagLib {
     static namespace = "r"
     
@@ -69,7 +71,6 @@ class ResourceTagLib {
         
         if (!trk.contains(url)) {
             trk.add(url)
-            println "trk is ${trk}"
             if (log.debugEnabled) {
                 log.debug "This request has not already pulled in [$url]"
             }
@@ -104,8 +105,9 @@ class ResourceTagLib {
 	  	def url = attrs.remove('url')
 	  	if (url == null) {
 	  	    if (attrs.uri) {
-	  	        // Might be app-relative URI
-	  	        url =  g.createLink(uri:resourceService.staticUrlPrefix+attrs.remove('uri'))
+	  	        // Might be app-relative resource URI 
+//	  	        url = g.createLink(uri:resourceService.staticUrlPrefix+attrs.remove('uri'))
+	  	        url = r.resource(uri:attrs.remove('uri'))
 	  	    } else {
         	    url = r.resource(plugin:attrs.remove('plugin'), dir:attrs.remove('dir'), file:attrs.remove('file')).toString()
     	    }
@@ -116,7 +118,8 @@ class ResourceTagLib {
     	if (usingResource(url)) {
         	def t = attrs.remove('type')
             if (!t) {
-                def ext = url[url.lastIndexOf('.')+1..-1]
+                def extUrl = url.indexOf('?') > 0 ? url[0..url.indexOf('?')-1] : url
+                def ext = extUrl[url.lastIndexOf('.')+1..-1]
                 t = LINK_EXTENSIONS_TO_TYPES[ext]
                 if (!t) {
                     t = ext
@@ -169,12 +172,13 @@ class ResourceTagLib {
             if (log.debugEnabled) {
                 log.debug "Rendering the resources of module [${name}]"
             }
+            def debugMode = (Environment.current == Environment.DEVELOPMENT) && params.debugResources
             module.resources.each { r ->
                 if (!r.exists()) {
                     throw new IllegalArgumentException("Module [$name] depends on resource [${r.sourceUrl}] but the file cannot be found")
                 }
-                def args = r.attributes.clone()
-                args.uri = r.actualUrl
+                def args = r.tagAttributes?.clone() ?: [:]
+                args.uri = debugMode ? r.sourceUrl : r.actualUrl
                 args.wrapper = r.prePostWrapper
                 if (log.debugEnabled) {
                     log.debug "Rendering one of the module's resource links: ${args}"
@@ -187,14 +191,21 @@ class ResourceTagLib {
     }
 
     /**
-     *
+     * Get the URL for a resource
      * @todo this currently won't for for absolute="true" invocations
      */
     def resource = { attrs ->
         def ctxPath = request.contextPath
-        def uri = g.resource(attrs).toString()
+        def uri = attrs.uri ? ctxPath+attrs.uri : g.resource(attrs).toString()
+        def debugMode = (Environment.current == Environment.DEVELOPMENT) && params.debugResources
+
+        // Get out quick and add param to tell filter we don't want any fancy stuff
+        if (debugMode) {
+            out << uri+"?debug=y"
+            return
+        }
+        
         // Chop off context path
-        println "uri: $uri"
         def reluri = uri[ctxPath.size()..-1]
         def res = resourceService.getResourceMetaForURI(reluri)
         if (res) {

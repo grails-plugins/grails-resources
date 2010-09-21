@@ -1,16 +1,14 @@
 package org.grails.resources
 
-class ResourceModulesBuilder {
+class ResourceModulesBuilder implements GroovyInterceptable {
     
-    void dependsOn(moduleNameOrNames) {
-        
-    } 
-    
-    void resource(args) {
-        
-    }
+    def _modules = []
     
     def invokeMethod(String name, args) {
-        
+        System.out.println "RMB mmE: $name, $args"
+        def c = (Closure)args[0]
+        def m = new ModuleBuilder(c)
+        m._build()
+        _modules << [name:name, depends:m._depends, resources:m._resources]
     }
 }
