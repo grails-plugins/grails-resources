@@ -124,7 +124,7 @@ class ResourceService {
         }
     }
     
-    ResourceMeta getResourceMetaForURI(uri, adHocResource = true) {
+    ResourceMeta getResourceMetaForURI(uri, adHocResource = true, Closure postProcessor = null) {
         def r = processedResourcesByURI[uri]
 
         // If we don't already have it, its not been declared in the DSL and its
@@ -157,6 +157,9 @@ class ResourceService {
             // Only if the URI mapped to a real file, do we add the resource
             // Prevents DoS with zillions of 404s
             if (r.exists()) {
+                if (postProcessor) {
+                    postProcessor(r)
+                }
                 synchronized (mod.resources) {
                     // Prevent concurrent requests resulting in multiple additions of same resource
                     if (!mod.resources.find({ x -> x.sourceUrl == r.sourceUrl }) ) {
@@ -198,9 +201,12 @@ class ResourceService {
             
             // copy the file ready for mutation
             r.processedFile = new File(staticDir, fileSystemFile)
-            if (!r.processedFile.exists()) {
-                r.processedFile << origResource
+            // Delete the existing file - it may be from previous release, we cannot tell.
+            if (r.processedFile.exists()) {
+                assert r.processedFile.delete()
             }
+            // Now copy in the resource from this app deployment
+            r.processedFile << origResource
             
             r.actualUrl = r.sourceUrl
             
@@ -339,6 +345,7 @@ class ResourceService {
                 s1 << "             -- url for linking: ${resource.actualUrl}\n"
                 s1 << "             -- attributes: ${resource.attributes}\n"
                 s1 << "             -- tag attributes: ${resource.tagAttributes}\n"
+                s1 << "             -- defer: ${resource.defer}\n"
             }
         }
         def s2 = new StringBuilder()

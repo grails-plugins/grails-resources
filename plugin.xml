@@ -1,4 +1,4 @@
-<plugin name='resources' version='1.0-alpha' grailsVersion='1.2 &gt; *'>
+<plugin name='resources' version='1.0-alpha2' grailsVersion='1.2 &gt; *'>
   <author>Marc Palmer</author>
   <authorEmail>marc@grailsrocks.com</authorEmail>
   <title>Resources</title>
@@ -12,7 +12,6 @@ HTML resource management enhancements to replace g.resource etc.
     <resource>DataSource</resource>
     <resource>ResourcesBootStrap</resource>
     <resource>UrlMappings</resource>
-    <resource>org.grails.plugin.resource.ResourcesFilters</resource>
     <resource>org.grails.plugin.resource.ResourceService</resource>
     <resource>org.grails.plugin.resource.ResourceTagLib</resource>
   </resources>

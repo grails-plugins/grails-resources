@@ -2,7 +2,7 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class ResourcesGrailsPlugin {
     // the plugin version
-    def version = "1.0-alpha"
+    def version = "1.0-alpha2"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2 > *"
     // the other plugins this plugin depends on
@@ -40,7 +40,7 @@ HTML resource management enhancements to replace g.resource etc.
     
     def getConfigAdHocExtensions = {
         def config = ConfigurationHolder.config.grails.resources
-        def prf = config.adhoc.extension
+        def prf = config.adhoc.extensions
         if (!(prf instanceof List)) {
             prf = DEFAULT_ADHOC_EXTENSIONS
         }

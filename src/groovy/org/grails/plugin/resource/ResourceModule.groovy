@@ -37,6 +37,7 @@ class ResourceModule {
             url = '/'+url
         }
         def r = new ResourceMeta(sourceUrl: url)
+        r.defer = args.remove('defer')
         r.prePostWrapper = args.remove('wrapper')
         r.tagAttributes = args.remove('attrs')
         r.attributes.putAll(args)
@@ -66,19 +67,8 @@ class ResourceModule {
         this.resources = this.resources.asImmutable()
     }
     
-    /**
-     * Go through all resources, and apply all mappers to each
-     */
-    void applyMappings(List<Closure> mappers) {
-        resources.each { r ->
-            mappers.each { m ->
-                r.actualUrl = m(r.actualUrl, r.sourceType, r.attributes)
-            }
-        }
-    }
     
-    
-// ********************* EVIL ***********************
+// ********************* EVIL - I HATE INABILITY TO REUSE! ***********************
     /**
      * Copied from ApplicationTagLib
      */

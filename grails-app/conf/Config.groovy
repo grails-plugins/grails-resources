@@ -22,10 +22,10 @@ environments {
     }
 }
 
-
+//grails.resources.defer.default=false
 grails.resources.modules = {
     'jquery' { 
-        resource url:'js/jquery/jquery-1.4.2-min.js', nominify:true
+        resource url:'js/jquery/jquery-1.4.2-min.js', nominify:true, defer:false
     }
     'jquery-ui' {
         dependsOn 'jquery'

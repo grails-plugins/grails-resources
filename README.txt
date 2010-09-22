@@ -31,6 +31,13 @@ Features:
 
 * Provides a uniform resource API that other plugins can use to prevent duplication of resources in pages
 
+* Support for rendering external JS resources at end of page instead of inline
+
+* DSL to define resources
+
+* Detect ?debugResources var in request params of *Referer* and use clean non-processed resources (sourceUrl) for that request
+
+
 Will also soon:
 
 * Add linkOverride mechanism
@@ -41,13 +48,35 @@ Will also soon:
 
 * Support "flavours" of resources e.g. source, CDN, minified etc
 
-* Support for rendering external JS resources at end of page instead of inline
-  with the CSS, e.g. <r:module loadScripts="false"/> and <r:loadScripts/>
-
 * Support for defining which mappers are to be assigned to each file type -
   e.g. allow cachability of images but not gzipping of them
 
-* Have a better way (DSL) to define resources
+* Support for parameterized resources eg plugins or themes, by passing a map to the linking tags, which will result
+	in new resources being created from the parameterized template:
+	
+    resource id:'jq-ui-css', url:[dir:'js/jquery-ui/themes/$theme', file:'jquery-ui-1.8-custom-min.css'], minified: true
+
+  Invoking <r:dependsOn name="jquery-ui" args="[theme:'cupertino']"/> would put "cupertino" into the resource with $theme substituted.	
+
+* Application-specific resource dependency overrides (e.g. force a plugin you use to use a newer version of jquery)
+
+* Cache the HTML needed to include the JS and CSS resources, so including these becomes very efficient
+
+* Allow app author to control which URIs are subject to filtering, not just types. E.g. a CMS may not want all its images and CSS processed.
+
+* Add option to CachedResources plugin to flatten the directory structure for shorter uris
+
+* Make CachedResources use base62 encoding to shorten hashed url links
+
+* Make SmartImageResources plugin that adds an <r:img> tag that uses
+  <r:resource> to locate the resource and renders out width and height that
+  are pre-calculated by parsing the image
+
+* Support for apps to update the resource definitions of plugins e.g. to force no-defer on jquery
+
+
+DSL FULL FEATURE (NOT ALL IMPL'D) EXAMPLE
+
 
 // App and plugins stash their module DSL definitions into Config.
 //
@@ -61,7 +90,8 @@ Will also soon:
 //      dependsOn <string-module-id>
 //      dependsOn <list-of-string-module-id>
 //      <flavour-name> grouping name for alternative sets of resources to be chosen at build/runtime (?)
-config.resources.modules << {
+grails.resources.defer.default = 'true'
+grails.resources.modules << {
     'jquery' {
         resource url:'js/jquery/jquery-1.4.2.js', bundle:'jq'
     }
@@ -104,28 +134,8 @@ config.resources.modules << {
 		
         resource url:'css/main.css'
         resource url:'js/application.js'
+        resource url:'js/appcode.js', defer: false // make sure it loads in head
 		// A generated resource that resource plugins can see should be cached per-user
 		resource url:'generator/user-specific.css', userSpecific: true, nominify:true
     }
 }
-
-* Support for parameterized resources eg plugins or themes, by passing a map to the linking tags, which will result
-	in new resources being created from the parameterized template:
-	
-    resource id:'jq-ui-css', url:[dir:'js/jquery-ui/themes/$theme', file:'jquery-ui-1.8-custom-min.css'], minified: true
-
-  Invoking <r:module name="jquery-ui" args="[theme:'cupertino']"/> would put "cupertino" into the resource with $theme substituted.	
-
-* Application-specific resource dependency overrides (e.g. force a plugin you use to use a newer version of jquery)
-
-* Cache the HTML needed to include the JS and CSS resources, so including these becomes very efficient
-
-* Allow app author to control which mappers are applied, in which order, for different resources
-
-* Allow app author to control which URIs are subject to filtering, not just types. E.g. a CMS may not want all its images and CSS processed.
-
-* Detect ?debugResources var in request params of *Referer* and use clean non-processed resources (sourceUrl) for that request
-
-* Add option to CachedResources plugin to flatten the directory structure for shorter uris
-
-* Make CachedResources use base62 encoding to shorten hashed url links

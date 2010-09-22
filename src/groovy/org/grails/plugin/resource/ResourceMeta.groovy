@@ -9,10 +9,13 @@ class ResourceMeta {
     String cdnUrl
 
     String actualUrl
-    String sourceType // one of "img", "css" or "js"
     String contentType
-
-    String cachedTagText
+    
+    Boolean defer = null // we want tri-state
+    
+    //@todo impl this later
+    //String cachedTagText
+    
     File processedFile
     
     // For per-resource options like "minify", 'zip'
