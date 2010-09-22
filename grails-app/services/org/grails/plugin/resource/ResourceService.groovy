@@ -312,7 +312,11 @@ class ResourceService {
         forgetResources()
         
         // Placeholder code, we might support lists of config closures in future
-        def moduleClosures = [ConfigurationHolder.config.grails.resources.modules]
+        def modules = ConfigurationHolder.config.grails.resources.modules
+        if (!(modules instanceof Closure)) {
+            return
+        }
+        def moduleClosures = [modules]
         if (log.debugEnabled) {
             log.debug "Loading resource module definitions from Config... "+moduleClosures
         }

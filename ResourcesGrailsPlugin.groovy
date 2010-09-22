@@ -2,7 +2,7 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class ResourcesGrailsPlugin {
     // the plugin version
-    def version = "1.0-alpha2"
+    def version = "1.0-alpha3"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2 > *"
     // the other plugins this plugin depends on
