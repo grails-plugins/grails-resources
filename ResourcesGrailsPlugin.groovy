@@ -13,7 +13,9 @@ class ResourcesGrailsPlugin {
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp",
-            "grails-app/views/index.gsp"
+            "grails-app/views/index.gsp",
+            "web-app/css/**/*.*",
+            "web-app/js/**/*.*"
     ]
 
     // TODO Fill in these fields
