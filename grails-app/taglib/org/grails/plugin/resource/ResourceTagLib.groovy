@@ -114,29 +114,29 @@ class ResourceTagLib {
             log.debug "resourceLink with $attrs"
         }
 
-	  	def url = attrs.remove('url')
-    	def defer = attrs.defer
+        def url = attrs.remove('url')
+        def defer = attrs.defer
 
-	  	if (url == null) {
-	  	    if (attrs.uri) {
-	  	        // Might be app-relative resource URI 
-	  	        url = r.resource(uri:attrs.remove('uri'), defer:defer)
-	  	    } else {
-        	    url = r.resource(plugin:attrs.remove('plugin'), dir:attrs.remove('dir'), 
-        	        file:attrs.remove('file'), defer:defer).toString()
-    	    }
-    	} else if (url instanceof Map) {
-    	    url = r.resource(url.clone+[defer:defer]).toString()
-    	}
+        if (url == null) {
+            if (attrs.uri) {
+                // Might be app-relative resource URI 
+                url = r.resource(uri:attrs.remove('uri'), defer:defer)
+            } else {
+                url = r.resource(plugin:attrs.remove('plugin'), dir:attrs.remove('dir'), 
+                    file:attrs.remove('file'), defer:defer).toString()
+            }
+        } else if (url instanceof Map) {
+            url = r.resource(url.clone+[defer:defer]).toString()
+        }
     
-    	if (defer) {
-    	    // Just get out, we've called r.resource which has created the implicit resource and added it to implicit module
-    	    // and layoutResources will render the implicit module
-    	    return
-    	}
-    	
-    	if (usingResource(url)) {
-        	def t = attrs.remove('type')
+        if (defer) {
+            // Just get out, we've called r.resource which has created the implicit resource and added it to implicit module
+            // and layoutResources will render the implicit module
+            return
+        }
+        
+        if (usingResource(url)) {
+            def t = attrs.remove('type')
             if (!t) {
                 def extUrl = url.indexOf('?') > 0 ? url[0..url.indexOf('?')-1] : url
                 def ext = extUrl[url.lastIndexOf('.')+1..-1]
