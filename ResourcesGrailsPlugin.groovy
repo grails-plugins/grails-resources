@@ -19,30 +19,25 @@ class ResourcesGrailsPlugin {
     def description = 'HTML resource management enhancements to replace g.resource etc.'
     def documentation = "http://grails.org/plugin/resources"
 
-    static DEFAULT_ADHOC_EXTENSIONS = ['css','js','gif','jpg','png']
+    static DEFAULT_URI_PREFIX = 'static'
+    static DEFAULT_ADHOC_PATTERNS = ["/images/*"].asImmutable()
     
-    def getConfigUriPrefix = {
-        def config = ConfigurationHolder.config.grails.resources
-        def prf = config.uri.prefix
-        if (!(prf instanceof String)) {
-            prf = 'static'
-        }
-        return prf
+    def getResourcesConfig() {
+        ConfigurationHolder.config.grails.resources
     }
     
-    def getConfigAdHocExtensions = {
-        def config = ConfigurationHolder.config.grails.resources
-        def prf = config.adhoc.extensions
-        if (!(prf instanceof List)) {
-            prf = DEFAULT_ADHOC_EXTENSIONS
-        }
-        return prf
+    def getUriPrefix() {
+        def prf = resourcesConfig.uri.prefix
+        prf instanceof String ? prf : DEFAULT_URI_PREFIX
+    }
+    
+    def getAdHocPatterns() {
+        def patterns = resourcesConfig.adhoc.patterns
+        patterns instanceof List ? patterns : DEFAULT_ADHOC_PATTERNS
     }
 
     def doWithWebDescriptor = { webXml ->
-        
-        def prf = getConfigUriPrefix()
-        def adHocFileExtensions = getConfigAdHocExtensions()
+        def adHocPatterns = getAdHocPatterns()
         
         log.info("Adding servlet filter")
         def filters = webXml.filter[0]
@@ -51,12 +46,14 @@ class ResourcesGrailsPlugin {
                 'filter-name'("DeclaredResourcesPluginFilter")
                 'filter-class'("org.grails.plugin.resource.ProcessingFilter")
             }
-            'filter' {
-                'filter-name'("AdHocResourcesPluginFilter")
-                'filter-class'("org.grails.plugin.resource.ProcessingFilter")
-                'init-param' {
-                    'param-name'("adhoc")
-                    'param-value'("true")
+            if (adHocPatterns) {
+                'filter' {
+                    'filter-name'("AdHocResourcesPluginFilter")
+                    'filter-class'("org.grails.plugin.resource.ProcessingFilter")
+                    'init-param' {
+                        'param-name'("adhoc")
+                        'param-value'("true")
+                    }
                 }
             }
         }
@@ -64,23 +61,21 @@ class ResourcesGrailsPlugin {
         mappings + {
             'filter-mapping' {
                 'filter-name'("DeclaredResourcesPluginFilter")
-                'url-pattern'("/${prf}/*")
+                'url-pattern'("/${uriPrefix}/*")
             }
             // To be pre-Servlets 2.5 safe, we have 1 extension mapping per filter-mapping entry
             // Lame, but Tomcat 5.5 is not SSDK 2.5
-            adHocFileExtensions.each { ext ->
+            adHocPatterns.each { pattern ->
                 'filter-mapping' {
                     'filter-name'("AdHocResourcesPluginFilter")
-                    'url-pattern'("*.${ext}")
+                    'url-pattern'(pattern.toString())
                 }
             }
         }
     }
 
     def doWithApplicationContext = { applicationContext ->
-        def prf = getConfigUriPrefix()
-        
-        applicationContext.resourceService.staticUrlPrefix = '/'+prf
+        applicationContext.resourceService.staticUrlPrefix = "/${uriPrefix}"
     }
 
     def onChange = { event ->
