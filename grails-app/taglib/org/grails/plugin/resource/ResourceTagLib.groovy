@@ -157,6 +157,10 @@ class ResourceTagLib {
             def writerName = typeInfo.remove('writer')
             def writer = LINK_WRITERS[writerName ?: 'link']
             def wrapper = attrs.remove('wrapper')
+
+            // Allow attrs to overwrite any constants
+            attrs.each { typeInfo.remove(it.key) }
+
             def output = writer(url, typeInfo, attrs)
             if (wrapper) {
                 out << wrapper(output)
