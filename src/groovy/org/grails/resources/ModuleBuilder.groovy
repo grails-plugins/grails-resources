@@ -11,7 +11,6 @@ class ModuleBuilder {
     }
     
     void _build() {
-        println "MB build"
         _closure.delegate = this
         _closure.call()
     }

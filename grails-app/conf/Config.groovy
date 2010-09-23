@@ -23,10 +23,9 @@ environments {
 }
 
 //grails.resources.defer.default=false
-/*
 grails.resources.modules = {
     'jquery' { 
-        resource url:'js/jquery/jquery-1.4.2-min.js', nominify:true, defer:false
+        resource url:'js/jquery/jquery-1.4.2-min.js', nominify:true, disposition:'head'
     }
     'jquery-ui' {
         dependsOn 'jquery'
@@ -40,6 +39,6 @@ grails.resources.modules = {
     'app' {
         resource 'css/main.css'
         resource 'js/application.js'
+        resource url:'images/grails_logo.png', attrs:[width:200, height:100], disposition:'inline'
     }
 } 
-*/

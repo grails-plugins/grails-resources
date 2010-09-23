@@ -42,21 +42,6 @@ class ResourceTagLib {
         }
     ]
     
-    static LINK_RESOURCE_MAPPINGS = [
-        css:[type:"text/css", rel:'stylesheet'],
-        rss:[type:'application/rss+xml', rel:'alternate'], 
-        atom:[type:'application/atom+xml', rel:'alternate'], 
-        favicon:[type:'image/x-icon', rel:'shortcut icon'],
-        appleicon:[type:'image/x-icon', rel:'apple-touch-icon'],
-        js:[writer:'js', type:'text/javascript']
-    ]
-
-    static LINK_EXTENSIONS_TO_TYPES = [
-        ico:'favicon',
-        gif:'favicon',
-        png:'favicon'
-    ]
-    
     def resourceService
     
     boolean usingResource(url) {
@@ -115,45 +100,55 @@ class ResourceTagLib {
         }
 
         def url = attrs.remove('url')
-        def defer = attrs.defer
+        def disposition = attrs.remove('disposition')
 
+        def info 
+        
+        def resolveArgs = [:]
+        def type = attrs.remove('type')
+        def urlForExtension
+        
         if (url == null) {
             if (attrs.uri) {
                 // Might be app-relative resource URI 
-                url = r.resource(uri:attrs.remove('uri'), defer:defer)
+                resolveArgs.uri = attrs.remove('uri')
+                urlForExtension = resolveArgs.uri
             } else {
-                url = r.resource(plugin:attrs.remove('plugin'), dir:attrs.remove('dir'), 
-                    file:attrs.remove('file'), defer:defer).toString()
+                resolveArgs.plugin = attrs.remove('plugin')
+                resolveArgs.dir = attrs.remove('dir')
+                resolveArgs.file = attrs.remove('file')
+                urlForExtension = resolveArgs.file
             }
         } else if (url instanceof Map) {
-            url = r.resource(url.clone+[defer:defer]).toString()
+            resolveArgs.putAll(url)
+            urlForExtension = resolveArgs.file
         }
-    
-        if (defer) {
+
+        def typeInfo = resourceService.getTypeInfoForURI(urlForExtension, type)?.clone()  // must clone, we mutate this
+        if (!typeInfo) {
+            throwTagError "Unknown resourceLink type: ${t}"
+        }
+
+        println "disposition: ${disposition} - type dispos: ${typeInfo.disposition}"
+        // If a disposition specificed, we may be ad hoc so use that, else rever to default for type
+        def defaultDisposition = typeInfo.remove('disposition')
+        resolveArgs.disposition = disposition ?: defaultDisposition
+        
+        if (disposition == null) {
+            // Get default disposition for this type
+            disposition = 'head'
+        }
+
+        info = resolveResourceAndURI(resolveArgs)
+        
+        if (disposition != info.resource.disposition) {
+            println "LEAVING - dispositiomn is DEFER"
             // Just get out, we've called r.resource which has created the implicit resource and added it to implicit module
             // and layoutResources will render the implicit module
             return
         }
         
-        if (usingResource(url)) {
-            def t = attrs.remove('type')
-            if (!t) {
-                def extUrl = url.indexOf('?') > 0 ? url[0..url.indexOf('?')-1] : url
-                def ext = extUrl[url.lastIndexOf('.')+1..-1]
-                t = LINK_EXTENSIONS_TO_TYPES[ext]
-                if (!t) {
-                    t = ext
-                }
-            }
-            if (log.debugEnabled) {
-                log.debug "Resource [${url}] has type [$t]"
-            }
-            
-            def typeInfo = LINK_RESOURCE_MAPPINGS[t]?.clone() 
-            if (!typeInfo) {
-                throwTagError "Unknown resourceLink type: ${t}"
-            }
-        
+        if (usingResource(info.uri)) {
             def writerName = typeInfo.remove('writer')
             def writer = LINK_WRITERS[writerName ?: 'link']
             def wrapper = attrs.remove('wrapper')
@@ -161,7 +156,7 @@ class ResourceTagLib {
             // Allow attrs to overwrite any constants
             attrs.each { typeInfo.remove(it.key) }
 
-            def output = writer(url, typeInfo, attrs)
+            def output = writer(info.uri, typeInfo, attrs)
             if (wrapper) {
                 out << wrapper(output)
             } else {
@@ -205,7 +200,7 @@ class ResourceTagLib {
                 log.debug "Rendering non-deferred resources..."
             }
             trk.each { module ->
-                out << r.renderModule(name:module, deferred:false)
+                out << r.renderModule(name:module, disposition:"head")
             }
             request.resourceRenderedHeadResources = true
         } else if (!request.resourceRenderedFooterResources) {
@@ -213,7 +208,7 @@ class ResourceTagLib {
                 log.debug "Rendering deferred resources..."
             }
             trk.each { module ->
-                out << r.renderModule(name:module, deferred:true)
+                out << r.renderModule(name:module, disposition:"defer")
             }
             request.resourceRenderedFooterResources = true
         } else {
@@ -222,11 +217,15 @@ class ResourceTagLib {
     }
     
     /**
+     * For inline javascript that needs to be executed in the <head> section after all dependencies
+     */
+    def initScript = { attrs, body ->
+    }
+    
+    /**
      * For inline javascript that needs to be either deferred to the end of the page or put into "E.S.P." (in future)
      */
-    def script = { attrs, body ->
-        // @todo impl this. Accept "defer" (put in footer) "scope" (user = don't externalise, default = externalise with E.S.P.)
-        out << body()
+    def pageScript = { attrs, body ->
     }
     
     /**
@@ -255,7 +254,7 @@ class ResourceTagLib {
         
         def s = new StringBuilder()
         
-        def renderingDeferred = (attrs.deferred?.toString().toBoolean()) ?: false // Convert null to false
+        def renderingDisposition = attrs.remove('disposition')
 
         // Write out any dependent modules first
         if (module.dependsOn) {
@@ -263,7 +262,7 @@ class ResourceTagLib {
                 log.debug "Rendering the dependencies of module [${name}]"
             }
             module.dependsOn.each { modName ->
-                s << r.renderModule(name:modName, deferred:renderingDeferred)
+                s << r.renderModule(name:modName, disposition:renderingDisposition)
             }
         }
         
@@ -272,18 +271,19 @@ class ResourceTagLib {
         }
         
         def debugMode = (Environment.current == Environment.DEVELOPMENT) && params.debugResources
-        def _defaultDefer = defaultDefer
         
         module.resources.each { r ->
             if (!r.exists()) {
                 throw new IllegalArgumentException("Module [$name] depends on resource [${r.sourceUrl}] but the file cannot be found")
             }
-            def resIsDeferred = r.defer == null ? _defaultDefer : r.defer
-            log.debug "Res: ${r.sourceUrl} - defer ${r.defer} - rendering deferred ${renderingDeferred}"
-            if (resIsDeferred == renderingDeferred) {
+            if (log.debugEnabled) {
+                log.debug "Resource: ${r.sourceUrl} - disposition ${r.disposition} - rendering disposition ${renderingDisposition}"
+            }
+            if (r.disposition == renderingDisposition) {
                 def args = r.tagAttributes?.clone() ?: [:]
                 args.uri = debugMode ? r.sourceUrl : r.actualUrl
                 args.wrapper = r.prePostWrapper
+                args.disposition = r.disposition
                 if (log.debugEnabled) {
                     log.debug "Rendering one of the module's resource links: ${args}"
                 }
@@ -294,49 +294,73 @@ class ResourceTagLib {
         out << s
     }
 
-    boolean getDefaultDefer() {
-        // @todo eval this only once, is config change dependent
-        def _defaultDefer = ConfigurationHolder.config.grails.resources.defer.default 
-        if (!(_defaultDefer instanceof Boolean)) {
-            _defaultDefer = true
-        }
-        return _defaultDefer
+    /**
+     * Get the uri to use for linking, and - if relevant - the resource instance
+     * @return Map with uri property and *maybe* a resource property
+     */
+    def resolveResourceAndURI(attrs) {
+        def ctxPath = request.contextPath
+        def uri = attrs.remove('uri')
+        uri = uri ? ctxPath+uri : g.resource(attrs).toString()
+        def debugMode = (Environment.current == Environment.DEVELOPMENT) && params.debugResources
+
+        // Get out quick and add param to tell filter we don't want any fancy stuff
+        if (debugMode) {
+            return [uri:uri+"?debug=y", debug:true]
+        } 
+        
+        def disposition = attrs.remove('disposition')
+
+        // Chop off context path
+        def reluri = uri[ctxPath.size()..-1]
+        
+        // Get or create ResourceMeta
+        def res = resourceService.getResourceMetaForURI(reluri, true, { res ->
+            // If this is an ad hoc resource, we need to store if it can be deferred or not
+            if (disposition != null) {
+                res.disposition = disposition
+            }
+        })
+        
+        uri = ctxPath+resourceService.staticUrlPrefix+res.actualUrl
+        return [uri:uri, resource:res]
     }
-    
+     
     /**
      * Get the URL for an ad-hoc resource - NOT for declared resources
      * @todo this currently won't work for absolute="true" invocations, it should just passthrough these
      */
     def resource = { attrs ->
-        def ctxPath = request.contextPath
-        def defer = attrs.remove('defer')
-        def uri = attrs.uri ? ctxPath+attrs.uri : g.resource(attrs).toString()
-        def debugMode = (Environment.current == Environment.DEVELOPMENT) && params.debugResources
-
-        // Get out quick and add param to tell filter we don't want any fancy stuff
-        if (debugMode) {
-            out << uri+"?debug=y"
-            return
-        }
-        
-        // Chop off context path
-        def reluri = uri[ctxPath.size()..-1]
-        // Get or create ResourceMeta
-        def res = resourceService.getResourceMetaForURI(reluri, true, { res ->
-            log.debug "Defer is $defer"
-            if (defer != null) {
-                res.defer = defer.toBoolean()
-            }
-            log.debug "Resource Defer is ${res.defer}"
-        })
-        if (res) {
-            out << ctxPath+resourceService.staticUrlPrefix+res.actualUrl
+        def info = resolveResourceAndURI(attrs)
+        if (info.resource) {
+            // We know we located the resource
+            out << info.uri
         } else {
-            // We don't know about this, back out and use grails URI
-            if (log.warnEnabled) {
+            // We don't know about this, back out and use grails URI but warn
+            if (!info.debug && log.warnEnabled) {
                 log.warn "Invocation of <r:resource> for a resource that apparently doesn't exist: $uri"
             }
             out << uri
         }
+    }
+    
+    /**
+     * Write out an HTML <img> tag using resource processing for the image
+     */
+    def img = { attrs ->
+        attrs.disposition = "image"
+        def info = resolveResourceAndURI(attrs)
+        def res = info.resource
+
+        def o = new StringBuilder()
+        o << "<img src=\"${info.uri.encodeAsHTML()}\" "
+        if (res) {
+            def attribs = res.tagAttributes.clone()
+            attribs.putAll(attrs)
+            attrs = attribs
+        }
+        writeAttrs(attrs, o)
+        o << "/>"
+        out << o
     }
 }

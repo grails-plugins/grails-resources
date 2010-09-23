@@ -1,10 +1,8 @@
-<plugin name='resources' version='1.0-alpha3' grailsVersion='1.2 &gt; *'>
+<plugin name='resources' version='1.0-alpha4' grailsVersion='1.2 &gt; *'>
   <author>Marc Palmer</author>
   <authorEmail>marc@grailsrocks.com</authorEmail>
   <title>Resources</title>
-  <description>\
-HTML resource management enhancements to replace g.resource etc.
-</description>
+  <description>HTML resource management enhancements to replace g.resource etc.</description>
   <documentation>http://grails.org/plugin/resources</documentation>
   <resources>
     <resource>BuildConfig</resource>

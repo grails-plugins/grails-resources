@@ -16,14 +16,14 @@ class ResourceModule {
         this.name = name
     }
     
-    ResourceModule(name, Map resourceInfo) {
+    ResourceModule(name, Map resourceInfo, ResourceService svc) {
         this(name)
         def args = [:]
         args.putAll(resourceInfo)
         if (args.url instanceof Map) {
             args.url = getResourceUrl(args.url)
         }
-        this.resources << newResourceFromArgs(args)
+        this.resources << newResourceFromArgs(args, svc)
         lockDown()
     }
 
@@ -31,20 +31,25 @@ class ResourceModule {
         dependsOn << name
     }
     
-    ResourceMeta newResourceFromArgs(Map args) {
+    ResourceMeta newResourceFromArgs(Map args, ResourceService svc) {
         def url = args.remove('url')
         if (!url.startsWith('/')) {
             url = '/'+url
         }
         def r = new ResourceMeta(sourceUrl: url)
-        r.defer = args.remove('defer')
+        // @todo change this to assume default for the *type* from info in ResourceService
+        def ti = svc.getTypeInfoForURI(url)
+        if (!ti) {
+            throw new IllegalArgumentException("Cannot create resource $url, is not a supported type")
+        }
+        r.disposition = args.remove('disposition') ?: ti.disposition
         r.prePostWrapper = args.remove('wrapper')
         r.tagAttributes = args.remove('attrs')
         r.attributes.putAll(args)
         return r        
     }
     
-    ResourceModule(name, List resourceInfoList) {
+    ResourceModule(name, List resourceInfoList, ResourceService svc) {
         this.name = name
         resourceInfoList.each { i ->
             if (i instanceof Map) {
@@ -52,10 +57,10 @@ class ResourceModule {
                 if (args.url instanceof Map) {
                     args.url = getResourceUrl(args.url)
                 }
-                def r = newResourceFromArgs(args)
+                def r = newResourceFromArgs(args, svc)
                 this.resources << r
             } else if (i instanceof String) {
-                this.resources << newResourceFromArgs(url:i)
+                this.resources << newResourceFromArgs(url:i, svc)
             } else {
                 throw new IllegalArgumentException("Barf!")
             }

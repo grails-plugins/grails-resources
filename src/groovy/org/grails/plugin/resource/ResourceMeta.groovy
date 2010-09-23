@@ -11,7 +11,7 @@ class ResourceMeta {
     String actualUrl
     String contentType
     
-    Boolean defer = null // we want tri-state
+    String disposition
     
     //@todo impl this later
     //String cachedTagText

@@ -40,6 +40,8 @@ Features:
 
 Will also soon:
 
+* Change default extensions mechanism to grails.resources.filter.includes and allow any servlet matcher pattern there. Gives finer control
+
 * Add linkOverride mechanism
 
 * Support automatic bundling of files into less files prior to processing, and

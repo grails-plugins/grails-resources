@@ -8,7 +8,7 @@
 <!-- This tests resource tag enhancement for legacy usage -->
 <r:resourceLink dir="css" file="legacy.css"/>
 <!-- This tests ad hoc resource deferral -->
-<r:resourceLink dir="js" file="core.js" defer="true"/>
+<r:resourceLink dir="js" file="core.js"/>
 <r:layoutResources/>
 </g:set>
 
@@ -20,9 +20,11 @@
     <pre>
         ${output.encodeAsHTML()}
     </pre>
+    <p>Grails logo using processing:<r:img uri="/images/grails_logo.png"/></p>
+    
     <p>Resource cache info:</p>
     <pre>${grailsApplication.mainContext.resourceService.dumpResources().encodeAsHTML()}</pre>
-    
+
     <g:set var="deferred">
         <r:layoutResources/>
     </g:set>
@@ -30,5 +32,7 @@
     <pre>
         ${deferred.encodeAsHTML()}
     </pre>
+    
+    ${deferred}
 </body>
 </html>

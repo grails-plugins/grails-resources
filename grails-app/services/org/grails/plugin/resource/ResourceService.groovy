@@ -20,6 +20,21 @@ class ResourceService {
 
     static IMPLICIT_MODULE = "__@legacy-files@__"
     
+    static LINK_RESOURCE_MAPPINGS = [
+        css:[disposition: 'head', type:"text/css", rel:'stylesheet'],
+        rss:[disposition: 'head', type:'application/rss+xml', rel:'alternate'], 
+        atom:[disposition: 'head', type:'application/atom+xml', rel:'alternate'], 
+        favicon:[disposition: 'head', type:'image/x-icon', rel:'shortcut icon'],
+        appleicon:[disposition: 'head', type:'image/x-icon', rel:'apple-touch-icon'],
+        js:[disposition: 'defer', writer:'js', type:'text/javascript']
+    ]
+
+    static LINK_EXTENSIONS_TO_TYPES = [
+        ico:'favicon',
+        gif:'favicon',
+        png:'favicon'
+    ]
+
     // @todo make this Config, default to something in /tmp
     def staticFilePath = '/tmp/grails/static'
     File staticFileDir = new File(staticFilePath)
@@ -285,11 +300,11 @@ class ResourceService {
     }
 
     def module(String name, List urlsOrInfos) {
-        storeModule(new ResourceModule(name, urlsOrInfos))
+        storeModule(new ResourceModule(name, urlsOrInfos, this))
     }
 
     def module(String name, List urlsOrInfos, List moduleDeps) {
-        def m = new ResourceModule(name, urlsOrInfos)
+        def m = new ResourceModule(name, urlsOrInfos, this)
         storeModule(m)
         moduleDeps?.each { d ->
             m.addModuleDependency(d)
@@ -335,6 +350,20 @@ class ResourceService {
         }
     }
     
+    def getTypeInfoForURI(uri, typeOverride = null) {
+        if (!typeOverride) {
+            def extUrl = uri.indexOf('?') > 0 ? uri[0..uri.indexOf('?')-1] : uri
+            def ext = extUrl[uri.lastIndexOf('.')+1..-1]
+            typeOverride = LINK_EXTENSIONS_TO_TYPES[ext]
+            if (!typeOverride) {
+                typeOverride = ext
+            }
+        }
+        
+        LINK_RESOURCE_MAPPINGS[typeOverride]
+    }
+    
+    
     def dumpResources(toLog = true) {
         def s1 = new StringBuilder()
         modulesByName.keySet().sort().each { moduleName ->
@@ -349,7 +378,7 @@ class ResourceService {
                 s1 << "             -- url for linking: ${resource.actualUrl}\n"
                 s1 << "             -- attributes: ${resource.attributes}\n"
                 s1 << "             -- tag attributes: ${resource.tagAttributes}\n"
-                s1 << "             -- defer: ${resource.defer}\n"
+                s1 << "             -- disposition: ${resource.disposition}\n"
             }
         }
         def s2 = new StringBuilder()
