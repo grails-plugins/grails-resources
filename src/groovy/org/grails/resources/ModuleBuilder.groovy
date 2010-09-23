@@ -16,12 +16,8 @@ class ModuleBuilder {
         _closure.call()
     }
     
-    void dependsOn(moduleNameOrNames) {
-        if (moduleNameOrNames instanceof String) {
-            _depends << moduleNameOrNames 
-        } else {
-            _depends += moduleNameOrNames 
-        }
+    void dependsOn(String[] dependencies) {
+        _depends.addAll(dependencies.toList())
     } 
     
     void resource(args) {
