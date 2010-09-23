@@ -1,16 +1,11 @@
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class ResourcesGrailsPlugin {
-    // the plugin version
+
     def version = "1.0-alpha3"
-    // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2 > *"
-    // the other plugins this plugin depends on
     def dependsOn = [logging:'1.0 > *']
-    
     def loadAfter = ['logging']
-    
-    // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp",
             "grails-app/views/index.gsp",
@@ -18,15 +13,10 @@ class ResourcesGrailsPlugin {
             "web-app/js/**/*.*"
     ]
 
-    // TODO Fill in these fields
     def author = "Marc Palmer"
     def authorEmail = "marc@grailsrocks.com"
     def title = "Resources"
-    def description = '''\\
-HTML resource management enhancements to replace g.resource etc.
-'''
-
-    // URL to the plugin's documentation
+    def description = 'HTML resource management enhancements to replace g.resource etc.'
     def documentation = "http://grails.org/plugin/resources"
 
     static DEFAULT_ADHOC_EXTENSIONS = ['css','js','gif','jpg','png']
@@ -54,44 +44,37 @@ HTML resource management enhancements to replace g.resource etc.
         def prf = getConfigUriPrefix()
         def adHocFileExtensions = getConfigAdHocExtensions()
         
-		log.info("Adding servlet filter")
-		def filters = webXml.filter[0]
-	    filters + {
-			'filter' {
-				'filter-name'("DeclaredResourcesPluginFilter")
-				'filter-class'("org.grails.plugin.resource.ProcessingFilter")
-			}
-			'filter' {
-				'filter-name'("AdHocResourcesPluginFilter")
-				'filter-class'("org.grails.plugin.resource.ProcessingFilter")
-				'init-param' {
-				    'param-name'("adhoc")
-				    'param-value'("true")
-				}
-			}
-      	}
-		def mappings = webXml.'filter-mapping' // this does only yield 2 filter mappings
-		mappings + {
-			'filter-mapping' {
-			    'filter-name'("DeclaredResourcesPluginFilter")
-			    'url-pattern'("/${prf}/*")
-	    	}
+        log.info("Adding servlet filter")
+        def filters = webXml.filter[0]
+        filters + {
+            'filter' {
+                'filter-name'("DeclaredResourcesPluginFilter")
+                'filter-class'("org.grails.plugin.resource.ProcessingFilter")
+            }
+            'filter' {
+                'filter-name'("AdHocResourcesPluginFilter")
+                'filter-class'("org.grails.plugin.resource.ProcessingFilter")
+                'init-param' {
+                    'param-name'("adhoc")
+                    'param-value'("true")
+                }
+            }
+        }
+        def mappings = webXml.'filter-mapping' // this does only yield 2 filter mappings
+        mappings + {
+            'filter-mapping' {
+                'filter-name'("DeclaredResourcesPluginFilter")
+                'url-pattern'("/${prf}/*")
+            }
             // To be pre-Servlets 2.5 safe, we have 1 extension mapping per filter-mapping entry
             // Lame, but Tomcat 5.5 is not SSDK 2.5
-			adHocFileExtensions.each { ext ->
-    			'filter-mapping' {
-    			    'filter-name'("AdHocResourcesPluginFilter")
-    			    'url-pattern'("*.${ext}")
-    	    	}
-	    	}
-      	}
-    }
-
-    def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
-    }
-
-    def doWithDynamicMethods = { ctx ->
+            adHocFileExtensions.each { ext ->
+                'filter-mapping' {
+                    'filter-name'("AdHocResourcesPluginFilter")
+                    'url-pattern'("*.${ext}")
+                }
+            }
+        }
     }
 
     def doWithApplicationContext = { applicationContext ->
