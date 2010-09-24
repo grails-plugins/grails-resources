@@ -2,7 +2,7 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class ResourcesGrailsPlugin {
 
-    def version = "1.0-alpha5"
+    def version = "1.0-alpha6"
     def grailsVersion = "1.2 > *"
     def dependsOn = [logging:'1.0 > *']
     def loadAfter = ['logging']
@@ -22,7 +22,7 @@ class ResourcesGrailsPlugin {
     def documentation = "http://grails.org/plugin/resources"
 
     static DEFAULT_URI_PREFIX = 'static'
-    static DEFAULT_ADHOC_PATTERNS = ["/images/*"].asImmutable()
+    static DEFAULT_ADHOC_PATTERNS = ["/images/*", "*.css", "*.js"].asImmutable()
     
     def getResourcesConfig() {
         ConfigurationHolder.config.grails.resources

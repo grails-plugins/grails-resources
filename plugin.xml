@@ -1,4 +1,4 @@
-<plugin name='resources' version='1.0-alpha5' grailsVersion='1.2 &gt; *'>
+<plugin name='resources' version='1.0-alpha6' grailsVersion='1.2 &gt; *'>
   <author>Marc Palmer</author>
   <authorEmail>marc@grailsrocks.com</authorEmail>
   <title>Resources</title>
