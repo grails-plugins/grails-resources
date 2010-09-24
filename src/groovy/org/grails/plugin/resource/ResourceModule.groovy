@@ -38,7 +38,7 @@ class ResourceModule {
         }
         def r = new ResourceMeta(sourceUrl: url)
         // @todo change this to assume default for the *type* from info in ResourceService
-        def ti = svc.getTypeInfoForURI(url)
+        def ti = svc.getTypeInfoForURI(url, args.attrs?.type)
         if (!ti) {
             throw new IllegalArgumentException("Cannot create resource $url, is not a supported type")
         }
