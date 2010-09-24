@@ -5,6 +5,10 @@
 <r:resourceLink uri="/images/favicon.ico"/>
 <r:resourceLink uri="/images/springsource.png" type="appleicon"/>
 
+<r:script disposition="head">
+    document.write("<title>This is a test</title>");
+</r:script>
+
 <!-- Here we pull in our smart links, and capture them just for sake of demo page output -->
 <r:dependsOn module="jquery-ui"/>
 <r:dependsOn module="app"/>
@@ -27,6 +31,10 @@
     </pre>
     <p>Grails logo using processing:<r:img uri="/images/grails_logo.png"/></p>
     
+    <r:script>
+        document.write("<p>This is going to come out in the footer<p>");
+    </r:script>
+
     <p>Resource cache info:</p>
     <pre>${grailsApplication.mainContext.resourceService.dumpResources().encodeAsHTML()}</pre>
 

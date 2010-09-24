@@ -228,6 +228,12 @@ class ResourceTagLib {
             trk.each { module ->
                 out << r.renderModule(name:module, disposition:"head")
             }
+            
+            def pageScripts = request['resourceRequestScripts:head']
+            if (pageScripts) {
+                out << "<script type=\"text/javascript\">${pageScripts}</script>"
+                request['resourceRequestScripts:head'] = null // help out the GC
+            }
             request.resourceRenderedHeadResources = true
         } else if (!request.resourceRenderedFooterResources) {
             if (log.debugEnabled) {
@@ -236,22 +242,34 @@ class ResourceTagLib {
             trk.each { module ->
                 out << r.renderModule(name:module, disposition:"defer")
             }
+            def pageScripts = request['resourceRequestScripts:defer']
+            if (pageScripts) {
+                out << "<script type=\"text/javascript\">${pageScripts}</script>"
+                request['resourceRequestScripts:defer'] = null // help out the GC
+            }
             request.resourceRenderedFooterResources = true
         } else {
             throw new RuntimeException('You have invoked [layoutResources] more than twice. Invoke once in head and once in footer only.')
         }
     }
     
-    /**
-     * For inline javascript that needs to be executed in the <head> section after all dependencies
-     */
-    def initScript = { attrs, body ->
+    void storeRequestScript(text, disposition) {
+        def trkName = 'resourceRequestScripts:'+disposition
+        def trk = request[trkName]
+        if (!trk) {
+            trk = new StringBuilder() // Always include this
+            request[trkName] = trk
+        }
+        trk << text
     }
     
     /**
-     * For inline javascript that needs to be either deferred to the end of the page or put into "E.S.P." (in future)
+     * For inline javascript that needs to be executed in the <head> section after all dependencies
+     * @todo Later, we implement ESP hooks here and add scope="user" or scope="shared"
      */
-    def pageScript = { attrs, body ->
+    def script = { attrs, body ->
+        def dispos = attrs.remove('disposition') ?: 'defer'
+        storeRequestScript(body(), dispos)
     }
     
     /**

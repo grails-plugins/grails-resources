@@ -37,10 +37,13 @@ Features:
 
 * Detect ?debugResources var in request params of *Referer* and use clean non-processed resources (sourceUrl) for that request
 
+* Strip off query params when processing resources, but leave them in when linking
+
+* Add currentTimeMillis to end of URIs from taglibs when debugResources is enabled - prevents caching during dev in lame browsers like IE
+
+* Add linkOverride mechanism (for CDNs, S3 uploaders etc)
 
 Will also soon:
-
-* Strip off query params when processing resources, but leave them in when linking
 
 * Workaround SSDK bug where it fails to extract correct mime type for files
   with multiple dots in the name e.g. jquery-1.8.2-min.js returns a null mime
@@ -50,13 +53,9 @@ Will also soon:
   resources plugin handles whether or not each mapper gets applied by resource
   type or URI
 
-* Add currentTimeMillis to end of URIs from taglibs when debugResources is enabled - prevents caching during dev in lame browsers like IE
-
 * Monitor resources and do resource reloading (re-processing)
 
 * Add a config flag to disable all processing (so you can disable it completely in test / dev)
-
-* Add linkOverride mechanism (for CDNs, S3 uploaders etc)
 
 * Support automatic bundling of files into less files prior to processing, and
   give application ability to override/redefine the bundling of resources

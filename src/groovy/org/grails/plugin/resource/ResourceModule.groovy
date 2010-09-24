@@ -43,6 +43,7 @@ class ResourceModule {
             throw new IllegalArgumentException("Cannot create resource $url, is not a supported type")
         }
         r.disposition = args.remove('disposition') ?: ti.disposition
+        r.linkOverride = args.remove('linkOverride')
         r.prePostWrapper = args.remove('wrapper')
         def resattrs = ti.attrs?.clone() ?: [:]
         def attrs = args.remove('attrs')
