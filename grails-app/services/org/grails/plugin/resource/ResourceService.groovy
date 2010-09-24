@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-
+import org.springframework.web.util.WebUtils
 import org.grails.resources.ResourceModulesBuilder
 
 /**
@@ -35,10 +35,9 @@ class ResourceService {
         png:'favicon'
     ]
 
-    // @todo make this Config, default to something in /tmp
-    def staticFilePath = '/tmp/grails/static'
-    File staticFileDir = new File(staticFilePath)
     def staticUrlPrefix
+    
+    @Lazy File workDir = new File(WebUtils.getTempDir(ServletContextHolder.servletContext), "grails-resources")
     
     def modulesByName = [:]
 
@@ -163,7 +162,7 @@ class ResourceService {
             if (log.debugEnabled) {
                 log.debug "Creating new implicit resource for ${uri}"
             }
-            r = new ResourceMeta(sourceUrl:uri)
+            r = new ResourceMeta(sourceUrl: uri, workDir: workDir)
         
             // Do the processing
             // @todo we should really sync here on something specific to the resource
@@ -207,7 +206,7 @@ class ResourceService {
         try {
             def fileSystemDir = uri[0..uri.lastIndexOf('/')-1].replaceAll('/', File.separator)
             def fileSystemFile = uri[uri.lastIndexOf('/')+1..-1].replaceAll('/', File.separator)
-            def staticDir = new File(staticFileDir, fileSystemDir)
+            def staticDir = new File(workDir, fileSystemDir)
             
             // force the structure
             if (!staticDir.exists()) {
