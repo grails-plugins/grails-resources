@@ -20,7 +20,7 @@ class ResourceTagLib {
     static LINK_WRITERS = [
         js: { url, constants, attrs ->
             def o = new StringBuilder()
-            o << "<script src=\"${url.encodeAsHTML()}\" "
+            o << "<script src=\"${url}\" "
 
             // Output info from the mappings
             writeAttrs(constants, o)
@@ -32,7 +32,7 @@ class ResourceTagLib {
         
         link: { url, constants, attrs ->
             def o = new StringBuilder()
-            o << "<link href=\"${url.encodeAsHTML()}\" "
+            o << "<link href=\"${url}\" "
 
             // Output info from the mappings
             writeAttrs(constants, o)
@@ -336,7 +336,7 @@ class ResourceTagLib {
         // Get out quick and add param to tell filter we don't want any fancy stuff
         if (debugMode) {
             def t = System.currentTimeMillis()
-            uri += (uri.indexOf('?') >= 0) ? "&debug=y&$t" : "?&debug=y$t"
+            uri += (uri.indexOf('?') >= 0) ? "&debug=y&n=$t" : "?debug=y&n=$t"
             return [uri:uri, debug:true]
         } 
         
@@ -357,11 +357,6 @@ class ResourceTagLib {
         return [uri:uri, resource:res]
     }
      
-    void outputCacheDefeater(output, uri) {
-        def t = System.currentTimeMillis()
-        output << (uri.indexOf('?') >= 0) ? "&$t" : "?$t"
-    }
-
     /**
      * Get the URL for an ad-hoc resource - NOT for declared resources
      * @todo this currently won't work for absolute="true" invocations, it should just passthrough these
