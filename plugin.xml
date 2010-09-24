@@ -10,6 +10,7 @@
     <resource>DataSource</resource>
     <resource>ResourcesBootStrap</resource>
     <resource>UrlMappings</resource>
+    <resource>FeedsController</resource>
     <resource>org.grails.plugin.resource.ResourceService</resource>
     <resource>org.grails.plugin.resource.ResourceTagLib</resource>
   </resources>

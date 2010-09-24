@@ -9,8 +9,10 @@ class ResourcesGrailsPlugin {
     def pluginExcludes = [
             "grails-app/views/error.gsp",
             "grails-app/views/index.gsp",
+            "grails-app/controllers/**/*.groovy",
             "web-app/css/**/*.*",
-            "web-app/js/**/*.*"
+            "web-app/js/**/*.*",
+            "web-app/images/**/*.*"
     ]
 
     def author = "Marc Palmer"

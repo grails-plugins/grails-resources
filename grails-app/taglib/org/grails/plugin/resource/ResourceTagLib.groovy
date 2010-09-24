@@ -2,6 +2,7 @@ package org.grails.plugin.resource
 
 import grails.util.Environment
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.apache.commons.io.FilenameUtils
 
 class ResourceTagLib {
     static namespace = "r"
@@ -41,10 +42,26 @@ class ResourceTagLib {
             return o
         }
     ]
+
+    static SUPPORTED_TYPES = [
+        css:[type:"text/css", rel:'stylesheet'],
+        js:[type:'text/javascript', writer:'js'],
+
+        gif:[type:'image/x-icon', rel:'shortcut icon'],
+        jpg:[type:'image/x-icon', rel:'shortcut icon'],
+        png:[type:'image/x-icon', rel:'shortcut icon'],
+        ico:[type:'image/x-icon', rel:'shortcut icon'],
+        appleicon:[rel:'apple-touch-icon'],
+        /*
+        Be nice to do this later but we need dynamic resource impl'd first
+        rss:[type:'application/rss+xml', rel:'alternate'], 
+        atom:[type:'application/atom+xml', rel:'alternate'], 
+        */
+    ]
     
     def resourceService
     
-    boolean usingResource(url) {
+    boolean notAlreadyIncludedResource(url) {
         url = url.toString()
         if (log.debugEnabled) {
             log.debug "Checking if this request has already pulled in [$url]"
@@ -85,7 +102,12 @@ class ResourceTagLib {
     }
     
     /**
-     * Render an appropriate resource link for an external resource
+     * Render an appropriate resource link for a resource - WHETHER IT IS PROCESSED BY THIS PLUGIN OR NOT.
+     *
+     * IMPORTANT: The point is that devs can use this for smart links in <head> whether or not they are using the resource
+     * processing mechanisms. This gives utility to all, and allows us to have a single tag in Grails, meaning
+     * that users need make no changes when they move to install processing plugins like zipped-resources.
+     *
      * This accepts a "url" attribute which is a Map like that passed to g.resource,
      * or "uri" attribute which is an app-relative uri e.g. 'js/main.js
      * or "plugin"/"dir"/"file" attributes like g.resource
@@ -112,7 +134,7 @@ class ResourceTagLib {
             if (attrs.uri) {
                 // Might be app-relative resource URI 
                 resolveArgs.uri = attrs.remove('uri')
-                urlForExtension = resolveArgs.uri
+                urlForExtension = ResourceService.removeQueryParams(resolveArgs.uri)
             } else {
                 resolveArgs.plugin = attrs.remove('plugin')
                 resolveArgs.dir = attrs.remove('dir')
@@ -121,33 +143,37 @@ class ResourceTagLib {
             }
         } else if (url instanceof Map) {
             resolveArgs.putAll(url)
-            urlForExtension = resolveArgs.file
+            urlForExtension = url.file
         }
 
-        def typeInfo = resourceService.getTypeInfoForURI(urlForExtension, type)?.clone()  // must clone, we mutate this
+        // Work out type from extension if not specified as an arg
+        if (!type) {
+            type = FilenameUtils.getExtension(urlForExtension)
+        }
+        
+        println "Type is ${type}"
+        def typeInfo = SUPPORTED_TYPES[type]?.clone()  // must clone, we mutate this
         if (!typeInfo) {
-            throwTagError "Unknown resourceLink type: ${t}"
+            throwTagError "I can't work out the type of ${urlForExtension}. Please check the URL or specify [type] attribute"
         }
 
         // If a disposition specificed, we may be ad hoc so use that, else rever to default for type
-        def defaultDisposition = typeInfo.remove('disposition')
-        resolveArgs.disposition = disposition ?: defaultDisposition
-        
         if (disposition == null) {
             // Get default disposition for this type
             disposition = 'head'
         }
+        resolveArgs.disposition = disposition
 
         info = resolveResourceAndURI(resolveArgs)
         
         if (disposition != info.resource.disposition) {
-            println "LEAVING - dispositiomn is DEFER"
             // Just get out, we've called r.resource which has created the implicit resource and added it to implicit module
             // and layoutResources will render the implicit module
             return
         }
         
-        if (usingResource(info.uri)) {
+        // Don't do resource check if this isn't a defer/head resource
+        if (!(disposition in ['defer', 'head']) || notAlreadyIncludedResource(info.uri)) {
             def writerName = typeInfo.remove('writer')
             def writer = LINK_WRITERS[writerName ?: 'link']
             def wrapper = attrs.remove('wrapper')
@@ -280,7 +306,7 @@ class ResourceTagLib {
             }
             if (r.disposition == renderingDisposition) {
                 def args = r.tagAttributes?.clone() ?: [:]
-                args.uri = debugMode ? r.sourceUrl : r.actualUrl
+                args.uri = debugMode ? r.sourceUrl : "${r.linkUrl}"
                 args.wrapper = r.prePostWrapper
                 args.disposition = r.disposition
                 if (log.debugEnabled) {
@@ -298,6 +324,9 @@ class ResourceTagLib {
      * @return Map with uri property and *maybe* a resource property
      */
     def resolveResourceAndURI(attrs) {
+        if (log.debugEnabled) {
+            log.debug "resolveResourceAndURI: ${attrs}"
+        }
         def ctxPath = request.contextPath
         def uri = attrs.remove('uri')
         uri = uri ? ctxPath+uri : g.resource(attrs).toString()
@@ -321,7 +350,7 @@ class ResourceTagLib {
             }
         })
         
-        uri = ctxPath+resourceService.staticUrlPrefix+res.actualUrl
+        uri = ctxPath+resourceService.staticUrlPrefix+res.linkUrl
         return [uri:uri, resource:res]
     }
      

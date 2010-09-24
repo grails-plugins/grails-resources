@@ -7,6 +7,7 @@ import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.web.util.WebUtils
 import org.grails.resources.ResourceModulesBuilder
+import org.apache.commons.io.FilenameUtils
 
 /**
  * @todo Move all this code out into a standard Groovy bean class and declare the bean in plugin setup
@@ -19,20 +20,15 @@ class ResourceService {
     static transactional = false
 
     static IMPLICIT_MODULE = "__@legacy-files@__"
-    
-    static LINK_RESOURCE_MAPPINGS = [
-        css:[disposition: 'head', type:"text/css", rel:'stylesheet'],
-        rss:[disposition: 'head', type:'application/rss+xml', rel:'alternate'], 
-        atom:[disposition: 'head', type:'application/atom+xml', rel:'alternate'], 
-        favicon:[disposition: 'head', type:'image/x-icon', rel:'shortcut icon'],
-        appleicon:[disposition: 'head', type:'image/x-icon', rel:'apple-touch-icon'],
-        js:[disposition: 'defer', writer:'js', type:'text/javascript']
-    ]
 
-    static LINK_EXTENSIONS_TO_TYPES = [
-        ico:'favicon',
-        gif:'favicon',
-        png:'favicon'
+    static DEFAULT_MODULE_SETTINGS = [
+        css:[disposition: 'head'],
+        rss:[disposition: 'head'],
+        gif:[disposition: 'head'],
+        jpg:[disposition: 'head'],
+        png:[disposition: 'head'],
+        ico:[disposition: 'head'],
+        js:[disposition: 'defer']
     ]
 
     def staticUrlPrefix
@@ -65,7 +61,8 @@ class ResourceService {
         if (log.debugEnabled) {
             log.debug "Handling ad-hoc resource ${request.requestURI}"
         }
-        def res = getResourceMetaForURI(request.requestURI[request.contextPath.size()..-1], false)
+        def uri = ResourceService.removeQueryParams(request.requestURI[request.contextPath.size()..-1])
+        def res = getResourceMetaForURI(uri, false)
         if (res?.exists()) {
             redirectToActualUrl(res, request, response)
         } else {
@@ -73,6 +70,9 @@ class ResourceService {
         }
     }
     
+    /**
+     * Redirect the client to the actual processed Url, used for when an ad-hoc resource is accessed
+     */
     void redirectToActualUrl(ResourceMeta res, request, response) {
         // Now redirect the client to the processed url
         def u = request.contextPath+staticUrlPrefix+res.actualUrl
@@ -92,7 +92,7 @@ class ResourceService {
             log.debug "Handling resource ${request.requestURI}"
         }
         // Find the ResourceMeta for the request, or create it
-        def uri = request.requestURI[(request.contextPath+staticUrlPrefix).size()..-1]
+        def uri = ResourceService.removeQueryParams(request.requestURI[(request.contextPath+staticUrlPrefix).size()..-1])
         def inf = getResourceMetaForURI(uri)
         
         // See if its an ad-hoc resource that has come here via a relative link
@@ -138,6 +138,10 @@ class ResourceService {
         }
     }
     
+    /**
+     * Get the existing or create a new ad-hoc ResourceMeta for the URI.
+     * @returns The resource instance - which may have a null processedFile if the resource cannot be found
+     */
     ResourceMeta getResourceMetaForURI(uri, adHocResource = true, Closure postProcessor = null) {
         def r = processedResourcesByURI[uri]
 
@@ -185,6 +189,9 @@ class ResourceService {
         return r
     }
     
+    /**
+     * Execute the processing chain for the resource
+     */
     void prepareResource(ResourceMeta r, boolean adHocResource) {
         if (log.debugEnabled) {
             log.debug "Preparing resource ${r.sourceUrl}"
@@ -195,7 +202,7 @@ class ResourceService {
             if (log.errorEnabled) {
                 log.error "Resource not found: ${uri}"
             }
-            return // do nothing, 404s
+            throw new IllegalArgumentException("Cannot locate resource [$uri]")
         }
         
         r.contentType = ServletContextHolder.servletContext.getMimeType(uri)
@@ -349,17 +356,25 @@ class ResourceService {
         }
     }
     
-    def getTypeInfoForURI(uri, typeOverride = null) {
+    static removeQueryParams(uri) {
+        def qidx = uri.indexOf('?')
+        qidx > 0 ? uri[0..qidx-1] : uri
+    }
+    
+    def getDefaultSettingsForURI(uri, typeOverride = null) {
+        
         if (!typeOverride) {
-            def extUrl = uri.indexOf('?') > 0 ? uri[0..uri.indexOf('?')-1] : uri
-            def ext = extUrl[uri.lastIndexOf('.')+1..-1]
-            typeOverride = LINK_EXTENSIONS_TO_TYPES[ext]
-            if (!typeOverride) {
-                typeOverride = ext
+            // Strip off query args
+            def extUrl = ResourceService.removeQueryParams(uri)
+            
+            def ext = FilenameUtils.getExtension(extUrl)
+            if (log.debugEnabled) {
+                log.debug "Extension extracted from ${uri} ([$extUrl]) is ${ext}"
             }
+            typeOverride = ext
         }
         
-        LINK_RESOURCE_MAPPINGS[typeOverride]
+        DEFAULT_MODULE_SETTINGS[typeOverride]
     }
     
     

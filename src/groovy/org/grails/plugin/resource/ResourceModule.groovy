@@ -38,13 +38,18 @@ class ResourceModule {
         }
         def r = new ResourceMeta(sourceUrl: url, workDir: svc.workDir)
         // @todo change this to assume default for the *type* from info in ResourceService
-        def ti = svc.getTypeInfoForURI(url, args.attrs?.type)
+        def ti = svc.getDefaultSettingsForURI(url, args.attrs?.type)
         if (!ti) {
             throw new IllegalArgumentException("Cannot create resource $url, is not a supported type")
         }
         r.disposition = args.remove('disposition') ?: ti.disposition
         r.prePostWrapper = args.remove('wrapper')
-        r.tagAttributes = args.remove('attrs')
+        def resattrs = ti.attrs?.clone() ?: [:]
+        def attrs = args.remove('attrs')
+        if (attrs) {
+            resattrs += attrs
+        }
+        r.tagAttributes = attrs 
         r.attributes.putAll(args)
         return r        
     }

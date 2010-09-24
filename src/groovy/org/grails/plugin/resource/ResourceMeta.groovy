@@ -1,5 +1,7 @@
 package org.grails.plugin.resource
 
+import org.apache.commons.io.FilenameUtils
+
 /**
  * Holder for info about a resource declaration at runtime
  */
@@ -13,10 +15,14 @@ class ResourceMeta {
     File workDir
 
     String sourceUrl
+    String queryParams
+    /* This will be handled by flavours
     String minifiedUrl
     String cdnUrl
-
+    */
+    
     String actualUrl
+    String linkOverride
     String contentType
     
     String disposition
@@ -26,7 +32,7 @@ class ResourceMeta {
     
     File processedFile
     
-    // For per-resource options like "minify", 'zip'
+    // For per-resource options like "nominify", 'nozip'
     Map attributes = [:]
     
     // For per-resource tag resource attributes like "media", 'width', 'height' etc
@@ -37,21 +43,34 @@ class ResourceMeta {
     // A list of Closures taking request & response. Delegates to resourceMeta
     List requestProcessors = []
     
+    private String _linkUrl
+    
     boolean exists() {
         processedFile != null
     }
     
+    String getLinkUrl() {
+        linkOverride ?: _linkUrl 
+    }
+    
+    void setActualUrl(url) {
+        actualUrl = url
+        _linkUrl = queryParams ? "${actualUrl}?${queryParams}" : actualUrl
+    }
+    
+    void setSourceUrl(url) {
+        def qidx = url.indexOf('?')
+
+        sourceUrl = qidx >= 0 ? url[0..qidx-1] : url
+        queryParams = qidx >= 0 ? url[qidx+1..-1] : null
+    }
+
     /**
      * The file extension of the processedFile, or null if it has no extension.
      */
     String getProcessedFileExtension() {
         if (processedFile) {
-            def extensionSeperatorIndex = processedFile.name.lastIndexOf('.')
-            if (extensionSeperatorIndex == -1 || extensionSeperatorIndex == (processedFile.name.size() - 1)) {
-                null
-            } else {
-                processedFile.name.substring(extensionSeperatorIndex + 1)
-            }
+            FilenameUtils.getExtension(processedFile.name) ?: null
         }
     }
     

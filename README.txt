@@ -40,9 +40,23 @@ Features:
 
 Will also soon:
 
-* Change default extensions mechanism to grails.resources.filter.includes and allow any servlet matcher pattern there. Gives finer control
+* Strip off query params when processing resources, but leave them in when linking
 
-* Add linkOverride mechanism
+* Workaround SSDK bug where it fails to extract correct mime type for files
+  with multiple dots in the name e.g. jquery-1.8.2-min.js returns a null mime
+  type.
+
+* Add support for grails.resources.<mapper-name>.excludes so that this
+  resources plugin handles whether or not each mapper gets applied by resource
+  type or URI
+
+* Add currentTimeMillis to end of URIs from taglibs when debugResources is enabled - prevents caching during dev in lame browsers like IE
+
+* Monitor resources and do resource reloading (re-processing)
+
+* Add a config flag to disable all processing (so you can disable it completely in test / dev)
+
+* Add linkOverride mechanism (for CDNs, S3 uploaders etc)
 
 * Support automatic bundling of files into less files prior to processing, and
   give application ability to override/redefine the bundling of resources
@@ -70,8 +84,7 @@ Will also soon:
 
 * Make CachedResources use base62 encoding to shorten hashed url links
 
-* Make SmartImageResources plugin that adds an <r:img> tag that uses
-  <r:resource> to locate the resource and renders out width and height that
+* Make SmartImageResources plugin that adds width and height tagAttributes that
   are pre-calculated by parsing the image
 
 * Support for apps to update the resource definitions of plugins e.g. to force no-defer on jquery

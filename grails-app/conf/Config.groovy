@@ -25,16 +25,17 @@ environments {
 //grails.resources.defer.default=false
 grails.resources.modules = {
     'jquery' { 
-        resource url:'js/jquery/jquery-1.4.2-min.js', nominify:true, disposition:'head'
+        resource url:'js/jquery/jquery-1.4.2.min.js', nominify:true, disposition:'head'
     }
     'jquery-ui' {
         dependsOn 'jquery'
-        resource url:[dir:'js/jquery-ui', file:'jquery-ui-1.8-min.js'], nominify:true
-        resource url:[dir:'js/jquery-ui', file:'jquery-ui-1.8-min.css'], nominify:true
+        resource url:[dir:'js/jquery-ui', file:'jquery-ui-1.8.2.custom.min.js?someargument=value'], nominify:true
+        resource url:[dir:'js/jquery-ui', file:'jquery-ui-1.8.2.custom.css'], nominify:true, attrs:[media:'screen, projection']
     }
     'blueprint' {
-        resource url:[dir:'css/blueprint',file:'main.css']
-        resource url:[dir:'css/blueprint',file:'ie.css'], wrapper: { s -> "<!--[if lt IE 8]>$s<![endif]-->" }
+        resource url:[dir:'css/blueprint',file:'screen.css'], attrs:[media:'screen, projection']
+        resource url:[dir:'css/blueprint',file:'ie.css'], attrs:[media:'screen, projection']
+            wrapper: { s -> "<!--[if lt IE 8]>$s<![endif]-->" }
     }
     'app' {
         resource 'css/main.css'

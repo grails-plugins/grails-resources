@@ -1,7 +1,12 @@
 <html>
 <head>
 <g:set var="output">
+<!-- icon tests -->
+<r:resourceLink uri="/images/favicon.ico"/>
+<r:resourceLink uri="/images/springsource.png" type="appleicon"/>
+
 <!-- Here we pull in our smart links, and capture them just for sake of demo page output -->
+<r:dependsOn module="jquery-ui"/>
 <r:dependsOn module="app"/>
 <!-- This tests resource duplication detection for explicit resourceLink -->
 <r:resourceLink dir="css" file="main.css"/>
