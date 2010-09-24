@@ -27,6 +27,10 @@ class ProcessingFilter implements Filter {
         // Then we don't do any processing
         def debugging = (Environment.current == Environment.DEVELOPMENT) && 
             (request.getParameter('debug') || request.getHeader('Referer')?.contains('?debugResources'))
+            
+        println "REQUEST FILTER: ${request.requestURI}"
+        
+        request['resources.debug'] = debugging
         if (!debugging) {
             if (adhoc) {
                 resourceService.processAdHocResource(request, response)

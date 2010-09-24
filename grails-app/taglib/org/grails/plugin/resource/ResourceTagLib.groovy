@@ -166,7 +166,8 @@ class ResourceTagLib {
 
         info = resolveResourceAndURI(resolveArgs)
         
-        if (disposition != info.resource.disposition) {
+        // If we found a resource (i.e. not debug mode) and disposition is not what we're rendering, skip
+        if (info.resource && (disposition != info.resource.disposition)) {
             // Just get out, we've called r.resource which has created the implicit resource and added it to implicit module
             // and layoutResources will render the implicit module
             return
@@ -334,13 +335,15 @@ class ResourceTagLib {
 
         // Get out quick and add param to tell filter we don't want any fancy stuff
         if (debugMode) {
-            return [uri:uri+"?debug=y", debug:true]
+            def t = System.currentTimeMillis()
+            uri += (uri.indexOf('?') >= 0) ? "&debug=y&$t" : "?&debug=y$t"
+            return [uri:uri, debug:true]
         } 
         
         def disposition = attrs.remove('disposition')
 
         // Chop off context path
-        def reluri = uri[ctxPath.size()..-1]
+        def reluri = ResourceService.removeQueryParams(uri[ctxPath.size()..-1])
         
         // Get or create ResourceMeta
         def res = resourceService.getResourceMetaForURI(reluri, true, { res ->
@@ -354,6 +357,11 @@ class ResourceTagLib {
         return [uri:uri, resource:res]
     }
      
+    void outputCacheDefeater(output, uri) {
+        def t = System.currentTimeMillis()
+        output << (uri.indexOf('?') >= 0) ? "&$t" : "?$t"
+    }
+
     /**
      * Get the URL for an ad-hoc resource - NOT for declared resources
      * @todo this currently won't work for absolute="true" invocations, it should just passthrough these
@@ -368,7 +376,7 @@ class ResourceTagLib {
             if (!info.debug && log.warnEnabled) {
                 log.warn "Invocation of <r:resource> for a resource that apparently doesn't exist: $uri"
             }
-            out << uri
+            out << info.uri
         }
     }
     

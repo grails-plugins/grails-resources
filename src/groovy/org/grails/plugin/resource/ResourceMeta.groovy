@@ -53,12 +53,14 @@ class ResourceMeta {
         linkOverride ?: _linkUrl 
     }
     
-    void setActualUrl(url) {
-        actualUrl = url
-        _linkUrl = queryParams ? "${actualUrl}?${queryParams}" : actualUrl
+    void setActualUrl(String url) {
+        println "setActualUrl: $url"
+        this.@actualUrl = url
+        println "updating linkUrl actual: $actualUrl"
+        _linkUrl = queryParams ? "${actualUrl}?${queryParams}" : url
     }
     
-    void setSourceUrl(url) {
+    void setSourceUrl(String url) {
         def qidx = url.indexOf('?')
 
         sourceUrl = qidx >= 0 ? url[0..qidx-1] : url
@@ -75,6 +77,8 @@ class ResourceMeta {
     }
     
     void updateActualUrlFromProcessedFile() {
-        actualUrl = (processedFile.path - workDir.path).replace('\\', '/')
+        println "Updating from processed file: ${processedFile} / ${workDir}"
+        setActualUrl((processedFile.path - workDir.path).replace('\\', '/'))
+        println "Back from Updating from processed file: new actual url is ${actualUrl} - ${processedFile} / ${workDir}"
     }
 }

@@ -36,7 +36,7 @@ class ResourceModule {
         if (!url.startsWith('/')) {
             url = '/'+url
         }
-        def r = new ResourceMeta(sourceUrl: url, workDir: svc.workDir)
+        def r = new ResourceMeta(sourceUrl: url , workDir: svc.workDir)
         // @todo change this to assume default for the *type* from info in ResourceService
         def ti = svc.getDefaultSettingsForURI(url, args.attrs?.type)
         if (!ti) {

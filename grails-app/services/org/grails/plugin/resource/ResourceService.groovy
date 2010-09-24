@@ -20,7 +20,8 @@ class ResourceService {
     static transactional = false
 
     static IMPLICIT_MODULE = "__@legacy-files@__"
-
+    static REQ_ATTR_DEBUGGING = 'resources.debug'
+    
     static DEFAULT_MODULE_SETTINGS = [
         css:[disposition: 'head'],
         rss:[disposition: 'head'],
@@ -75,7 +76,7 @@ class ResourceService {
      */
     void redirectToActualUrl(ResourceMeta res, request, response) {
         // Now redirect the client to the processed url
-        def u = request.contextPath+staticUrlPrefix+res.actualUrl
+        def u = request.contextPath+staticUrlPrefix+res.linkUrl
         if (log.debugEnabled) {
             log.debug "Redirecting ad-hoc resource ${request.requestURI} to $u which makes it UNCACHEABLE - declare this resource "+
                 "and use resourceLink/module tags to avoid redirects and enable client-side caching"
@@ -288,7 +289,7 @@ class ResourceService {
         }
         
         m.resources.each { r ->
-            prepareResource(r, true)
+            prepareResource(r, false)
         }
         modulesByName[m.name] = m
     }
@@ -389,7 +390,9 @@ class ResourceService {
                 s1 << "   Resource: ${resource.sourceUrl}\n"
                 s1 << "             -- local file: ${resource.processedFile}\n"
                 s1 << "             -- mime type: ${resource.contentType}\n"
-                s1 << "             -- url for linking: ${resource.actualUrl}\n"
+                s1 << "             -- processed Url: ${resource.actualUrl}\n"
+                s1 << "             -- url for linking: ${resource.linkUrl}\n"
+                s1 << "             -- url override: ${resource.linkOverride}\n"
                 s1 << "             -- attributes: ${resource.attributes}\n"
                 s1 << "             -- tag attributes: ${resource.tagAttributes}\n"
                 s1 << "             -- disposition: ${resource.disposition}\n"
