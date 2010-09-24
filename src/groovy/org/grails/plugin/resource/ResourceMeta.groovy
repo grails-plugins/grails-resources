@@ -54,9 +54,7 @@ class ResourceMeta {
     }
     
     void setActualUrl(String url) {
-        println "setActualUrl: $url"
         this.@actualUrl = url
-        println "updating linkUrl actual: $actualUrl"
         _linkUrl = queryParams ? "${actualUrl}?${queryParams}" : url
     }
     
@@ -77,8 +75,7 @@ class ResourceMeta {
     }
     
     void updateActualUrlFromProcessedFile() {
-        println "Updating from processed file: ${processedFile} / ${workDir}"
+        // have to call the method @todo is the "-" safe?
         setActualUrl((processedFile.path - workDir.path).replace('\\', '/'))
-        println "Back from Updating from processed file: new actual url is ${actualUrl} - ${processedFile} / ${workDir}"
     }
 }

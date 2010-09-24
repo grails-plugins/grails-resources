@@ -151,7 +151,6 @@ class ResourceTagLib {
             type = FilenameUtils.getExtension(urlForExtension)
         }
         
-        println "Type is ${type}"
         def typeInfo = SUPPORTED_TYPES[type]?.clone()  // must clone, we mutate this
         if (!typeInfo) {
             throwTagError "I can't work out the type of ${urlForExtension}. Please check the URL or specify [type] attribute"
