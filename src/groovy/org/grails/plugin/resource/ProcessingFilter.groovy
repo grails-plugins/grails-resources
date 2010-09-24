@@ -26,10 +26,8 @@ class ProcessingFilter implements Filter {
         // If in DEV mode and debug=y is supplied OR the referer has debugResources param in referer
         // Then we don't do any processing
         def debugging = (Environment.current == Environment.DEVELOPMENT) && 
-            (request.getParameter('debug') || request.getHeader('Referer')?.contains('?debugResources'))
+            (request.getParameter('debug') || request.getHeader('Referer')?.contains('?debugResources='))
             
-        println "REQUEST FILTER: ${request.requestURI}"
-        
         request['resources.debug'] = debugging
         if (!debugging) {
             if (adhoc) {
