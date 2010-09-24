@@ -129,7 +129,6 @@ class ResourceTagLib {
             throwTagError "Unknown resourceLink type: ${t}"
         }
 
-        println "disposition: ${disposition} - type dispos: ${typeInfo.disposition}"
         // If a disposition specificed, we may be ad hoc so use that, else rever to default for type
         def defaultDisposition = typeInfo.remove('disposition')
         resolveArgs.disposition = disposition ?: defaultDisposition
