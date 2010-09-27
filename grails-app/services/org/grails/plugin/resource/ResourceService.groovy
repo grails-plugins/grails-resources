@@ -96,39 +96,56 @@ class ResourceService {
      * and / is app-absolute, and anything with a protocol :// is absolute
      */
      def resolveURI(base, target) {
-         if (target.indexOf('://') >= 0) {
-             return target
-         } else {
-             def relbase = base
-             def wasAbs = base.startsWith('/')
-             if (base != '/') {
-                 def lastSlash = base.lastIndexOf('/')
-                 if (base.endsWith('/')) {
-                     lastSlash = base[0..lastSlash-1].lastIndexOf('/')
-                 }
+        if (target.indexOf('://') >= 0) {
+            return target
+        } else {
+            def relbase = base
+            def wasAbs = base.startsWith('/')
+            if (base != '/') {
+                def lastSlash = base.lastIndexOf('/')
+                if (base.endsWith('/')) {
+                    lastSlash = base[0..lastSlash-1].lastIndexOf('/')
+                }
 
-                 relbase = base[0..(lastSlash >= 0 ? lastSlash-1 : base.size())]                
-             }
-             def relURI
+                relbase = base[0..(lastSlash >= 0 ? lastSlash-1 : -1)]                
+            }
+            def relURI
 
-             if (target.startsWith('../')) {
-                  def lastSlash = relbase.lastIndexOf('/')
-                 if (lastSlash > 0) {
-                     relbase = relbase[0..lastSlash-1]
-                 } else {
-                     relbase = wasAbs ? '/' : ''
-                 }
-                 relURI = target[3..-1]
-             } else if (target.startsWith('./')) {
-                 relURI = target[2..-1]
-             } else if (target.startsWith('/')) {
-                 relURI = target[1..-1]
-             } else {
-                 relURI = target
-             }
+            println "1: relbase = $relbase"
 
-             return "${relbase}/${relURI}"
-         }
+            if (target.startsWith('../')) {
+                // go "up" a dir in the base
+                def lastSlash = relbase.lastIndexOf('/')
+                if (lastSlash > 0) {
+                    relbase = relbase[0..lastSlash-1]
+                } else {
+                    relbase = ''
+                }
+                relURI = target[3..-1]
+                if (relbase.endsWith('/')) {
+                    if (relbase.size() > 1) {
+                        relbase = relbase[0..-2]
+                    } else {
+                        relbase = ''
+                    }
+                }
+                println "2: relbase = $relbase"
+                println "2: relURI = $relURI"
+                println "2: wasabs = $wasAbs"
+            } else if (target.startsWith('./')) {
+                relURI = target[2..-1]
+            } else if (target.startsWith('/')) {
+                relURI = target[1..-1]
+            } else {
+                relURI = target
+            }
+
+            if (relbase) {
+                return "${relbase}/${relURI}"
+            } else {
+                return wasAbs ? '/' + relURI : relURI
+            }
+        }
     }
          
     /**
