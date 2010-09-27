@@ -74,8 +74,16 @@ class ResourceMeta {
         }
     }
     
+    String getWorkDirRelativeParentPath() {
+        workDirRelativePath - "/$processedFile.name"
+    }
+    
+    String getWorkDirRelativePath() {
+        processedFile.path - workDir.path
+    }
+    
     void updateActualUrlFromProcessedFile() {
         // have to call the method @todo is the "-" safe?
-        setActualUrl((processedFile.path - workDir.path).replace('\\', '/'))
+        setActualUrl(workDirRelativePath.replace('\\', '/'))
     }
 }
