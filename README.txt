@@ -53,6 +53,9 @@ Will also soon:
   resources plugin handles whether or not each mapper gets applied by resource
   type or URI
 
+* Work out if resourceLink should add the link to the deps list instead of doing nothing (aside from creating the resource) 
+  if disposition does not match.
+
 * Monitor resources and do resource reloading (re-processing)
 
 * Add a config flag to disable all processing (so you can disable it completely in test / dev)

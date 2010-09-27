@@ -21,6 +21,7 @@ class ResourceService {
 
     static IMPLICIT_MODULE = "__@legacy-files@__"
     static REQ_ATTR_DEBUGGING = 'resources.debug'
+    static CSS_URL_PATTERN = ~/url\((.+)\)/    
     
     static DEFAULT_MODULE_SETTINGS = [
         css:[disposition: 'head'],
@@ -84,6 +85,84 @@ class ResourceService {
         response.sendRedirect(u)
     }
 
+    
+    protected isCSSRewriteCandidate(resource) {
+        resource.contentType == "text/css" || resource.tagAttributes?.type == "css"
+    }
+    
+    /**
+     * Take a base URI and a target URI and resolve target against the base
+     * using the normal rules e.g. "../x", "./x" "x" results in a link relative to the base's folder
+     * and / is app-absolute, and anything with a protocol :// is absolute
+     */
+     def resolveURI(base, target) {
+         if (target.indexOf('://') >= 0) {
+             return target
+         } else {
+             def relbase = base
+             def wasAbs = base.startsWith('/')
+             if (base != '/') {
+                 def lastSlash = base.lastIndexOf('/')
+                 if (base.endsWith('/')) {
+                     lastSlash = base[0..lastSlash-1].lastIndexOf('/')
+                 }
+
+                 relbase = base[0..(lastSlash >= 0 ? lastSlash-1 : base.size())]                
+             }
+             def relURI
+
+             if (target.startsWith('../')) {
+                  def lastSlash = relbase.lastIndexOf('/')
+                 if (lastSlash > 0) {
+                     relbase = relbase[0..lastSlash-1]
+                 } else {
+                     relbase = wasAbs ? '/' : ''
+                 }
+                 relURI = target[3..-1]
+             } else if (target.startsWith('./')) {
+                 relURI = target[2..-1]
+             } else if (target.startsWith('/')) {
+                 relURI = target[1..-1]
+             } else {
+                 relURI = target
+             }
+
+             return "${relbase}/${relURI}"
+         }
+    }
+         
+    /**
+     * Find all url() and fix up the url if it is not absolute
+     */
+    void fixCSSResourceLinks(resource, inputStream) {
+        // Create a tmp file to write to
+        def rewrittenFile = resource.processedFile
+        if (log.debugEnabled) {
+            log.debug "Pre-processing CSS resource ${resource.sourceUrl} to rewrite links"
+        }
+        // Replace all urls to resources we know about to their processed urls
+        rewrittenFile.withPrintWriter("utf-8") { writer ->
+            inputStream.eachLine { line ->
+                def fixedLine = line.replaceAll(CSS_URL_PATTERN) { Object[] args ->
+                    def originalUrl = args[1]
+                    def uri = resolveURI(resource.sourceUrl, originalUrl)
+                    try {
+                        // This triggers the processing chain if necessary for any resource referenced by the CSS
+                        def linkedToResource = getResourceMetaForURI(uri)
+                        
+                        def fixedUrl = linkedToResource.linkUrl - "$resource.workDirRelativeParentPath/"
+                        return "url(${fixedUrl})"
+                    } catch (IllegalArgumentException e) {
+                        // @todo We don't want to do this really... or do we? New exception type better probably
+                        log.error "Cannot resolve CSS resource, leaving link as is: ${originalUrl}"
+                        return "url(${originalUrl})"
+                    }
+                }
+                writer.println(fixedLine)
+            }
+        }
+    }
+    
     /**
      * Process a URI where the input URI matches a cached and declared resource URI,
      * without any redirects. This is the real deal
@@ -227,8 +306,14 @@ class ResourceService {
             if (r.processedFile.exists()) {
                 assert r.processedFile.delete()
             }
-            // Now copy in the resource from this app deployment
-            r.processedFile << origResource
+            
+            // Now copy in the resource from this app deployment into the cache, ready for mutation
+            if (isCSSRewriteCandidate(r)) {
+                // In the case of CSS we fix up url(x) refs as we copy
+                fixCSSResourceLinks(r, origResource)
+            } else {
+                r.processedFile << origResource
+            }
             
             r.actualUrl = r.sourceUrl
             
