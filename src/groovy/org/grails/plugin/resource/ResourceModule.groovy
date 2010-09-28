@@ -27,6 +27,25 @@ class ResourceModule {
         lockDown()
     }
 
+    ResourceModule(name, List resourceInfoList, ResourceService svc) {
+        this.name = name
+        resourceInfoList.each { i ->
+            if (i instanceof Map) {
+                def args = i.clone()
+                if (args.url instanceof Map) {
+                    args.url = getResourceUrl(args.url)
+                }
+                def r = newResourceFromArgs(args, svc)
+                this.resources << r
+            } else if (i instanceof String) {
+                this.resources << newResourceFromArgs(url:i, svc)
+            } else {
+                throw new IllegalArgumentException("Barf!")
+            }
+        }
+        lockDown()
+    }
+    
     void addModuleDependency(String name) {
         dependsOn << name
     }
@@ -53,25 +72,6 @@ class ResourceModule {
         r.tagAttributes = attrs 
         r.attributes.putAll(args)
         return r        
-    }
-    
-    ResourceModule(name, List resourceInfoList, ResourceService svc) {
-        this.name = name
-        resourceInfoList.each { i ->
-            if (i instanceof Map) {
-                def args = i.clone()
-                if (args.url instanceof Map) {
-                    args.url = getResourceUrl(args.url)
-                }
-                def r = newResourceFromArgs(args, svc)
-                this.resources << r
-            } else if (i instanceof String) {
-                this.resources << newResourceFromArgs(url:i, svc)
-            } else {
-                throw new IllegalArgumentException("Barf!")
-            }
-        }
-        lockDown()
     }
     
     void lockDown() {
