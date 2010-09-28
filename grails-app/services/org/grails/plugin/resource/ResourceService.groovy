@@ -21,7 +21,7 @@ class ResourceService {
 
     static IMPLICIT_MODULE = "__@legacy-files@__"
     static REQ_ATTR_DEBUGGING = 'resources.debug'
-    static CSS_URL_PATTERN = ~/url\((.+)\)/    
+    static CSS_URL_PATTERN = ~/(url\s*\(['"]?\s*)(.+?)(\s*['"]?\s*\))/
     
     static DEFAULT_MODULE_SETTINGS = [
         css:[disposition: 'head'],
@@ -161,18 +161,20 @@ class ResourceService {
         rewrittenFile.withPrintWriter("utf-8") { writer ->
             inputStream.eachLine { line ->
                 def fixedLine = line.replaceAll(CSS_URL_PATTERN) { Object[] args ->
-                    def originalUrl = args[1]
+                    def prefix = args[1]
+                    def originalUrl = args[2]
+                    def suffix = args[3]
                     def uri = resolveURI(resource.sourceUrl, originalUrl)
                     try {
                         // This triggers the processing chain if necessary for any resource referenced by the CSS
                         def linkedToResource = getResourceMetaForURI(uri)
                         
                         def fixedUrl = linkedToResource.linkUrl - "$resource.workDirRelativeParentPath/"
-                        return "url(${fixedUrl})"
+                        return "${prefix}${fixedUrl}${suffix}"
                     } catch (IllegalArgumentException e) {
                         // @todo We don't want to do this really... or do we? New exception type better probably
                         log.error "Cannot resolve CSS resource, leaving link as is: ${originalUrl}"
-                        return "url(${originalUrl})"
+                        return "${prefix}${originalUrl}${suffix}"
                     }
                 }
                 writer.println(fixedLine)
