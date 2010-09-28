@@ -159,6 +159,12 @@ class ResourceService {
                     def prefix = args[1]
                     def originalUrl = args[2]
                     def suffix = args[3]
+                    
+                    // Leave any urls that contain a protocol alone
+                    if (originalUrl.toURI().scheme != null) {
+                        return "${prefix}${originalUrl}${suffix}"
+                    }
+                    
                     def uri = resolveURI(resource.sourceUrl, originalUrl)
                     try {
                         // This triggers the processing chain if necessary for any resource referenced by the CSS
