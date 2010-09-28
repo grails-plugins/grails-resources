@@ -169,9 +169,14 @@ class ResourceService {
                     try {
                         // This triggers the processing chain if necessary for any resource referenced by the CSS
                         def linkedToResource = getResourceMetaForURI(uri)
-                        
                         def fixedUrl = linkedToResource.linkUrl - "$resource.workDirRelativeParentPath/"
-                        return "${prefix}${fixedUrl}${suffix}"
+                        def replacement = "${prefix}${fixedUrl}${suffix}"
+                        
+                        if (log.debugEnabled) {
+                            log.debug "Rewriting CSS URL '${args[0]}' to '$replacement'"
+                        }
+                        
+                        return replacement
                     } catch (IllegalArgumentException e) {
                         // @todo We don't want to do this really... or do we? New exception type better probably
                         log.warn "Cannot resolve CSS resource, leaving link as is: ${originalUrl}"
