@@ -94,6 +94,10 @@ class ResourceService {
      * Take a base URI and a target URI and resolve target against the base
      * using the normal rules e.g. "../x", "./x" "x" results in a link relative to the base's folder
      * and / is app-absolute, and anything with a protocol :// is absolute
+     *
+     * Please note, I take full responsibility for the nastiness of this code. I could not 
+     * find a nice way to do this, and I wanted to find an existing lib to do it. Its
+     * certainly not my finest moment. Sorry. Rely on the MenuTagTests.
      */
      def resolveURI(base, target) {
         if (target.indexOf('://') >= 0) {
@@ -102,12 +106,19 @@ class ResourceService {
             def relbase = base
             def wasAbs = base.startsWith('/')
             if (base != '/') {
-                def lastSlash = base.lastIndexOf('/')
-                if (base.endsWith('/')) {
-                    lastSlash = base[0..lastSlash-1].lastIndexOf('/')
+                if (wasAbs) {
+                    base = base[1..-1]
                 }
+                def lastSlash = base.lastIndexOf('/')
+                if (lastSlash < 0) {
+                    relbase = ''
+                } else {
+                    if (base.endsWith('/')) {
+                        lastSlash = base[0..lastSlash-1].lastIndexOf('/')
+                    }
 
-                relbase = base[0..(lastSlash >= 0 ? lastSlash-1 : -1)]                
+                    relbase = base[0..(lastSlash >= 0 ? lastSlash-1 : -1)]                
+                }
             }
             def relURI
 
@@ -130,13 +141,13 @@ class ResourceService {
             } else if (target.startsWith('./')) {
                 relURI = target[2..-1]
             } else if (target.startsWith('/')) {
-                relURI = target[1..-1]
+                return target
             } else {
                 relURI = target
             }
 
             if (relbase) {
-                return "${relbase}/${relURI}"
+                return wasAbs ? "/${relbase}/${relURI}" : "${relbase}/${relURI}"
             } else {
                 return wasAbs ? '/' + relURI : relURI
             }

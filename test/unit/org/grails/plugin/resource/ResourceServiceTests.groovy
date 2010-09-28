@@ -21,7 +21,7 @@ class ResourceServiceTests extends GrailsUnitTestCase {
         assertEquals "bg_fade.png", svc.resolveURI('main.css', 'bg_fade.png')
         assertEquals "/bg_fade.png", svc.resolveURI('/main.css', 'bg_fade.png')
         assertEquals "css/bg_fade.png", svc.resolveURI('css/main.css', 'bg_fade.png')
-        assertEquals "/css/bg_fade.png", svc.resolveURI('css/main.css', 'bg_fade.png')
+        assertEquals "/css/bg_fade.png", svc.resolveURI('/css/main.css', 'bg_fade.png')
         assertEquals "/bg_fade.png", svc.resolveURI('/main.css', '/bg_fade.png')
         assertEquals "/bg_fade.png", svc.resolveURI('css/main.css', '/bg_fade.png')
         assertEquals "/bg_fade.png", svc.resolveURI('/css/main.css', '/bg_fade.png')
