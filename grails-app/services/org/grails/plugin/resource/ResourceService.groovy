@@ -111,8 +111,6 @@ class ResourceService {
             }
             def relURI
 
-            println "1: relbase = $relbase"
-
             if (target.startsWith('../')) {
                 // go "up" a dir in the base
                 def lastSlash = relbase.lastIndexOf('/')
@@ -129,9 +127,6 @@ class ResourceService {
                         relbase = ''
                     }
                 }
-                println "2: relbase = $relbase"
-                println "2: relURI = $relURI"
-                println "2: wasabs = $wasAbs"
             } else if (target.startsWith('./')) {
                 relURI = target[2..-1]
             } else if (target.startsWith('/')) {
