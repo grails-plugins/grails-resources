@@ -174,7 +174,7 @@ class ResourceService {
                         return "${prefix}${fixedUrl}${suffix}"
                     } catch (IllegalArgumentException e) {
                         // @todo We don't want to do this really... or do we? New exception type better probably
-                        log.error "Cannot resolve CSS resource, leaving link as is: ${originalUrl}"
+                        log.warn "Cannot resolve CSS resource, leaving link as is: ${originalUrl}"
                         return "${prefix}${originalUrl}${suffix}"
                     }
                 }
