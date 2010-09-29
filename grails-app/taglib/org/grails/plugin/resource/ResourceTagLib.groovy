@@ -352,8 +352,16 @@ class ResourceTagLib {
 
         // Get out quick and add param to tell filter we don't want any fancy stuff
         if (debugMode) {
-            def t = System.currentTimeMillis()
-            uri += (uri.indexOf('?') >= 0) ? "&debug=y&n=$t" : "?debug=y&n=$t"
+            
+            // Some JS libraries can't handle different query params being sent to other dependencies
+            // so we reuse the same timestamp for the lifecycle of the request
+            def timestamp = request['grails-resources.debug-timestamp']
+            if (!timestamp) {
+                timestamp = System.currentTimeMillis()
+                request['grails-resources.debug-timestamp'] = timestamp
+            }
+
+            uri += (uri.indexOf('?') >= 0) ? "&debug=y&n=$timestamp" : "?debug=y&n=$timestamp"
             return [uri:uri, debug:true]
         } 
         
