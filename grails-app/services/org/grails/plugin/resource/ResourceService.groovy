@@ -5,7 +5,6 @@ import java.util.concurrent.ConcurrentHashMap
 import grails.util.Environment
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.web.util.WebUtils
 import org.grails.resources.ResourceModulesBuilder
 import org.apache.commons.io.FilenameUtils
@@ -468,7 +467,7 @@ class ResourceService {
         forgetResources()
         
         // Placeholder code, we might support lists of config closures in future
-        def modules = ConfigurationHolder.config.grails.resources.modules
+        def modules = config.modules
         if (!(modules instanceof Closure)) {
             return
         }
