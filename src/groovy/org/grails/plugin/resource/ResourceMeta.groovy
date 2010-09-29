@@ -75,6 +75,7 @@ class ResourceMeta {
     }
     
     String getWorkDirRelativeParentPath() {
+        // @todo I still don't trust this. surely a URL with duplication in would cause odd effects?
         workDirRelativePath - "/$processedFile.name"
     }
     
@@ -83,7 +84,12 @@ class ResourceMeta {
     }
     
     void updateActualUrlFromProcessedFile() {
-        // have to call the method @todo is the "-" safe?
-        setActualUrl(workDirRelativePath.replace('\\', '/'))
+        def p = workDirRelativePath.replace('\\', '/')
+        // Strip leading / off, we want relative paths
+        if (p.startsWith('/')) {
+            p = p[1..-1]
+        }
+        // have to call the setter method
+        setActualUrl(p)
     }
 }

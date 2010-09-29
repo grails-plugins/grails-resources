@@ -2,6 +2,7 @@ package org.grails.plugin.resource
 
 import java.util.concurrent.ConcurrentHashMap
 
+import grails.util.Environment
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
@@ -68,7 +69,11 @@ class ResourceService {
             log.debug "Handling ad-hoc resource ${request.requestURI}"
         }
         def uri = ResourceService.removeQueryParams(request.requestURI[request.contextPath.size()..-1])
+        // @todo query params are lost at this point for ad hoc resources, this needs fixing
         def res = getResourceMetaForURI(uri, false)
+        if (Environment.current == Environment.DEVELOPMENT) {
+            response.setHeader('X-Grails-Resources-Original-Src', res.sourceUrl)
+        }
         if (res?.exists()) {
             redirectToActualUrl(res, request, response)
         } else {
@@ -81,7 +86,7 @@ class ResourceService {
      */
     void redirectToActualUrl(ResourceMeta res, request, response) {
         // Now redirect the client to the processed url
-        def u = request.contextPath+staticUrlPrefix+res.linkUrl
+        def u = request.contextPath+staticUrlPrefix+'/'+res.linkUrl
         if (log.debugEnabled) {
             log.debug "Redirecting ad-hoc resource ${request.requestURI} to $u which makes it UNCACHEABLE - declare this resource "+
                 "and use resourceLink/module tags to avoid redirects and enable client-side caching"
@@ -172,7 +177,7 @@ class ResourceService {
             inputStream.eachLine { line ->
                 def fixedLine = line.replaceAll(CSS_URL_PATTERN) { Object[] args ->
                     def prefix = args[1]
-                    def originalUrl = args[2]
+                    def originalUrl = args[2].trim()
                     def suffix = args[3]
                     
                     // Leave any urls that contain a protocol alone
@@ -184,7 +189,7 @@ class ResourceService {
                     try {
                         // This triggers the processing chain if necessary for any resource referenced by the CSS
                         def linkedToResource = getResourceMetaForURI(uri)
-                        def fixedUrl = linkedToResource.linkUrl - "$resource.workDirRelativeParentPath/"
+                        def fixedUrl = linkedToResource.linkUrl
                         def replacement = "${prefix}${fixedUrl}${suffix}"
                         
                         if (log.debugEnabled) {
@@ -215,9 +220,13 @@ class ResourceService {
         def uri = ResourceService.removeQueryParams(request.requestURI[(request.contextPath+staticUrlPrefix).size()..-1])
         def inf = getResourceMetaForURI(uri)
         
+        if (Environment.current == Environment.DEVELOPMENT) {
+            response.setHeader('X-Grails-Resources-Original-Src', inf?.sourceUrl)
+        }
+
         // See if its an ad-hoc resource that has come here via a relative link
         // @todo make this development mode only by default?
-        if (inf.actualUrl != uri) {
+        if ('/'+inf.actualUrl != uri) {
             redirectToActualUrl(inf, request, response)
             return
         }
@@ -381,11 +390,11 @@ class ResourceService {
             }
             
             if (log.debugEnabled) {
-                log.debug "Updating URI to resource cache for ${r.actualUrl} >> ${r.processedFile}"
+                log.debug "Updating URI to resource cache for /${r.actualUrl} >> ${r.processedFile}"
             }
             
             // Add the actual linking URL to the cache so resourceLink resolves
-            processedResourcesByURI[r.actualUrl] = r
+            processedResourcesByURI['/'+r.actualUrl] = r
             
             // Add the original source url to the cache as well, if it was an ad-hoc resource
             // As the original URL is used, we need this to resolve to the actualUrl for redirect
@@ -549,8 +558,8 @@ class ResourceService {
     }
     
     boolean isDebugMode(ServletRequest request) {
-        if (config.debug) {
-            true
+        if (config.debug instanceof Boolean) {
+            config.debug
         } else if (request != null) {
             isExplicitDebugRequest(request)
         } else {
@@ -561,7 +570,7 @@ class ResourceService {
     private isExplicitDebugRequest(ServletRequest request) {
         if (Environment.current == Environment.DEVELOPMENT) {
             def requestContainsDebug = request.getParameter('debug') != null
-            def wasReferredFromDebugRequest = request.getHeader('Referer')?.contains('?debugResources=')
+            def wasReferredFromDebugRequest = request.getHeader('Referer')?.contains('?debug=')
 
             requestContainsDebug || wasReferredFromDebugRequest
         } else {
