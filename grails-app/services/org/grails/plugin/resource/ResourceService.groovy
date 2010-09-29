@@ -8,6 +8,8 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.web.util.WebUtils
 import org.grails.resources.ResourceModulesBuilder
 import org.apache.commons.io.FilenameUtils
+import javax.servlet.ServletRequest
+import grails.util.Environment
 
 /**
  * @todo Move all this code out into a standard Groovy bean class and declare the bean in plugin setup
@@ -44,7 +46,9 @@ class ResourceService {
     def moduleNamesByBundle = [:]
     
     List resourceMappers = []
-        
+    
+    def grailsApplication
+    
     /**
      * Process a legacy URI that points to a normal resource, not produced with our
      * own tags, and likely not referencing a declared resource.
@@ -535,5 +539,33 @@ class ResourceService {
             log.debug '-'*50
         }
         return s1.toString() + s2.toString()
+    }
+    
+    /**
+     * Returns the config object under 'grails.resources'
+     */
+    ConfigObject getConfig() {
+        grailsApplication.config.grails.resources
+    }
+    
+    boolean isDebugMode(ServletRequest request) {
+        if (config.debug) {
+            true
+        } else if (request != null) {
+            isExplicitDebugRequest(request)
+        } else {
+            false
+        }
+    }
+    
+    private isExplicitDebugRequest(ServletRequest request) {
+        if (Environment.current == Environment.DEVELOPMENT) {
+            def requestContainsDebug = request.getParameter('debug') != null
+            def wasReferredFromDebugRequest = request.getHeader('Referer')?.contains('?debugResources=')
+
+            requestContainsDebug || wasReferredFromDebugRequest
+        } else {
+            false
+        }
     }
 }

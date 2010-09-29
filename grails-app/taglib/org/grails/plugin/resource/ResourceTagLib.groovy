@@ -313,7 +313,7 @@ class ResourceTagLib {
             log.debug "Rendering the resources of module [${name}]"
         }
         
-        def debugMode = (Environment.current == Environment.DEVELOPMENT) && params.debugResources
+        def debugMode = resourceService.isDebugMode(request)
         
         module.resources.each { r ->
             if (!r.exists()) {
@@ -348,7 +348,7 @@ class ResourceTagLib {
         def ctxPath = request.contextPath
         def uri = attrs.remove('uri')
         uri = uri ? ctxPath+uri : g.resource(attrs).toString()
-        def debugMode = (Environment.current == Environment.DEVELOPMENT) && params.debugResources
+        def debugMode = resourceService.isDebugMode(request)
 
         // Get out quick and add param to tell filter we don't want any fancy stuff
         if (debugMode) {

@@ -22,12 +22,7 @@ class ProcessingFilter implements Filter {
     void doFilter(ServletRequest request, ServletResponse response,
         FilterChain chain) throws IOException, ServletException {
 
-        //System.out.println "In filter ${request.requestURI} - debug param [${request.getParameter('debug')}]"
-        // If in DEV mode and debug=y is supplied OR the referer has debugResources param in referer
-        // Then we don't do any processing
-        def debugging = (Environment.current == Environment.DEVELOPMENT) && 
-            (request.getParameter('debug') || request.getHeader('Referer')?.contains('?debugResources='))
-            
+        def debugging = resourceService.isDebugMode(request)
         request['resources.debug'] = debugging
         if (!debugging) {
             if (adhoc) {
