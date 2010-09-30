@@ -361,7 +361,12 @@ class ResourceService {
             
             // force the structure
             if (!staticDir.exists()) {
-                assert staticDir.mkdirs()
+                // Do not assert this, we are re-entrant and may get multiple simultaneous calls.
+                // We just want to be sure one of them works
+                staticDir.mkdirs()
+                if (!staticDir.exists()) {
+                    log.error "Unable to create static resource cache directory: ${staticDir}"
+                }
             }
             
             // copy the file ready for mutation
