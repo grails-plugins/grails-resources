@@ -165,6 +165,8 @@ class ResourceService {
 
     /**
      * Find all url() and fix up the url if it is not absolute
+     * NOTE: This needs to run after any plugins that move resources around, but before any that obliterate
+     * the content i.e. before minify or gzip
      */
     void fixCSSResourceLinks(resource, inputStream, boolean adHocResource = true) {
         // Create a tmp file to write to
@@ -203,8 +205,12 @@ class ResourceService {
                             // otherwise we pop out as a favicon...
                             res.disposition = 'image'
                         }
+
+                        if (log.debugEnabled) {
+                            log.debug "Calculating URL of ${linkedToResource.dump()} relative to ${resource.dump()}"
+                        }
                         
-                        def fixedUrl = linkedToResource.relativeTo(rewrittenFile)
+                        def fixedUrl = linkedToResource.relativeTo(resource)
                         def replacement = "${prefix}${fixedUrl}${suffix}"
                         
                         if (log.debugEnabled) {
@@ -376,6 +382,8 @@ class ResourceService {
                 assert r.processedFile.delete()
             }
             
+            r.actualUrl = r.sourceUrl
+
             // Now copy in the resource from this app deployment into the cache, ready for mutation
             if (isCSSRewriteCandidate(r)) {
                 // In the case of CSS we fix up url(x) refs as we copy
@@ -384,7 +392,6 @@ class ResourceService {
                 r.processedFile << origResource
             }
             
-            r.actualUrl = r.sourceUrl
             
             // Now iterate over the mappers...
             if (log.debugEnabled) {
@@ -449,15 +456,15 @@ class ResourceService {
     }
     
     def defineModule(String name) {
-        storeModule(new ResourceModule(name))
+        storeModule(new ResourceModule(name, this))
     }
 
     def module(String name, String url) {
-        storeModule(new ResourceModule(name, [url:url]))
+        storeModule(new ResourceModule(name, [url:url], this))
     }
 
     def module(String name, Map urlInfo) {
-        storeModule(new ResourceModule(name, urlInfo))
+        storeModule(new ResourceModule(name, urlInfo, this))
     }
 
     def module(String name, List urlsOrInfos) {

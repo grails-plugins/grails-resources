@@ -40,19 +40,18 @@ class ResourceMetaTests extends GrailsUnitTestCase {
     void testRelativePathCalculations() {        
         def data = [
             // Expected, base, target
-            ["../images/logo.png", './test-tmp/css/main.css', './test-tmp/images/logo.png'],
-            ["../logo.png", './test-tmp/css/main.css', './test-tmp/logo.png'],
-            ["_yyyyyy.png", './test-tmp/_xxxxxx.css', './test-tmp/_yyyyyy.png'],
-            ["notgonnahappen/_yyyyyy.png", './test-tmp/_xxxxxx.css', './test-tmp/notgonnahappen/_yyyyyy.png'],
-            ["../notgonnahappen/really/_yyyyyy.png", './test-tmp/css/_xxxxxx.css', './test-tmp/notgonnahappen/really/_yyyyyy.png'],
-            ["../../notgonnahappen/really/_yyyyyy.png", './test-tmp/css/deep/_xxxxxx.css', './test-tmp/notgonnahappen/really/_yyyyyy.png'],
-            ["../../_yyyyyy.png", './test-tmp/css/deep/_xxxxxx.css', './test-tmp/_yyyyyy.png']
+            ["../images/logo.png", '/css/main.css', '/images/logo.png'],
+            ["../logo.png", '/css/main.css', '/logo.png'],
+            ["_yyyyyy.png", '/_xxxxxx.css', '/_yyyyyy.png'],
+            ["notgonnahappen/_yyyyyy.png", '/_xxxxxx.css', '/notgonnahappen/_yyyyyy.png'],
+            ["../notgonnahappen/really/_yyyyyy.png", '/css/_xxxxxx.css', '/notgonnahappen/really/_yyyyyy.png'],
+            ["../../notgonnahappen/really/_yyyyyy.png", '/css/deep/_xxxxxx.css', '/notgonnahappen/really/_yyyyyy.png'],
+            ["../../_yyyyyy.png", '/css/deep/_xxxxxx.css', '/_yyyyyy.png']
         ]
 
         data.each { d ->
-            def r = new ResourceMeta()
-            r.processedFile = new File(d[2])
-            assertEquals d[0], r.relativeTo(new File(d[1]))
+            def r = new ResourceMeta(actualUrl:d[2])
+            assertEquals d[0], r.relativeTo(new ResourceMeta(actualUrl:d[1]) )
         }
     }
 }

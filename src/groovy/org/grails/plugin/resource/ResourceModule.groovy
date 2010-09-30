@@ -12,12 +12,15 @@ class ResourceModule {
     List<ResourceMeta> resources = []
     List<String> dependsOn = []
 
-    ResourceModule(name) {
+    def pluginManager
+    
+    ResourceModule(name, ResourceService svc) {
         this.name = name
+        this.pluginManager = svc.pluginManager
     }
     
     ResourceModule(name, Map resourceInfo, ResourceService svc) {
-        this(name)
+        this(name, svc)
         def args = [:]
         args.putAll(resourceInfo)
         if (args.url instanceof Map) {
@@ -28,7 +31,7 @@ class ResourceModule {
     }
 
     ResourceModule(name, List resourceInfoList, ResourceService svc) {
-        this.name = name
+        this(name, svc)
         resourceInfoList.each { i ->
             if (i instanceof Map) {
                 def args = i.clone()
@@ -52,8 +55,10 @@ class ResourceModule {
     
     ResourceMeta newResourceFromArgs(Map args, ResourceService svc) {
         def url = args.remove('url')
-        if (!url.startsWith('/')) {
-            url = '/'+url
+        if (url) {
+            if (!url.startsWith('/')) {
+                url = '/'+url
+            }
         }
         def r = new ResourceMeta(sourceUrl: url , workDir: svc.workDir)
         // @todo change this to assume default for the *type* from info in ResourceService

@@ -82,23 +82,30 @@ class ResourceMeta {
         processedFile.path - workDir.path
     }
     
-    String relativeTo(File base) {
-        def baseDir = base.parentFile
-        def baseDirStr = base.parentFile.toString().replace('\\', '/')
-        def thisDirStr = this.processedFile.parentFile.toString().replace('\\', '/')
+    String getActualUrlParent() {
+        def lastSlash = actualUrl.lastIndexOf('/')
+        if (lastSlash >= 0) {
+            return actualUrl[0..lastSlash-1]
+        } else {
+            return ''
+        }
+    }
+    
+    String relativeTo(ResourceMeta base) {
+        def baseDirStr = base.actualUrlParent
+        def thisDirStr = this.actualUrlParent
         boolean isChild = thisDirStr.startsWith(baseDirStr)
         if (isChild) {
             // Truncate to the part that is after the base dir
-            return this.processedFile.toString()[baseDirStr.size()+1..-1].replace('\\', '/')
+            return this.actualUrl[baseDirStr.size()+1..-1]
         } else {
             def result = new StringBuilder()
 
             def commonStem = new StringBuilder()
-            def thisStr = this.processedFile.toString()
-            def baseStr = base.toString().replace('\\', '/')
+            def baseUrl = base.actualUrl
             // Eliminate the common portion - the base to which we need to ".."
-            def baseParts = baseStr.tokenize('/')
-            def thisParts = thisStr.tokenize('/')
+            def baseParts = baseUrl.tokenize('/')
+            def thisParts = actualUrl.tokenize('/')
             int i = 0
             for (; i < baseParts.size(); i++) { 
                 if (thisParts[i] == baseParts[i]) {
@@ -111,7 +118,7 @@ class ResourceMeta {
             if (baseParts.size()-1 > i) {
                 result << '../' * (baseParts.size()-1 - i)
             }
-            result << thisStr[commonStem.size()..-1]
+            result << actualUrl[commonStem.size()+1..-1]
             println "rel part: $result"
             return result.toString()
         }
