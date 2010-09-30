@@ -556,8 +556,21 @@ class ResourceService {
         grailsApplication.config.grails.resources
     }
     
+    /**
+     * Used to retrieve a resources config param, or return the supplied
+     * default value if no explicit value was set in config
+     */
+    def getConfigParamOrDefault(String key, defaultValue) {
+        def param = getConfig()."$key"
+        if (param instanceof ConfigObject) {
+            param.size() == 0 ? defaultValue : param
+        } else {
+            param
+        }
+    }
+    
     boolean isDebugMode(ServletRequest request) {
-        if (config.debug instanceof Boolean) {
+        if (getConfigParamOrDefault('debug', false)) {
             config.debug
         } else if (request != null) {
             isExplicitDebugRequest(request)
