@@ -80,7 +80,17 @@ class ResourceMeta {
     }
     
     String getWorkDirRelativePath() {
-        processedFile.path - workDir.path
+        def path = processedFile.path - workDir.path
+        path.startsWith("/") ? path - '/' : path
+    }
+    
+    String getLinkUrlRelativeTo(ResourceMeta relativeTo) {
+        def parentPath = relativeTo.workDirRelativeParentPath + "/"
+        if (linkUrl.startsWith(parentPath)) {
+            linkUrl - parentPath
+        } else {
+            throw new IllegalArgumentException("cannot calculate relative url from $relativeTo to ${this}")
+        }
     }
     
     void updateActualUrlFromProcessedFile() {

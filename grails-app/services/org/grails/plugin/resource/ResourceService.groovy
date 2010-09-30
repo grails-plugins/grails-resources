@@ -188,7 +188,7 @@ class ResourceService {
                     try {
                         // This triggers the processing chain if necessary for any resource referenced by the CSS
                         def linkedToResource = getResourceMetaForURI(uri)
-                        def fixedUrl = linkedToResource.linkUrl
+                        def fixedUrl = flattenLinks ? linkedToResource.linkUrl : linkedToResource.getLinkUrlRelativeTo(resource)
                         def replacement = "${prefix}${fixedUrl}${suffix}"
                         
                         if (log.debugEnabled) {
@@ -567,6 +567,10 @@ class ResourceService {
         } else {
             param
         }
+    }
+    
+    boolean getFlattenLinks() {
+        getConfigParamOrDefault('flatten', true)
     }
     
     boolean isDebugMode(ServletRequest request) {
