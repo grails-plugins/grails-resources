@@ -85,7 +85,7 @@ class ResourceService {
      */
     void redirectToActualUrl(ResourceMeta res, request, response) {
         // Now redirect the client to the processed url
-        def u = request.contextPath+staticUrlPrefix+'/'+res.linkUrl
+        def u = request.contextPath+staticUrlPrefix+res.linkUrl
         if (log.debugEnabled) {
             log.debug "Redirecting ad-hoc resource ${request.requestURI} to $u which makes it UNCACHEABLE - declare this resource "+
                 "and use resourceLink/module tags to avoid redirects and enable client-side caching"
@@ -95,7 +95,8 @@ class ResourceService {
 
     
     protected isCSSRewriteCandidate(resource) {
-        resource.contentType == "text/css" || resource.tagAttributes?.type == "css"
+        def enabled = config.rewrite.css instanceof Boolean ? config.rewrite.css : true
+        enabled && (resource.contentType == "text/css" || resource.tagAttributes?.type == "css")
     }
     
     /**
@@ -108,7 +109,7 @@ class ResourceService {
      * certainly not my finest moment. Sorry. Rely on the MenuTagTests.
      */
      def resolveURI(base, target) {
-        if (target.indexOf('://') >= 0) {
+        if (target.startsWith('/') || (target.indexOf('://') >= 0)) {
             return target
         } else {
             def relbase = base
@@ -161,11 +162,11 @@ class ResourceService {
             }
         }
     }
-         
+
     /**
      * Find all url() and fix up the url if it is not absolute
      */
-    void fixCSSResourceLinks(resource, inputStream) {
+    void fixCSSResourceLinks(resource, inputStream, boolean adHocResource = true) {
         // Create a tmp file to write to
         def rewrittenFile = resource.processedFile
         if (log.debugEnabled) {
@@ -184,11 +185,26 @@ class ResourceService {
                         return "${prefix}${originalUrl}${suffix}"
                     }
                     
+                    // We don't do absolutes - perhaps we should do "/" at some point? If app 
+                    // is mapped to root context then some people might do this but its lame
+                    if (originalUrl.startsWith('/') || (originalUrl.indexOf('://') > 0)) {
+                        return "${prefix}${originalUrl}${suffix}"
+                    }
+
                     def uri = resolveURI(resource.sourceUrl, originalUrl)
+                    if (log.debugEnabled) {
+                        log.debug "Calculated URI of CSS resource [$originalUrl] as [$uri]"
+                    }
+                    
                     try {
                         // This triggers the processing chain if necessary for any resource referenced by the CSS
-                        def linkedToResource = getResourceMetaForURI(uri)
-                        def fixedUrl = flattenLinks ? linkedToResource.linkUrl : linkedToResource.getLinkUrlRelativeTo(resource)
+                        def linkedToResource = getResourceMetaForURI(uri, adHocResource) { res ->
+                            // If there's no decl for the resource, create it with image disposition
+                            // otherwise we pop out as a favicon...
+                            res.disposition = 'image'
+                        }
+                        
+                        def fixedUrl = linkedToResource.relativeTo(rewrittenFile)
                         def replacement = "${prefix}${fixedUrl}${suffix}"
                         
                         if (log.debugEnabled) {
@@ -225,7 +241,7 @@ class ResourceService {
 
         // See if its an ad-hoc resource that has come here via a relative link
         // @todo make this development mode only by default?
-        if ('/'+inf.actualUrl != uri) {
+        if (inf.actualUrl != uri) {
             redirectToActualUrl(inf, request, response)
             return
         }
@@ -358,7 +374,7 @@ class ResourceService {
             // Now copy in the resource from this app deployment into the cache, ready for mutation
             if (isCSSRewriteCandidate(r)) {
                 // In the case of CSS we fix up url(x) refs as we copy
-                fixCSSResourceLinks(r, origResource)
+                fixCSSResourceLinks(r, origResource, adHocResource)
             } else {
                 r.processedFile << origResource
             }
@@ -389,11 +405,11 @@ class ResourceService {
             }
             
             if (log.debugEnabled) {
-                log.debug "Updating URI to resource cache for /${r.actualUrl} >> ${r.processedFile}"
+                log.debug "Updating URI to resource cache for ${r.actualUrl} >> ${r.processedFile}"
             }
             
             // Add the actual linking URL to the cache so resourceLink resolves
-            processedResourcesByURI['/'+r.actualUrl] = r
+            processedResourcesByURI[r.actualUrl] = r
             
             // Add the original source url to the cache as well, if it was an ad-hoc resource
             // As the original URL is used, we need this to resolve to the actualUrl for redirect

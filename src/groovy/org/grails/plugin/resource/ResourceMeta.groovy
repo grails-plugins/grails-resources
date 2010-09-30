@@ -75,30 +75,50 @@ class ResourceMeta {
     }
     
     String getWorkDirRelativeParentPath() {
-        // @todo I still don't trust this. surely a URL with duplication in would cause odd effects?
-        workDirRelativePath - "/$processedFile.name"
+        workDirRelativePath - "$processedFile.name"
     }
     
     String getWorkDirRelativePath() {
-        def path = processedFile.path - workDir.path
-        path.startsWith("/") ? path - '/' : path
+        processedFile.path - workDir.path
     }
     
-    String getLinkUrlRelativeTo(ResourceMeta relativeTo) {
-        def parentPath = relativeTo.workDirRelativeParentPath + "/"
-        if (linkUrl.startsWith(parentPath)) {
-            linkUrl - parentPath
+    String relativeTo(File base) {
+        def baseDir = base.parentFile
+        def baseDirStr = base.parentFile.toString().replace('\\', '/')
+        def thisDirStr = this.processedFile.parentFile.toString().replace('\\', '/')
+        boolean isChild = thisDirStr.startsWith(baseDirStr)
+        if (isChild) {
+            // Truncate to the part that is after the base dir
+            return this.processedFile.toString()[baseDirStr.size()+1..-1].replace('\\', '/')
         } else {
-            throw new IllegalArgumentException("cannot calculate relative url from $relativeTo to ${this}")
+            def result = new StringBuilder()
+
+            def commonStem = new StringBuilder()
+            def thisStr = this.processedFile.toString()
+            def baseStr = base.toString().replace('\\', '/')
+            // Eliminate the common portion - the base to which we need to ".."
+            def baseParts = baseStr.tokenize('/')
+            def thisParts = thisStr.tokenize('/')
+            int i = 0
+            for (; i < baseParts.size(); i++) { 
+                if (thisParts[i] == baseParts[i]) {
+                    commonStem << baseParts[i]+'/'
+                } else {
+                    break;
+                }
+            }
+            println "common stem: $commonStem"
+            if (baseParts.size()-1 > i) {
+                result << '../' * (baseParts.size()-1 - i)
+            }
+            result << thisStr[commonStem.size()..-1]
+            println "rel part: $result"
+            return result.toString()
         }
     }
     
     void updateActualUrlFromProcessedFile() {
         def p = workDirRelativePath.replace('\\', '/')
-        // Strip leading / off, we want relative paths
-        if (p.startsWith('/')) {
-            p = p[1..-1]
-        }
         // have to call the setter method
         setActualUrl(p)
     }

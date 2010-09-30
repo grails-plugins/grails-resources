@@ -324,7 +324,7 @@ class ResourceTagLib {
             }
             if (r.disposition == renderingDisposition) {
                 def args = r.tagAttributes?.clone() ?: [:]
-                args.uri = debugMode ? r.sourceUrl : "/${r.linkUrl}"
+                args.uri = debugMode ? r.sourceUrl : "${r.linkUrl}"
                 args.wrapper = r.prePostWrapper
                 args.disposition = r.disposition
                 if (log.debugEnabled) {
@@ -378,7 +378,7 @@ class ResourceTagLib {
             }
         })
         
-        uri = ctxPath+resourceService.staticUrlPrefix+'/'+res.linkUrl
+        uri = ctxPath+resourceService.staticUrlPrefix+res.linkUrl
         return [uri:uri, resource:res]
     }
      
