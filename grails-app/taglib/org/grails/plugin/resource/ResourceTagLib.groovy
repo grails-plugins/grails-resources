@@ -194,7 +194,7 @@ class ResourceTagLib {
      * Indicate that a page requires a named resource module
      * This is stored in the request until layoutResources is called, we then sort out what needs rendering or not later
      */
-    def dependsOn = { attrs ->
+    def use = { attrs ->
         def trk = request.resourceDependencyTracker
         if (!trk) {
             trk = [ResourceService.IMPLICIT_MODULE] // Always include this

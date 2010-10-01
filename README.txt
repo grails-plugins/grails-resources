@@ -43,7 +43,11 @@ Features:
 
 * Add linkOverride mechanism (for CDNs, S3 uploaders etc)
 
-Will also soon:
+* Add option to CachedResources plugin to flatten the directory structure for shorter uris
+
+* Make CachedResources use base62 encoding to shorten hashed url links
+
+**** COMING SOON:
 
 * Workaround SSDK bug where it fails to extract correct mime type for files
   with multiple dots in the name e.g. jquery-1.8.2-min.js returns a null mime
@@ -67,24 +71,20 @@ Will also soon:
 * Support "flavours" of resources e.g. source, CDN, minified etc
 
 * Support for defining which mappers are to be assigned to each file type -
-  e.g. allow cachability of images but not gzipping of them
+  e.g. allow cacheability of images but not gzipping of them
 
 * Support for parameterized resources eg plugins or themes, by passing a map to the linking tags, which will result
 	in new resources being created from the parameterized template:
 	
     resource id:'jq-ui-css', url:[dir:'js/jquery-ui/themes/$theme', file:'jquery-ui-1.8-custom-min.css'], minified: true
 
-  Invoking <r:dependsOn name="jquery-ui" args="[theme:'cupertino']"/> would put "cupertino" into the resource with $theme substituted.	
+  Invoking <r:use name="jquery-ui" args="[theme:'cupertino']"/> would put "cupertino" into the resource with $theme substituted.	
 
 * Application-specific resource dependency overrides (e.g. force a plugin you use to use a newer version of jquery)
 
 * Cache the HTML needed to include the JS and CSS resources, so including these becomes very efficient
 
 * Allow app author to control which URIs are subject to filtering, not just types. E.g. a CMS may not want all its images and CSS processed.
-
-* Add option to CachedResources plugin to flatten the directory structure for shorter uris
-
-* Make CachedResources use base62 encoding to shorten hashed url links
 
 * Make SmartImageResources plugin that adds width and height tagAttributes that
   are pre-calculated by parsing the image
