@@ -23,7 +23,6 @@ class ResourceService {
 
     static IMPLICIT_MODULE = "__@legacy-files@__"
     static REQ_ATTR_DEBUGGING = 'resources.debug'
-    static CSS_URL_PATTERN = ~/(url\s*\(['"]?\s*)(.+?)(\s*['"]?\s*\))/
     
     static DEFAULT_MODULE_SETTINGS = [
         css:[disposition: 'head'],
@@ -91,142 +90,6 @@ class ResourceService {
                 "and use resourceLink/module tags to avoid redirects and enable client-side caching"
         }
         response.sendRedirect(u)
-    }
-
-    
-    protected isCSSRewriteCandidate(resource) {
-        def enabled = config.rewrite.css instanceof Boolean ? config.rewrite.css : true
-        enabled && (resource.contentType == "text/css" || resource.tagAttributes?.type == "css")
-    }
-    
-    /**
-     * Take a base URI and a target URI and resolve target against the base
-     * using the normal rules e.g. "../x", "./x" "x" results in a link relative to the base's folder
-     * and / is app-absolute, and anything with a protocol :// is absolute
-     *
-     * Please note, I take full responsibility for the nastiness of this code. I could not 
-     * find a nice way to do this, and I wanted to find an existing lib to do it. Its
-     * certainly not my finest moment. Sorry. Rely on the MenuTagTests.
-     */
-     def resolveURI(base, target) {
-        if (target.startsWith('/') || (target.indexOf('://') >= 0)) {
-            return target
-        } else {
-            def relbase = base
-            def wasAbs = base.startsWith('/')
-            if (base != '/') {
-                if (wasAbs) {
-                    base = base[1..-1]
-                }
-                def lastSlash = base.lastIndexOf('/')
-                if (lastSlash < 0) {
-                    relbase = ''
-                } else {
-                    if (base.endsWith('/')) {
-                        lastSlash = base[0..lastSlash-1].lastIndexOf('/')
-                    }
-
-                    relbase = base[0..(lastSlash >= 0 ? lastSlash-1 : -1)]                
-                }
-            }
-            def relURI
-
-            if (target.startsWith('../')) {
-                // go "up" a dir in the base
-                def lastSlash = relbase.lastIndexOf('/')
-                if (lastSlash > 0) {
-                    relbase = relbase[0..lastSlash-1]
-                } else {
-                    relbase = ''
-                }
-                relURI = target[3..-1]
-                if (relbase.endsWith('/')) {
-                    if (relbase.size() > 1) {
-                        relbase = relbase[0..-2]
-                    } else {
-                        relbase = ''
-                    }
-                }
-            } else if (target.startsWith('./')) {
-                relURI = target[2..-1]
-            } else if (target.startsWith('/')) {
-                return target
-            } else {
-                relURI = target
-            }
-
-            if (relbase) {
-                return wasAbs ? "/${relbase}/${relURI}" : "${relbase}/${relURI}"
-            } else {
-                return wasAbs ? '/' + relURI : relURI
-            }
-        }
-    }
-
-    /**
-     * Find all url() and fix up the url if it is not absolute
-     * NOTE: This needs to run after any plugins that move resources around, but before any that obliterate
-     * the content i.e. before minify or gzip
-     */
-    void fixCSSResourceLinks(resource, inputStream, boolean adHocResource = true) {
-        // Create a tmp file to write to
-        def rewrittenFile = resource.processedFile
-        if (log.debugEnabled) {
-            log.debug "Pre-processing CSS resource ${resource.sourceUrl} to rewrite links"
-        }
-        // Replace all urls to resources we know about to their processed urls
-        rewrittenFile.withPrintWriter("utf-8") { writer ->
-            inputStream.eachLine { line ->
-                def fixedLine = line.replaceAll(CSS_URL_PATTERN) { Object[] args ->
-                    def prefix = args[1]
-                    def originalUrl = args[2].trim()
-                    def suffix = args[3]
-                    
-                    // Leave any urls that contain a protocol alone
-                    if (originalUrl.toURI().scheme != null) {
-                        return "${prefix}${originalUrl}${suffix}"
-                    }
-                    
-                    // We don't do absolutes - perhaps we should do "/" at some point? If app 
-                    // is mapped to root context then some people might do this but its lame
-                    if (originalUrl.startsWith('/') || (originalUrl.indexOf('://') > 0)) {
-                        return "${prefix}${originalUrl}${suffix}"
-                    }
-
-                    def uri = resolveURI(resource.sourceUrl, originalUrl)
-                    if (log.debugEnabled) {
-                        log.debug "Calculated URI of CSS resource [$originalUrl] as [$uri]"
-                    }
-                    
-                    try {
-                        // This triggers the processing chain if necessary for any resource referenced by the CSS
-                        def linkedToResource = getResourceMetaForURI(uri, adHocResource) { res ->
-                            // If there's no decl for the resource, create it with image disposition
-                            // otherwise we pop out as a favicon...
-                            res.disposition = 'image'
-                        }
-
-                        if (log.debugEnabled) {
-                            log.debug "Calculating URL of ${linkedToResource.dump()} relative to ${resource.dump()}"
-                        }
-                        
-                        def fixedUrl = linkedToResource.relativeTo(resource)
-                        def replacement = "${prefix}${fixedUrl}${suffix}"
-                        
-                        if (log.debugEnabled) {
-                            log.debug "Rewriting CSS URL '${args[0]}' to '$replacement'"
-                        }
-                        
-                        return replacement
-                    } catch (IllegalArgumentException e) {
-                        // @todo We don't want to do this really... or do we? New exception type better probably
-                        log.warn "Cannot resolve CSS resource, leaving link as is: ${originalUrl}"
-                        return "${prefix}${originalUrl}${suffix}"
-                    }
-                }
-                writer.println(fixedLine)
-            }
-        }
     }
     
     /**
@@ -385,19 +248,14 @@ class ResourceService {
             r.actualUrl = r.sourceUrl
 
             // Now copy in the resource from this app deployment into the cache, ready for mutation
-            if (isCSSRewriteCandidate(r)) {
-                // In the case of CSS we fix up url(x) refs as we copy
-                fixCSSResourceLinks(r, origResource, adHocResource)
-            } else {
-                r.processedFile << origResource
-            }
-            
-            
+            r.processedFile << origResource
+
             // Now iterate over the mappers...
             if (log.debugEnabled) {
                 log.debug "Applying mappers to ${r.processedFile}"
             }
-            resourceMappers.eachWithIndex { mapperInfo, i ->
+            def mappers = resourceMappers.sort({it.order})
+            mappers.eachWithIndex { mapperInfo, i ->
                 if (log.debugEnabled) {
                     log.debug "Applying static content mapper [${mapperInfo.name}] to ${r.dump()}"
                 }
@@ -405,7 +263,11 @@ class ResourceService {
                 // Apply mapper if not suppressed for this resource - check attributes
                 if (!r.attributes['no'+mapperInfo.name]) {
                     def prevFile = r.processedFile.toString()
-                    mapperInfo.mapper(r)
+                    if (mapperInfo.mapper.maximumNumberOfParameters == 1) {
+                        mapperInfo.mapper(r) 
+                    } else {
+                        mapperInfo.mapper(r, this) 
+                    }
                     
                     // Flag that this mapper has been applied
                     r.attributes['+'+mapperInfo.name] = true
@@ -440,8 +302,8 @@ class ResourceService {
      * The closure takes 1 arg - the current resource. Any mutations can be performed by 
      * changing actualUrl or processedFile or other propertis of ResourceMeta
      */    
-    void addResourceMapper(String name, Closure mapper) {
-        resourceMappers << [name:name, mapper:mapper]
+    void addResourceMapper(String name, Closure mapper, Integer order = 10000) {
+        resourceMappers << [name:name, mapper:mapper, order:order]
     }
     
     void storeModule(ResourceModule m) {
@@ -589,7 +451,8 @@ class ResourceService {
      * default value if no explicit value was set in config
      */
     def getConfigParamOrDefault(String key, defaultValue) {
-        def param = getConfig()."$key"
+        def param = key.tokenize('.').inject(config) { conf, v -> conf[v] }
+
         if (param instanceof ConfigObject) {
             param.size() == 0 ? defaultValue : param
         } else {

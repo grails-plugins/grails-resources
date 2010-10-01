@@ -7,7 +7,7 @@ class BootStrap {
             assert r.processedFile.renameTo(f)
             r.processedFile = f
             r.updateActualUrlFromProcessedFile()
-        }
+        }, 10
     }
     
     def destroy = {
