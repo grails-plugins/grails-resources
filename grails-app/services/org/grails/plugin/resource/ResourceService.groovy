@@ -460,10 +460,6 @@ class ResourceService {
         }
     }
     
-    boolean getFlattenLinks() {
-        getConfigParamOrDefault('flatten', true)
-    }
-    
     boolean isDebugMode(ServletRequest request) {
         if (getConfigParamOrDefault('debug', false)) {
             config.debug
