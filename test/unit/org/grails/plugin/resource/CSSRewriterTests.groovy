@@ -96,4 +96,44 @@ class CSSRewriterTests extends GrailsUnitTestCase {
 
         assertEquals expected, outcome
     }
+
+    /**
+     * This simulates CSS that uses some MS IE css behaviour hacks that can cause problems
+     * as they are not valid URLs
+     */
+    void testCSSRewritingWithInvalidURI() {
+        mockLogging(CSSRewriter)
+
+        def svc = [
+            getResourceMetaForURI : {  uri, adHoc, postProc = null ->
+                new ResourceMeta(actualUrl: uri, processedFile: new File(uri+'.gz'))
+            },
+            config : [ rewrite: [css: true] ]
+        ]
+
+        def base = new File('./test-tmp/')
+
+        def r = new ResourceMeta(sourceUrl:'/css/main.css')
+        r.workDir = base
+        r.actualUrl = r.sourceUrl
+        r.contentType = 'text/css'
+        r.processedFile = new File(base, 'css/main.css')
+        r.processedFile.parentFile.mkdirs()
+        r.processedFile.delete()
+
+        def css = """
+.bg1 { behaviour: url(#default#VML) }
+.bg2 { background: url(####BULL) }
+"""
+        r.processedFile << new ByteArrayInputStream(css.bytes)
+        CSSRewriter.mapper(r, svc)
+
+        def outcome = r.processedFile.text
+        def expected = """
+.bg1 { behaviour: url(#default#VML) }
+.bg2 { background: url(####BULL) }
+"""
+
+        assertEquals expected, outcome
+    }
 }

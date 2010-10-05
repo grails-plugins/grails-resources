@@ -20,7 +20,9 @@ environments {
     development {
         grails.serverURL = "http://localhost:8080/resources"
 
-        //grails.resources.defer.default=false
+        
+        grails.resources.test.excludes = ['/images/**']
+        
         grails.resources.modules = {
             'jquery' { 
                 resource url:'js/jquery/jquery-1.4.2.min.js', nominify:true, disposition:'head'

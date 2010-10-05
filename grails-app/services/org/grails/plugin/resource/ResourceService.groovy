@@ -10,6 +10,8 @@ import org.grails.resources.ResourceModulesBuilder
 import org.apache.commons.io.FilenameUtils
 import javax.servlet.ServletRequest
 import grails.util.Environment
+import org.springframework.util.AntPathMatcher
+
 
 /**
  * @todo Move all this code out into a standard Groovy bean class and declare the bean in plugin setup
@@ -254,8 +256,30 @@ class ResourceService {
             if (log.debugEnabled) {
                 log.debug "Applying mappers to ${r.processedFile}"
             }
+            
             def mappers = resourceMappers.sort({it.order})
+
+            // Build up list of excludes patterns for each mapper name
+            def mapperExcludes = [:]
+            resourceMappers.each { m -> 
+                // @todo where do we get defaults from? preferably from each plugin...
+                def patterns = getConfigParamOrDefault("${m.name}.excludes", [])
+                mapperExcludes[m.name] = patterns
+            }
+            
+            def antMatcher = new AntPathMatcher()
+            
             mappers.eachWithIndex { mapperInfo, i ->
+                def excludes = mapperExcludes[mapperInfo.name]
+                if (excludes) {
+                    if (excludes.any { pattern -> antMatcher.match(pattern, r.sourceUrl) }) {
+                        if (log.debugEnabled) {
+                            log.debug "Skipping static content mapper [${mapperInfo.name}] for ${r.sourceUrl} due to excludes pattern ${excludes}"
+                        }
+                        return // Skip this resource, it is excluded
+                    }
+                }
+
                 if (log.debugEnabled) {
                     log.debug "Applying static content mapper [${mapperInfo.name}] to ${r.dump()}"
                 }

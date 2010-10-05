@@ -46,12 +46,7 @@ class CSSRewriter {
                    def originalUrl = args[2].trim()
                    def suffix = args[3]
 
-                   // Leave any urls that contain a protocol alone
-                   if (originalUrl.toURI().scheme != null) {
-                       return "${prefix}${originalUrl}${suffix}"
-                   }
-
-                   // We don't do absolutes - perhaps we should do "/" at some point? If app 
+                   // We don't do absolutes or full URLs - perhaps we should do "/" at some point? If app 
                    // is mapped to root context then some people might do this but its lame
                    if (originalUrl.startsWith('/') || (originalUrl.indexOf('://') > 0)) {
                        return "${prefix}${originalUrl}${suffix}"
