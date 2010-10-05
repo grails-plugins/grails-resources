@@ -25,7 +25,6 @@ class CSSRewriter {
     static mapper = { resource, resourceService ->
         
         if (!isCSSRewriteCandidate(resource, resourceService)) {
-            println "Its not rewritable"
             return
         }
         
