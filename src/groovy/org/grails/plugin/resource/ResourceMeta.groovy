@@ -16,10 +16,6 @@ class ResourceMeta {
 
     String sourceUrl
     String queryParams
-    /* This will be handled by flavours
-    String minifiedUrl
-    String cdnUrl
-    */
     
     String actualUrl
     String linkOverride
@@ -114,12 +110,10 @@ class ResourceMeta {
                     break;
                 }
             }
-            println "common stem: $commonStem"
             if (baseParts.size()-1 > i) {
                 result << '../' * (baseParts.size()-1 - i)
             }
             result << actualUrl[commonStem.size()+1..-1]
-            println "rel part: $result"
             return result.toString()
         }
     }
