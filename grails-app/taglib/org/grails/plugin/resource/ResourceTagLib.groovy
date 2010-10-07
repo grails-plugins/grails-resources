@@ -10,10 +10,12 @@ class ResourceTagLib {
     static writeAttrs( attrs, output) {
         // Output any remaining user-specified attributes
         attrs.each { k, v ->
-           output << k
-           output << '="'
-           output << v.encodeAsHTML()
-           output << '" '    
+            if (v != null) {
+               output << k
+               output << '="'
+               output << v.encodeAsHTML()
+               output << '" '    
+           }
         }
     }
 
@@ -173,7 +175,8 @@ class ResourceTagLib {
         }
         
         // Don't do resource check if this isn't a defer/head resource
-        if (!(disposition in ['defer', 'head']) || notAlreadyIncludedResource(info.uri)) {
+        if (!(disposition in ['defer', 'head']) || 
+                notAlreadyIncludedResource(info.debug ? info.uri : info.resource.linkUrl)) {
             def writerName = typeInfo.remove('writer')
             def writer = LINK_WRITERS[writerName ?: 'link']
             def wrapper = attrs.remove('wrapper')
@@ -324,7 +327,7 @@ class ResourceTagLib {
             }
             if (r.disposition == renderingDisposition) {
                 def args = r.tagAttributes?.clone() ?: [:]
-                args.uri = debugMode ? r.sourceUrl : "${r.linkUrl}"
+                args.uri = debugMode ? r.originalUrl : "${r.linkUrl}"
                 args.wrapper = r.prePostWrapper
                 args.disposition = r.disposition
                 if (log.debugEnabled) {

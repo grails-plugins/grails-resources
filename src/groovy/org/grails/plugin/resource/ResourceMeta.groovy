@@ -14,7 +14,9 @@ class ResourceMeta {
      */
     File workDir
 
+    String originalUrl
     String sourceUrl
+    String sourceUrlExtension
     String queryParams
     
     String actualUrl
@@ -22,9 +24,15 @@ class ResourceMeta {
     String contentType
     
     String disposition
-    
+
     //@todo impl this later
     //String cachedTagText
+    
+    ResourceMeta delegate
+    
+    void delegateTo(ResourceMeta target) {
+        delegate = target
+    }
     
     File processedFile
     
@@ -41,12 +49,20 @@ class ResourceMeta {
     
     private String _linkUrl
     
+    boolean isDelegating() {
+        delegate != null
+    }
+    
     boolean exists() {
         processedFile != null
     }
     
     String getLinkUrl() {
-        linkOverride ?: _linkUrl 
+        if (!delegate) {
+            return linkOverride ?: _linkUrl 
+        } else {
+            return delegate.linkUrl
+        }
     }
     
     void setActualUrl(String url) {
@@ -54,11 +70,15 @@ class ResourceMeta {
         _linkUrl = queryParams ? "${actualUrl}?${queryParams}" : url
     }
     
+    
     void setSourceUrl(String url) {
         def qidx = url.indexOf('?')
 
+        originalUrl = url // the full monty
         sourceUrl = qidx >= 0 ? url[0..qidx-1] : url
         queryParams = qidx >= 0 ? url[qidx+1..-1] : null
+        
+        sourceUrlExtension = FilenameUtils.getExtension(sourceUrl) ?: null
     }
 
     /**

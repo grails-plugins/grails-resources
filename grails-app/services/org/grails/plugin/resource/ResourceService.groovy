@@ -23,7 +23,8 @@ class ResourceService {
     
     static transactional = false
 
-    static IMPLICIT_MODULE = "__@legacy-files@__"
+    static IMPLICIT_MODULE = "__@adhoc-files@__"
+    static SYNTHETIC_MODULE = "__@synthetic-files@__"
     static REQ_ATTR_DEBUGGING = 'resources.debug'
     
     static DEFAULT_MODULE_SETTINGS = [
@@ -43,6 +44,7 @@ class ResourceService {
     def modulesByName = [:]
 
     def processedResourcesByURI = new ConcurrentHashMap()
+    def syntheticResourcesByURI = new ConcurrentHashMap()
 
     def moduleNamesByBundle = [:]
     
@@ -70,7 +72,14 @@ class ResourceService {
         }
         def uri = ResourceService.removeQueryParams(request.requestURI[request.contextPath.size()..-1])
         // @todo query params are lost at this point for ad hoc resources, this needs fixing
-        def res = getResourceMetaForURI(uri, false)
+        def res
+        try {
+            res = getResourceMetaForURI(uri, false)
+        } catch (FileNotFoundException fnfe) {
+            response.sendError(404, fnfe.message)
+            return
+        }
+        
         if (Environment.current == Environment.DEVELOPMENT) {
             response.setHeader('X-Grails-Resources-Original-Src', res.sourceUrl)
         }
@@ -104,7 +113,13 @@ class ResourceService {
         }
         // Find the ResourceMeta for the request, or create it
         def uri = ResourceService.removeQueryParams(request.requestURI[(request.contextPath+staticUrlPrefix).size()..-1])
-        def inf = getResourceMetaForURI(uri)
+        def inf
+        try {
+            inf = getResourceMetaForURI(uri)
+        } catch (FileNotFoundException fnfe) {
+            response.sendError(404, fnfe.message)
+            return
+        }
         
         if (Environment.current == Environment.DEVELOPMENT) {
             response.setHeader('X-Grails-Resources-Original-Src', inf?.sourceUrl)
@@ -154,35 +169,75 @@ class ResourceService {
     }
     
     /**
+     * See if we have a ResourceMeta for this URI.
+     * @return null if not processed/created yet, the instance if it exists
+     */
+    ResourceMeta findSyntheticResourceForURI(String uri) {
+        syntheticResourcesByURI[uri]
+    }
+    
+    /**
+     * See if we have a ResourceMeta for this URI.
+     * @return null if not processed/created yet, the instance if it exists
+     */
+    ResourceMeta findResourceForURI(String uri) {
+        processedResourcesByURI[uri]
+    }
+    
+    ResourceMeta newSyntheticResource(String uri, type) {
+        if (log.debugEnabled) {
+            log.debug "Creating synthetic resource of type ${type} for URI [${uri}]"
+        }
+        def agg = type.newInstance()
+        agg.sourceUrl = uri // Hack
+        agg.workDir = workDir
+        agg.actualUrl = uri
+        agg.processedFile = makeFileForURI(uri)
+        
+        // Need to store this somewhere so GET requests can look in bundle as it is a synthetic resource
+        syntheticResourcesByURI[uri] = agg
+        
+        return agg
+    }
+    
+    /**
      * Get the existing or create a new ad-hoc ResourceMeta for the URI.
      * @returns The resource instance - which may have a null processedFile if the resource cannot be found
      */
     ResourceMeta getResourceMetaForURI(uri, adHocResource = true, Closure postProcessor = null) {
-        def r = processedResourcesByURI[uri]
+        def r = findResourceForURI(uri)
 
-        // If we don't already have it, its not been declared in the DSL and its
+        // If we don't already have it, its either not been declared in the DSL or its Synthetic and its
         // not already been retrieved
         if (!r) {
+            boolean synthetic = false
+            r = syntheticResourcesByURI[uri]
+            if (r) {
+                synthetic = true
+            }
+
+            def mod
+            def moduleName = synthetic ? SYNTHETIC_MODULE : IMPLICIT_MODULE
             // We often get multiple simultaneous requests at startup and this causes
             // multiple creates and loss of concurrently processed resources
-            def mod
-            synchronized (IMPLICIT_MODULE) {
-                mod = getModule(IMPLICIT_MODULE)
+            synchronized (moduleName) {
+                mod = getModule(moduleName)
                 if (!mod) {
                     if (log.debugEnabled) {
-                        log.debug "Creating implicit module"
+                        log.debug "Creating module: $moduleName"
                     }
-                    defineModule(IMPLICIT_MODULE)
-                    mod = getModule(IMPLICIT_MODULE)
+                    defineModule(moduleName)
+                    mod = getModule(moduleName)
                 }
             }
-            
-            // Need to put in cache
-            if (log.debugEnabled) {
-                log.debug "Creating new implicit resource for ${uri}"
-            }
-            r = new ResourceMeta(sourceUrl: uri, workDir: workDir)
         
+            if (!r) {
+                // Need to create ad-hoc resource
+                if (log.debugEnabled) {
+                    log.debug "Creating new implicit resource for ${uri}"
+                }
+                r = new ResourceMeta(sourceUrl: uri, workDir: workDir)
+            }
             // Do the processing
             // @todo we should really sync here on something specific to the resource
             prepareResource(r, adHocResource)
@@ -205,117 +260,148 @@ class ResourceService {
     }
     
     /**
+     * Workaround for replaceAll problems with \ in Java
+     */
+    String makeFileSystemPathFromURI(uri) {
+        def chars = uri.chars
+        chars.eachWithIndex { c, i ->
+            if (c == '/') {
+                chars[i] = File.separatorChar
+            }
+        }
+        new String(chars)
+    }
+    
+    File makeFileForURI(String uri) {
+        def splitPoint = uri.lastIndexOf('/')
+        def fileSystemDir = splitPoint > 0 ? makeFileSystemPathFromURI(uri[0..splitPoint-1]) : ''
+        def fileSystemFile = makeFileSystemPathFromURI(uri[splitPoint+1..-1])
+        def staticDir = new File(workDir, fileSystemDir)
+        
+        // force the structure
+        if (!staticDir.exists()) {
+            // Do not assert this, we are re-entrant and may get multiple simultaneous calls.
+            // We just want to be sure one of them works
+            staticDir.mkdirs()
+            if (!staticDir.exists()) {
+                log.error "Unable to create static resource cache directory: ${staticDir}"
+            }
+        }
+        
+        if (log.debugEnabled) {
+            log.debug "Creating file object for URI [$uri] from [${staticDir}] and [${fileSystemFile}]"
+        }
+        def f = new File(staticDir, fileSystemFile)
+        // Delete the existing file - it may be from previous release, we cannot tell.
+        if (f.exists()) {
+            assert f.delete()
+        }
+        return f
+    }
+    
+    /**
      * Execute the processing chain for the resource
      */
     void prepareResource(ResourceMeta r, boolean adHocResource) {
         if (log.debugEnabled) {
             log.debug "Preparing resource ${r.sourceUrl}"
         }
-        def uri = r.sourceUrl
-        def origResource = ServletContextHolder.servletContext.getResourceAsStream(uri)
-        if (!origResource) {
-            if (log.errorEnabled) {
-                log.error "Resource not found: ${uri}"
+        if (r.delegating) {
+            if (log.debugEnabled) {
+                log.debug "Skipping prepare resource for [${r.sourceUrl}] as it is delegated"
             }
-            throw new IllegalArgumentException("Cannot locate resource [$uri]")
+            return
         }
         
-        r.contentType = ServletContextHolder.servletContext.getMimeType(uri)
-        if (log.debugEnabled) {
-            log.debug "Resource [$uri] has content type [${r.contentType}]"
+        def uri = r.sourceUrl
+        if (!r.processedFile?.exists()) {
+            def origResource = ServletContextHolder.servletContext.getResourceAsStream(uri)
+            if (!origResource) {
+                if (log.errorEnabled) {
+                    log.error "Resource not found: ${uri} when preparing resource ${r.dump()}"
+                }
+                throw new FileNotFoundException("Cannot locate resource [$uri]")
+            }
+        
+            r.contentType = ServletContextHolder.servletContext.getMimeType(uri)
+            if (log.debugEnabled) {
+                log.debug "Resource [$uri] has content type [${r.contentType}]"
+            }
+
+            try {
+                def f = makeFileForURI(uri)
+                // copy the file ready for mutation
+                r.processedFile = f
+            
+                r.actualUrl = r.sourceUrl
+
+                // Now copy in the resource from this app deployment into the cache, ready for mutation
+                r.processedFile << origResource
+            } finally {
+                origResource?.close()
+            }
         }
 
-        try {
-            def fileSystemDir = uri[0..uri.lastIndexOf('/')-1].replaceAll('/', File.separator)
-            def fileSystemFile = uri[uri.lastIndexOf('/')+1..-1].replaceAll('/', File.separator)
-            def staticDir = new File(workDir, fileSystemDir)
-            
-            // force the structure
-            if (!staticDir.exists()) {
-                // Do not assert this, we are re-entrant and may get multiple simultaneous calls.
-                // We just want to be sure one of them works
-                staticDir.mkdirs()
-                if (!staticDir.exists()) {
-                    log.error "Unable to create static resource cache directory: ${staticDir}"
-                }
-            }
-            
-            // copy the file ready for mutation
-            r.processedFile = new File(staticDir, fileSystemFile)
-            // Delete the existing file - it may be from previous release, we cannot tell.
-            if (r.processedFile.exists()) {
-                assert r.processedFile.delete()
-            }
-            
-            r.actualUrl = r.sourceUrl
+        // Now iterate over the mappers...
+        if (log.debugEnabled) {
+            log.debug "Applying mappers to ${r.processedFile}"
+        }
+        def mappers = resourceMappers.sort({it.order})
 
-            // Now copy in the resource from this app deployment into the cache, ready for mutation
-            r.processedFile << origResource
-
-            // Now iterate over the mappers...
-            if (log.debugEnabled) {
-                log.debug "Applying mappers to ${r.processedFile}"
-            }
-            
-            def mappers = resourceMappers.sort({it.order})
-
-            // Build up list of excludes patterns for each mapper name
-            def mapperExcludes = [:]
-            resourceMappers.each { m -> 
-                // @todo where do we get defaults from? preferably from each plugin...
-                def patterns = getConfigParamOrDefault("${m.name}.excludes", [])
-                mapperExcludes[m.name] = patterns
-            }
-            
-            def antMatcher = new AntPathMatcher()
-            
-            mappers.eachWithIndex { mapperInfo, i ->
-                def excludes = mapperExcludes[mapperInfo.name]
-                if (excludes) {
-                    if (excludes.any { pattern -> antMatcher.match(pattern, r.sourceUrl) }) {
-                        if (log.debugEnabled) {
-                            log.debug "Skipping static content mapper [${mapperInfo.name}] for ${r.sourceUrl} due to excludes pattern ${excludes}"
-                        }
-                        return // Skip this resource, it is excluded
+        // Build up list of excludes patterns for each mapper name
+        def mapperExcludes = [:]
+        resourceMappers.each { m -> 
+            // @todo where do we get defaults from? preferably from each plugin...
+            def patterns = getConfigParamOrDefault("${m.name}.excludes", [])
+            mapperExcludes[m.name] = patterns
+        }
+        
+        def antMatcher = new AntPathMatcher()
+        
+        mappers.eachWithIndex { mapperInfo, i ->
+            def excludes = mapperExcludes[mapperInfo.name]
+            if (excludes) {
+                if (excludes.any { pattern -> antMatcher.match(pattern, r.sourceUrl) }) {
+                    if (log.debugEnabled) {
+                        log.debug "Skipping static content mapper [${mapperInfo.name}] for ${r.sourceUrl} due to excludes pattern ${excludes}"
                     }
-                }
-
-                if (log.debugEnabled) {
-                    log.debug "Applying static content mapper [${mapperInfo.name}] to ${r.dump()}"
-                }
-
-                // Apply mapper if not suppressed for this resource - check attributes
-                if (!r.attributes['no'+mapperInfo.name]) {
-                    def prevFile = r.processedFile.toString()
-                    if (mapperInfo.mapper.maximumNumberOfParameters == 1) {
-                        mapperInfo.mapper(r) 
-                    } else {
-                        mapperInfo.mapper(r, this) 
-                    }
-                    
-                    // Flag that this mapper has been applied
-                    r.attributes['+'+mapperInfo.name] = true
-                }
-
-                if (log.debugEnabled) {
-                    log.debug "Done applying static content mapper [${mapperInfo.name}] to ${r.dump()}"
+                    return // Skip this resource, it is excluded
                 }
             }
-            
+
             if (log.debugEnabled) {
-                log.debug "Updating URI to resource cache for ${r.actualUrl} >> ${r.processedFile}"
+                log.debug "Applying static content mapper [${mapperInfo.name}] to ${r.dump()}"
             }
-            
-            // Add the actual linking URL to the cache so resourceLink resolves
-            processedResourcesByURI[r.actualUrl] = r
-            
-            // Add the original source url to the cache as well, if it was an ad-hoc resource
-            // As the original URL is used, we need this to resolve to the actualUrl for redirect
-            if (adHocResource) {
-                processedResourcesByURI[r.sourceUrl] = r
+
+            // Apply mapper if not suppressed for this resource - check attributes
+            if (!r.attributes['no'+mapperInfo.name]) {
+                def prevFile = r.processedFile.toString()
+                if (mapperInfo.mapper.maximumNumberOfParameters == 1) {
+                    mapperInfo.mapper(r) 
+                } else {
+                    mapperInfo.mapper(r, this) 
+                }
+                
+                // Flag that this mapper has been applied
+                r.attributes['+'+mapperInfo.name] = true
             }
-        } finally {
-            origResource?.close()
+
+            if (log.debugEnabled) {
+                log.debug "Done applying static content mapper [${mapperInfo.name}] to ${r.dump()}"
+            }
+        }
+        
+        if (log.debugEnabled) {
+            log.debug "Updating URI to resource cache for ${r.actualUrl} >> ${r.processedFile}"
+        }
+        
+        // Add the actual linking URL to the cache so resourceLink resolves
+        processedResourcesByURI[r.actualUrl] = r
+        
+        // Add the original source url to the cache as well, if it was an ad-hoc resource
+        // As the original URL is used, we need this to resolve to the actualUrl for redirect
+        if (adHocResource) {
+            processedResourcesByURI[r.sourceUrl] = r
         }
     }
     
@@ -450,6 +536,11 @@ class ResourceService {
             def res = processedResourcesByURI[uri]
             s2 << "Request URI: ${uri} => ${res.processedFile}\n"
         }
+        def s3 = new StringBuilder()
+        syntheticResourcesByURI.keySet().sort().each { uri ->
+            def res = syntheticResourcesByURI[uri]
+            s3 << "Request URI: ${uri} => ${res.processedFile}\n"
+        }
         if (toLog) {
             log.debug '-'*50
             log.debug "Resource definitions"
@@ -458,6 +549,10 @@ class ResourceService {
             log.debug "Resource URI cache"
             log.debug '-'*50
             log.debug(s2)
+            log.debug '-'*50
+            log.debug "Synthetic Resources"
+            log.debug '-'*50
+            log.debug(s3)
             log.debug '-'*50
         }
         return s1.toString() + s2.toString()

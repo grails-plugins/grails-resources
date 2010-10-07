@@ -34,10 +34,10 @@ class CSSRewriterTests extends GrailsUnitTestCase {
         r.processedFile.delete()
 
         def css = """
-.bg1 { background: url(../images/theme/bg1.png) }
-.bg2 { background: url(images/bg2.png) }
-.bg3 { background: url(/images/bg3.png) }
-.bg4 { background: url(bg4.png) }
+.bg1 { background: url(resource:/images/theme/bg1.png) }
+.bg2 { background: url(resource:/images/bg2.png) }
+.bg3 { background: url(resource:/images/bg3.png) }
+.bg4 { background: url(resource:/bg4.png) }
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
         CSSRewriter.mapper(r, svc)
@@ -46,7 +46,7 @@ class CSSRewriterTests extends GrailsUnitTestCase {
         def expected = """
 .bg1 { background: url(../cached/bg1.png) }
 .bg2 { background: url(../cached/bg2.png) }
-.bg3 { background: url(/images/bg3.png) }
+.bg3 { background: url(../cached/bg3.png) }
 .bg4 { background: url(../cached/bg4.png) }
 """
     
@@ -78,10 +78,10 @@ class CSSRewriterTests extends GrailsUnitTestCase {
         r.processedFile.delete()
 
         def css = """
-.bg1 { background: url(../images/theme/bg1.png) }
-.bg2 { background: url(images/bg2.png) }
-.bg3 { background: url(/images/bg3.png) }
-.bg4 { background: url(bg4.png) }
+.bg1 { background: url(resource:/images/theme/bg1.png) }
+.bg2 { background: url(resource:/images/bg2.png) }
+.bg3 { background: url(resource:/images/bg3.png) }
+.bg4 { background: url(resource:/bg4.png) }
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
         CSSRewriter.mapper(r, svc)
@@ -89,9 +89,9 @@ class CSSRewriterTests extends GrailsUnitTestCase {
         def outcome = r.processedFile.text
         def expected = """
 .bg1 { background: url(../images/theme/bg1.png) }
-.bg2 { background: url(images/bg2.png) }
-.bg3 { background: url(/images/bg3.png) }
-.bg4 { background: url(bg4.png) }
+.bg2 { background: url(../images/bg2.png) }
+.bg3 { background: url(../images/bg3.png) }
+.bg4 { background: url(../bg4.png) }
 """
 
         assertEquals expected, outcome

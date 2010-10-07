@@ -24,28 +24,31 @@
     ${output}
 </head>
 <body>
-    <h1>This is the resource test page</h1>
-    <p>It produced the following output in the head section</p>
-    <pre>
-        ${output.encodeAsHTML()}
-    </pre>
-    <p>Grails logo using processing:<r:img uri="/images/grails_logo.png"/></p>
+    <div class="container">
+        <div class="span-24 last">
+            <h1>This is the resource test page</h1>
+            <p>It produced the following output in the head section</p>
+            <pre>
+                ${output.encodeAsHTML()}
+            </pre>
+            <p>Grails logo using processing:<r:img uri="/images/grails_logo.png"/></p>
     
-    <r:script>
-        document.write("<p>This is going to come out in the footer<p>");
-    </r:script>
+            <r:script>
+                document.write("<p>This is going to come out in the footer<p>");
+            </r:script>
 
-    <p>Resource cache info:</p>
-    <pre>${grailsApplication.mainContext.resourceService.dumpResources().encodeAsHTML()}</pre>
+            <p>Resource cache info:</p>
+            <pre>${grailsApplication.mainContext.resourceService.dumpResources().encodeAsHTML()}</pre>
 
-    <g:set var="deferred">
-        <r:layoutResources/>
-    </g:set>
-    <p>It produced the following output in the footer</p>
-    <pre>
-        ${deferred.encodeAsHTML()}
-    </pre>
-    
+            <g:set var="deferred">
+                <r:layoutResources/>
+            </g:set>
+            <p>It produced the following output in the footer</p>
+            <pre>
+                ${deferred.encodeAsHTML()}
+            </pre>
+        </div>
+    </div>
     ${deferred}
 </body>
 </html>
