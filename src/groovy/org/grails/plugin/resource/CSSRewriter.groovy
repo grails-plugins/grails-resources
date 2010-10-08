@@ -19,8 +19,6 @@ class CSSRewriter {
             if (originalUrl.startsWith('resource:')) {
                 def uri = originalUrl - 'resource:'
                 
-                println "Found preprocessed resource: ${originalUrl}"
-
                 if (log.debugEnabled) {
                     log.debug "Calculated URI of CSS resource [$originalUrl] as [$uri]"
                 }
