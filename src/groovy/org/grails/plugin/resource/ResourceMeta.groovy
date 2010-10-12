@@ -14,7 +14,7 @@ class ResourceMeta {
      */
     File workDir
 
-    String originalUrl
+    private String originalUrl
     String sourceUrl
     String sourceUrlExtension
     String queryParams

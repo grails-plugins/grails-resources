@@ -2,7 +2,7 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class ResourcesGrailsPlugin {
 
-    def version = "1.0-alpha9"
+    def version = "1.0-alpha10"
     def grailsVersion = "1.2 > *"
     def dependsOn = [logging:'1.0 > *']
     def loadAfter = ['logging']

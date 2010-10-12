@@ -39,7 +39,7 @@ class ResourceService {
 
     def staticUrlPrefix
     
-    @Lazy File workDir = new File(WebUtils.getTempDir(ServletContextHolder.servletContext), "grails-resources")
+    private File workDir
     
     def modulesByName = [:]
 
@@ -51,6 +51,15 @@ class ResourceService {
     List resourceMappers = []
     
     def grailsApplication
+    
+    File getWorkDir() {
+        // @todo this isn't threadsafe at startup if its lazy. We should change it.
+        if (!this.@workDir) {
+            def d = getConfigParamOrDefault('work.dir', null)
+            this.@workDir = d ? new File(d) : new File(WebUtils.getTempDir(ServletContextHolder.servletContext), "grails-resources")
+        }
+        return this.@workDir
+    }
     
     /**
      * Process a legacy URI that points to a normal resource, not produced with our
