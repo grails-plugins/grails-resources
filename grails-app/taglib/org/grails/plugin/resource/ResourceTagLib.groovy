@@ -358,13 +358,23 @@ class ResourceTagLib {
             
             // Some JS libraries can't handle different query params being sent to other dependencies
             // so we reuse the same timestamp for the lifecycle of the request
-            def timestamp = request['grails-resources.debug-timestamp']
+    
+            // Here we allow a refresh arg that will generate a new timestamp, normally we used the last we 
+            // generated. Otherwise, you can't debug anything in a JS debugger as the URI of the JS 
+            // is different every time.
+            if (params._refreshResources && !request.'grails-resources.debug-timestamp-refreshed') {
+                // Force re-generation of a new timestamp in debug mode
+                session.removeAttribute('grails-resources.debug-timestamp')
+                request.'grails-resources.debug-timestamp-refreshed' = true
+            }
+            
+            def timestamp = session['grails-resources.debug-timestamp']
             if (!timestamp) {
                 timestamp = System.currentTimeMillis()
-                request['grails-resources.debug-timestamp'] = timestamp
+                session['grails-resources.debug-timestamp'] = timestamp
             }
 
-            uri += (uri.indexOf('?') >= 0) ? "&debug=y&n=$timestamp" : "?debug=y&n=$timestamp"
+            uri += (uri.indexOf('?') >= 0) ? "&_debugResources=y&n=$timestamp" : "?_debugResources=y&n=$timestamp"
             return [uri:uri, debug:true]
         } 
         

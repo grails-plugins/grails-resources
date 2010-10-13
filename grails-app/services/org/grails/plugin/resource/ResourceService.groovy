@@ -600,8 +600,8 @@ class ResourceService {
     
     private isExplicitDebugRequest(ServletRequest request) {
         if (Environment.current == Environment.DEVELOPMENT) {
-            def requestContainsDebug = request.getParameter('debug') != null
-            def wasReferredFromDebugRequest = request.getHeader('Referer')?.contains('?debug=')
+            def requestContainsDebug = request.getParameter('_debugResources') != null
+            def wasReferredFromDebugRequest = request.getHeader('Referer')?.contains('?_debugResources=')
 
             requestContainsDebug || wasReferredFromDebugRequest
         } else {
