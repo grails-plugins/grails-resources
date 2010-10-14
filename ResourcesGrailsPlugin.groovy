@@ -20,8 +20,8 @@ class ResourcesGrailsPlugin {
 
     def artefacts = [getResourceMapperArtefactHandler()]
     def watchedResources = [
-        "file:./grails-app/resourceMappers/**/*",
-        "file:./plugins/*/grails-app/resourceMappers/**/*",
+        "file:./grails-app/resourceMappers/**/*.groovy",
+        "file:./plugins/*/grails-app/resourceMappers/**/*.groovy",
     ]
 
     def author = "Marc Palmer"
