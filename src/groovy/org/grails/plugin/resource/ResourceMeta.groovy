@@ -143,4 +143,12 @@ class ResourceMeta {
         // have to call the setter method
         setActualUrl(p)
     }
+    
+    boolean excludesMapper(String mapperName) {
+        attributes["no$mapperName"]
+    }
+    
+    void wasProcessedByMapper(String mapperName) {
+        attributes["+$mapperName"] = true
+    }
 }

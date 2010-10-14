@@ -6,14 +6,14 @@ import groovy.util.ConfigObject
 
 import grails.test.*
 
-class CSSPreprocessorTests extends GrailsUnitTestCase {
+class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
     
     /**
      * This simulates a test where the image resources are moved to a new flat dir
      * but the CSS is *not* moved, to force recalculation of paths
      */
     void testCSSPreprocessing() {
-        mockLogging(CSSPreprocessor)
+        mockLogging(CSSPreprocessorResourceMapper)
 
         def svc = [
             config : [ rewrite: [css: true] ]
@@ -35,7 +35,11 @@ class CSSPreprocessorTests extends GrailsUnitTestCase {
 .bg5 { background: url(http://google.com/images/bg5.png) }
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
-        CSSPreprocessor.mapper(r, svc)
+        
+        new CSSPreprocessorResourceMapper().with {
+            resourceService = svc
+            map(r, new ConfigObject())
+        }
 
         def outcome = r.processedFile.text
         def expected = """
@@ -53,7 +57,7 @@ class CSSPreprocessorTests extends GrailsUnitTestCase {
      * as they are not valid URLs
      */
     void testCSSPreprocessingWithInvalidURI() {
-        mockLogging(CSSPreprocessor)
+        mockLogging(CSSPreprocessorResourceMapper)
 
         def svc = [
             getResourceMetaForURI : {  uri, adHoc, postProc = null ->
@@ -77,7 +81,11 @@ class CSSPreprocessorTests extends GrailsUnitTestCase {
 .bg2 { background: url(####BULL) }
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
-        CSSPreprocessor.mapper(r, svc)
+
+        new CSSPreprocessorResourceMapper().with {
+            resourceService = svc
+            map(r, new ConfigObject())
+        }
 
         def outcome = r.processedFile.text
         def expected = """

@@ -10,8 +10,10 @@ import org.grails.resources.ResourceModulesBuilder
 import org.apache.commons.io.FilenameUtils
 import javax.servlet.ServletRequest
 import grails.util.Environment
-import org.springframework.util.AntPathMatcher
 
+import grails.spring.BeanBuilder
+import org.grails.plugin.resource.mapper.ResourceMappersFactory
+import java.lang.reflect.Modifier
 
 /**
  * @todo Move all this code out into a standard Groovy bean class and declare the bean in plugin setup
@@ -48,7 +50,7 @@ class ResourceService {
 
     def moduleNamesByBundle = [:]
     
-    List resourceMappers = []
+    def resourceMappers
     
     def grailsApplication
     
@@ -355,49 +357,9 @@ class ResourceService {
         if (log.debugEnabled) {
             log.debug "Applying mappers to ${r.processedFile}"
         }
-        def mappers = resourceMappers.sort({it.order})
-
-        // Build up list of excludes patterns for each mapper name
-        def mapperExcludes = [:]
-        resourceMappers.each { m -> 
-            // @todo where do we get defaults from? preferably from each plugin...
-            def patterns = getConfigParamOrDefault("${m.name}.excludes", [])
-            mapperExcludes[m.name] = patterns
-        }
         
-        def antMatcher = new AntPathMatcher()
-        
-        mappers.eachWithIndex { mapperInfo, i ->
-            def excludes = mapperExcludes[mapperInfo.name]
-            if (excludes) {
-                if (excludes.any { pattern -> antMatcher.match(pattern, r.sourceUrl) }) {
-                    if (log.debugEnabled) {
-                        log.debug "Skipping static content mapper [${mapperInfo.name}] for ${r.sourceUrl} due to excludes pattern ${excludes}"
-                    }
-                    return // Skip this resource, it is excluded
-                }
-            }
-
-            if (log.debugEnabled) {
-                log.debug "Applying static content mapper [${mapperInfo.name}] to ${r.dump()}"
-            }
-
-            // Apply mapper if not suppressed for this resource - check attributes
-            if (!r.attributes['no'+mapperInfo.name]) {
-                def prevFile = r.processedFile.toString()
-                if (mapperInfo.mapper.maximumNumberOfParameters == 1) {
-                    mapperInfo.mapper(r) 
-                } else {
-                    mapperInfo.mapper(r, this) 
-                }
-                
-                // Flag that this mapper has been applied
-                r.attributes['+'+mapperInfo.name] = true
-            }
-
-            if (log.debugEnabled) {
-                log.debug "Done applying static content mapper [${mapperInfo.name}] to ${r.dump()}"
-            }
+        resourceMappers.each {
+            it.invokeIfNotExcluded(r)
         }
         
         if (log.debugEnabled) {
@@ -413,18 +375,7 @@ class ResourceService {
             processedResourcesByURI[r.sourceUrl] = r
         }
     }
-    
-    /**
-     * Resource mappers can mutate URLs any way they like. They are exeecuted in the order
-     * registered, so plugins must use dependsOn & loadAfter to set their ordering correctly before
-     * they register with us
-     * The closure takes 1 arg - the current resource. Any mutations can be performed by 
-     * changing actualUrl or processedFile or other propertis of ResourceMeta
-     */    
-    void addResourceMapper(String name, Closure mapper, Integer order = 10000) {
-        resourceMappers << [name:name, mapper:mapper, order:order]
-    }
-    
+        
     void storeModule(ResourceModule m) {
         if (log.debugEnabled) {
             log.debug "Storing resource module definition ${m.dump()}"
@@ -607,5 +558,11 @@ class ResourceService {
         } else {
             false
         }
+    }
+    
+    def reload() {
+        log.warn("reloading resource mappers")
+        resourceMappers = ResourceMappersFactory.createResourceMappers(grailsApplication, config.mappers)
+        loadResourcesFromConfig()
     }
 }

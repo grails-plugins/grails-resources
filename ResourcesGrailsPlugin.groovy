@@ -1,5 +1,7 @@
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
+import org.springframework.beans.factory.config.MethodInvokingFactoryBean
+
 class ResourcesGrailsPlugin {
 
     def version = "1.0-alpha10"
@@ -13,6 +15,12 @@ class ResourcesGrailsPlugin {
             "web-app/css/**/*.*",
             "web-app/js/**/*.*",
             "web-app/images/**/*.*"
+    ]
+
+    def artefacts = [getResourceMapperArtefactHandler()]
+    def watchedResources = [
+        "file:./grails-app/resourceMappers/**/*",
+        "file:./plugins/*/grails-app/resourceMappers/**/*",
     ]
 
     def author = "Marc Palmer"
@@ -37,7 +45,7 @@ class ResourcesGrailsPlugin {
         def patterns = resourcesConfig.adhoc.patterns
         patterns instanceof List ? patterns : DEFAULT_ADHOC_PATTERNS
     }
-
+    
     def doWithWebDescriptor = { webXml ->
         def adHocPatterns = getAdHocPatterns()
         
@@ -81,10 +89,47 @@ class ResourcesGrailsPlugin {
     }
 
     def onChange = { event ->
-        // @todo monitor the static resources mapped and flush mappings from cache
+        if (handleChange(application, event, getResourceMapperArtefactHandler().TYPE, log)) {
+            log.info("reloading resources due to change of $event.source.name")
+            event.application.mainContext.resourceService.reload()
+        }
+    }
+
+    protected handleChange(application, event, type, log) {
+        if (application.isArtefactOfType(type, event.source)) {
+            log.debug("reloading $event.source.name ($type)")
+            def oldClass = application.getArtefact(type, event.source.name)
+            application.addArtefact(type, event.source)
+            // Reload subclasses
+            application.getArtefacts(type).each {
+                if (it.clazz != event.source && oldClass.clazz.isAssignableFrom(it.clazz)) {
+                    def newClass = application.classLoader.reloadClass(it.clazz.name)
+                    application.addArtefact(type, newClass)
+                }
+            }
+            
+            true
+        } else {
+            false
+        }
     }
 
     def onConfigChange = { event ->
-        event.application.mainContext.resourceService.loadResourcesFromConfig()
+        event.application.mainContext.resourceService.reload()
+    }
+
+    /**
+     * We have to soft load this class so this file can be compiled on it's own.
+     */
+    static getResourceMapperArtefactHandler() {
+        softLoadClass('org.grails.plugin.resources.artefacts.ResourceMapperArtefactHandler')
+    }
+
+    static softLoadClass(String className) {
+        try {
+            getClassLoader().loadClass(className)
+        } catch (ClassNotFoundException e) {
+            null
+        }
     }
 }

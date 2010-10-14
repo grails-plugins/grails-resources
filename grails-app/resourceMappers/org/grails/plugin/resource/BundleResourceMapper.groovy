@@ -1,7 +1,5 @@
 package org.grails.plugin.resource
 
-import org.apache.commons.logging.LogFactory
-
 /**
  *
  * Create bundle if doesn't exist
@@ -51,11 +49,13 @@ import org.apache.commons.logging.LogFactory
  body { background: url(889798798798ddfjks.png) }
 
  */
-class ResourceBundler {
+class BundleResourceMapper {
     
-    static log = LogFactory.getLog('org.grails.plugin.resource.ResourceBundler')
-
     static BUNDLE_DIR = "bundles"
+    
+    def priority = Integer.MAX_VALUE - 100
+    
+    def resourceService
     
     /**
      * Find resources that belong in bundles, and create the bundles, and make the resource delegate to the bundle
@@ -67,7 +67,7 @@ class ResourceBundler {
      * I'm not sure this is the best way, but it means we don't need to mess with existing module and resource definitions
      * which would undoubtedly cause us all kinds of pain.
      */
-    static mapper = { resource, resourceService ->
+    def map(resource, config) {
         def bundleId = resource.attributes.bundle
         if (bundleId) {
             // Find/create bundle for this extension type

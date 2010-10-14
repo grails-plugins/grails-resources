@@ -6,14 +6,14 @@ import groovy.util.ConfigObject
 
 import grails.test.*
 
-class CSSRewriterTests extends GrailsUnitTestCase {
+class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
     
     /**
      * This simulates a test where the image resources are moved to a new flat dir
      * but the CSS is *not* moved, to force recalculation of paths
      */
     void testCSSRewritingWithMovingFiles() {
-        mockLogging(CSSRewriter)
+        mockLogging(CSSRewriterResourceMapper)
 
         def svc = [
             getResourceMetaForURI : {  uri, adHoc, postProc = null ->
@@ -40,7 +40,11 @@ class CSSRewriterTests extends GrailsUnitTestCase {
 .bg4 { background: url(resource:/bg4.png) }
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
-        CSSRewriter.mapper(r, svc)
+
+        CSSRewriterResourceMapper.newInstance().with {
+            resourceService = svc
+            map(r, new ConfigObject())
+        }
 
         def outcome = r.processedFile.text
         def expected = """
@@ -58,7 +62,7 @@ class CSSRewriterTests extends GrailsUnitTestCase {
      * and the actualUrl is not mutated (i.e. like zipping)
      */
     void testCSSRewritingWithRenamedFilesBySameUrl() {
-        mockLogging(CSSRewriter)
+        mockLogging(CSSRewriterResourceMapper)
 
         def svc = [
             getResourceMetaForURI : {  uri, adHoc, postProc = null ->
@@ -84,7 +88,11 @@ class CSSRewriterTests extends GrailsUnitTestCase {
 .bg4 { background: url(resource:/bg4.png) }
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
-        CSSRewriter.mapper(r, svc)
+        
+        CSSRewriterResourceMapper.newInstance().with {
+            resourceService = svc
+            map(r, new ConfigObject())
+        }
 
         def outcome = r.processedFile.text
         def expected = """
@@ -102,7 +110,7 @@ class CSSRewriterTests extends GrailsUnitTestCase {
      * as they are not valid URLs
      */
     void testCSSRewritingWithInvalidURI() {
-        mockLogging(CSSRewriter)
+        mockLogging(CSSRewriterResourceMapper)
 
         def svc = [
             getResourceMetaForURI : {  uri, adHoc, postProc = null ->
@@ -126,7 +134,11 @@ class CSSRewriterTests extends GrailsUnitTestCase {
 .bg2 { background: url(####BULL) }
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
-        CSSRewriter.mapper(r, svc)
+    
+        CSSRewriterResourceMapper.newInstance().with {
+            resourceService = svc
+            map(r, new ConfigObject())
+        }
 
         def outcome = r.processedFile.text
         def expected = """

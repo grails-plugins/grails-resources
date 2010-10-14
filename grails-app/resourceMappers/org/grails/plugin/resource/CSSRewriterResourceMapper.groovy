@@ -1,17 +1,17 @@
 package org.grails.plugin.resource
 
-import org.apache.commons.logging.LogFactory
+class CSSRewriterResourceMapper {
 
-class CSSRewriter {
+    def priority = Integer.MAX_VALUE - 500
     
-    static log = LogFactory.getLog(CSSRewriter)
-
+    def resourceService
+    
     /**
      * Find all url() and fix up the url if it is not absolute
      * NOTE: This needs to run after any plugins that move resources around, but before any that obliterate
      * the content i.e. before minify or gzip
      */
-    static mapper = { resource, resourceService ->
+    def map(resource, config) {
 
         def processor = new CSSLinkProcessor()
         processor.process(resource, resourceService) { prefix, originalUrl, suffix ->
