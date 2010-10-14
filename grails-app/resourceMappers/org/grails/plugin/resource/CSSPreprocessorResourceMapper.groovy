@@ -2,7 +2,7 @@ package org.grails.plugin.resource
 
 class CSSPreprocessorResourceMapper {
 
-    def priority = Integer.MAX_VALUE
+    def priority = Integer.MAX_VALUE - 100
     
     def resourceService
     

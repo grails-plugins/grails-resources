@@ -14,7 +14,8 @@ class ResourcesGrailsPlugin {
             "grails-app/controllers/**/*.groovy",
             "web-app/css/**/*.*",
             "web-app/js/**/*.*",
-            "web-app/images/**/*.*"
+            "web-app/images/**/*.*",
+            "grails-app/resourceMappers/**/test/*"
     ]
 
     def artefacts = [getResourceMapperArtefactHandler()]

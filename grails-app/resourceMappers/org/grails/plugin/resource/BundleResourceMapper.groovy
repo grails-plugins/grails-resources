@@ -53,7 +53,7 @@ class BundleResourceMapper {
     
     static BUNDLE_DIR = "bundles"
     
-    def priority = Integer.MAX_VALUE - 100
+    def priority = Integer.MAX_VALUE - 200
     
     def resourceService
     
