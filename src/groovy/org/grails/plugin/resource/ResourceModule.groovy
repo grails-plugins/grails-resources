@@ -110,13 +110,13 @@ class ResourceModule {
         // Ugly copy and paste from ApplicationTagLib
         def base = args.remove('base')
         if (base) {
-            s <<= base
+            s << base
         } else {
             def abs = args.remove("absolute")
             if (Boolean.valueOf(abs)) {
                 def u = makeServerURL()
                 if (u) {
-                    s <<= u
+                    s << u
                 } else {
                     throw new IllegalArgumentException("Attribute absolute='true' specified but no grails.serverURL set in Config")
                 }
@@ -124,20 +124,20 @@ class ResourceModule {
             else {
                 // @todo work out how to get servlet context path
                 // For servlets SDK 2.5 you can servletContext.getContextPath()
-                s <<= ''
+                s << ''
             }
         }
 
         def dir = args['dir']
         if (args.plugin) {
-            s <<= pluginManager.getPluginPath(args.plugin) ?: ''
+            s << pluginManager.getPluginPath(args.plugin) ?: ''
         }
         if (dir) {
-            s <<= (dir.startsWith("/") ?  dir : "/${dir}")
+            s << (dir.startsWith("/") ?  dir : "/${dir}")
         }
         def file = args['file']
         if (file) {
-            s <<= (file.startsWith("/") || dir?.endsWith('/') ?  file : "/${file}")
+            s << (file.startsWith("/") || dir?.endsWith('/') ?  file : "/${file}")
         }    
         return s.toString()
     }
