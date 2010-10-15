@@ -4,6 +4,9 @@ import org.apache.commons.io.FilenameUtils
 
 /**
  * Holder for info about a resource declaration at runtime
+ *
+ * This is actually non-trivial. A lot of data kept here. Be wary of what you think a "url" is. 
+ * See the javadocs for each URL property.
  */
 class ResourceMeta {
 
@@ -14,20 +17,52 @@ class ResourceMeta {
      */
     File workDir
 
-    private String originalUrl
+    /**
+     * The original Url provided in the mapping declaration, verbatim
+     */
+    final String originalUrl
+
+    /**
+     * The app-relative url of the LOCAL source of this resource, minus query params
+     */
     String sourceUrl
+
+    /**
+     * The original file extension of the resource
+     */
     String sourceUrlExtension
+
+    /**
+     * The original queryParams of the resource, if any
+     */
     String queryParams
     
+    /**
+     * The url of the local resource, after processing. (no query params)
+     */
     String actualUrl
+    
+    /**
+     * The url to use when rendering links - e.g. for absolute CDN overrides
+     */
     String linkOverride
+    
+    /**
+     * The original mime type
+     */
     String contentType
     
+    /**
+     * Where do you want this resource? "defer", "head" etc
+     */
     String disposition
 
     //@todo impl this later
     //String cachedTagText
     
+    /**
+     * The delegate to actually use when linking, if any. Think bundling.
+     */
     ResourceMeta delegate
     
     void delegateTo(ResourceMeta target) {
@@ -65,6 +100,14 @@ class ResourceMeta {
         }
     }
     
+    String  getActualUrl() {
+        if (!delegate) {
+            return this.@actualUrl 
+        } else {
+            return delegate.actualUrl
+        }
+    }
+
     void setActualUrl(String url) {
         this.@actualUrl = url
         _linkUrl = queryParams ? "${actualUrl}?${queryParams}" : url
@@ -74,7 +117,7 @@ class ResourceMeta {
     void setSourceUrl(String url) {
         def qidx = url.indexOf('?')
 
-        originalUrl = url // the full monty
+        this.@originalUrl = url // the full monty
         sourceUrl = qidx >= 0 ? url[0..qidx-1] : url
         queryParams = qidx >= 0 ? url[qidx+1..-1] : null
         

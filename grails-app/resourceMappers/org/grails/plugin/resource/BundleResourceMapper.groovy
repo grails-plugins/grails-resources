@@ -8,46 +8,42 @@ package org.grails.plugin.resource
  * Make sure resources does not apply zip etc multiple times to the bundled file
  * Clear the bundle file at startup (how?)
  *
- * Perhaps just incorporate into resources core for now, during first copy and before applying mappers?
- 
- *
- 
- The tricky problem of changing the base url of possibly deeply nested CSS files and their relative links.
- 
- Example input CSS at "/js/library/main.css":
- 
- body { background: url(../images/bg.png) }
- 
- Example in bundled file "/bundle-app.css" - BREAKS IMAGE LINK:
-
- body { background: url(../images/bg.png) }
-
- Example in bundled file after flattening of all files and renaming to "/9349484849494.css":
-
- body { background: url(8977867868s7a6d7sdsad6786asd.png) }
-
-
-
- Example input CSS at "/js/library/main.css":
- 
- body { background: url(../images/bg.png) }
- 
- >>>>>> after CSSabsoluting:
-
- body { background: url(/js/library/images/bg.png) }
-
- >>>>> after bundling - file /bundle-app.css:
-
- body { background: url(/js/library/images/bg.png) }
-
- >>>>> after caching/hashing file /786876786868.css:
-
- body { background: url(/js/library/images/bg.png) }
-
- >>>>> after final CSSRewrite bundled file /786876786868.css:
-
- body { background: url(889798798798ddfjks.png) }
-
+ * The tricky problem of changing the base url of possibly deeply nested CSS files and their relative links.
+ * 
+ * Example input CSS at "/js/library/main.css":
+ * 
+ * body { background: url(../images/bg.png) }
+ * 
+ * Example in bundled file "/bundle-app.css" - BREAKS IMAGE LINK:
+ * 
+ * body { background: url(../images/bg.png) }
+ * 
+ * Example in bundled file after flattening of all files and renaming to "/9349484849494.css":
+ * 
+ * body { background: url(8977867868s7a6d7sdsad6786asd.png) }
+ * 
+ * 
+ * 
+ * Example input CSS at "/js/library/main.css":
+ * 
+ * body { background: url(../images/bg.png) }
+ * 
+ * >>>>>> after CSSabsoluting:
+ * 
+ * body { background: url(/js/library/images/bg.png) }
+ * 
+ * >>>>> after bundling - file /bundle-app.css:
+ * 
+ * body { background: url(/js/library/images/bg.png) }
+ * 
+ * >>>>> after caching/hashing file /786876786868.css:
+ * 
+ * body { background: url(/js/library/images/bg.png) }
+ * 
+ * >>>>> after final CSSRewrite bundled file /786876786868.css:
+ * 
+ * body { background: url(889798798798ddfjks.png) }
+ * 
  */
 class BundleResourceMapper {
     

@@ -319,7 +319,7 @@ class ResourceTagLib {
         def debugMode = resourceService.isDebugMode(request)
         
         module.resources.each { r ->
-            if (!r.exists()) {
+            if (!r.actualUrl.contains('://') && !r.exists()) {
                 throw new IllegalArgumentException("Module [$name] depends on resource [${r.sourceUrl}] but the file cannot be found")
             }
             if (log.debugEnabled) {
@@ -327,7 +327,8 @@ class ResourceTagLib {
             }
             if (r.disposition == renderingDisposition) {
                 def args = r.tagAttributes?.clone() ?: [:]
-                args.uri = debugMode ? r.originalUrl : "${r.linkUrl}"
+                // args.uri needs to be the source uri used to identify the resource locally
+                args.uri = debugMode ? r.originalUrl : "${r.actualUrl}"
                 args.wrapper = r.prePostWrapper
                 args.disposition = r.disposition
                 if (log.debugEnabled) {
@@ -342,7 +343,7 @@ class ResourceTagLib {
 
     /**
      * Get the uri to use for linking, and - if relevant - the resource instance
-     * @return Map with uri property and *maybe* a resource property
+     * @return Map with uri/url property and *maybe* a resource property
      */
     def resolveResourceAndURI(attrs) {
         if (log.debugEnabled) {
@@ -391,8 +392,16 @@ class ResourceTagLib {
             }
         })
         
-        uri = ctxPath+resourceService.staticUrlPrefix+res.linkUrl
-        return [uri:uri, resource:res]
+        // We need to handle a) absolute links here for CDN, and b) base url
+        def linkUrl = res.linkUrl
+        def baseUrl = '' // @todo get from config
+        if (linkUrl.contains('://') || baseUrl) {
+            // @todo do we need to toggle http/https here based on current request protocol?
+            return [uri:baseUrl ? baseUrl+linkUrl : linkUrl, resource:res]
+        } else {
+            uri = ctxPath+resourceService.staticUrlPrefix+res.linkUrl
+            return [uri:uri, resource:res]
+        }
     }
      
     /**

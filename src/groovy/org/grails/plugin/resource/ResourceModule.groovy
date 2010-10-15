@@ -56,12 +56,11 @@ class ResourceModule {
     ResourceMeta newResourceFromArgs(Map args, ResourceService svc) {
         def url = args.remove('url')
         if (url) {
-            if (!url.startsWith('/')) {
+            if (!url.contains('://') && !url.startsWith('/')) {
                 url = '/'+url
             }
         }
         def r = new ResourceMeta(sourceUrl: url , workDir: svc.workDir)
-        // @todo change this to assume default for the *type* from info in ResourceService
         def ti = svc.getDefaultSettingsForURI(url, args.attrs?.type)
         if (!ti) {
             throw new IllegalArgumentException("Cannot create resource $url, is not a supported type")

@@ -106,6 +106,7 @@ class ResourceService {
      */
     void redirectToActualUrl(ResourceMeta res, request, response) {
         // Now redirect the client to the processed url
+        // NOTE: only works for local resources
         def u = request.contextPath+staticUrlPrefix+res.linkUrl
         if (log.debugEnabled) {
             log.debug "Redirecting ad-hoc resource ${request.requestURI} to $u which makes it UNCACHEABLE - declare this resource "+
@@ -325,49 +326,58 @@ class ResourceService {
         }
         
         def uri = r.sourceUrl
-        if (!r.processedFile?.exists()) {
-            def origResource = ServletContextHolder.servletContext.getResourceAsStream(uri)
-            if (!origResource) {
-                if (log.errorEnabled) {
-                    log.error "Resource not found: ${uri} when preparing resource ${r.dump()}"
+        if (!uri.contains('://')) {
+            if (!r.processedFile?.exists()) {
+                def origResource = ServletContextHolder.servletContext.getResourceAsStream(uri)
+                if (!origResource) {
+                    if (log.errorEnabled) {
+                        log.error "Resource not found: ${uri} when preparing resource ${r.dump()}"
+                    }
+                    throw new FileNotFoundException("Cannot locate resource [$uri]")
                 }
-                throw new FileNotFoundException("Cannot locate resource [$uri]")
-            }
         
-            r.contentType = ServletContextHolder.servletContext.getMimeType(uri)
-            if (log.debugEnabled) {
-                log.debug "Resource [$uri] has content type [${r.contentType}]"
-            }
+                r.contentType = ServletContextHolder.servletContext.getMimeType(uri)
+                if (log.debugEnabled) {
+                    log.debug "Resource [$uri] has content type [${r.contentType}]"
+                }
 
-            try {
-                def f = makeFileForURI(uri)
-                // copy the file ready for mutation
-                r.processedFile = f
+                try {
+                    def f = makeFileForURI(uri)
+                    // copy the file ready for mutation
+                    r.processedFile = f
             
-                r.actualUrl = r.sourceUrl
+                    r.actualUrl = r.sourceUrl
 
-                // Now copy in the resource from this app deployment into the cache, ready for mutation
-                r.processedFile << origResource
-            } finally {
-                origResource?.close()
+                    // Now copy in the resource from this app deployment into the cache, ready for mutation
+                    r.processedFile << origResource
+                } finally {
+                    origResource?.close()
+                }
             }
-        }
 
-        // Now iterate over the mappers...
-        if (log.debugEnabled) {
-            log.debug "Applying mappers to ${r.processedFile}"
-        }
+            // Now iterate over the mappers...
+            if (log.debugEnabled) {
+                log.debug "Applying mappers to ${r.processedFile}"
+            }
         
-        resourceMappers.each {
-            it.invokeIfNotExcluded(r)
-        }
+            resourceMappers.each {
+                it.invokeIfNotExcluded(r)
+            }
         
-        if (log.debugEnabled) {
-            log.debug "Updating URI to resource cache for ${r.actualUrl} >> ${r.processedFile}"
+            if (log.debugEnabled) {
+                log.debug "Updating URI to resource cache for ${r.actualUrl} >> ${r.processedFile}"
+            }
+        } else {
+            r.actualUrl = r.sourceUrl
+
+            log.warn "Skipping mappers for ${r.actualUrl} because its an absolute URL."
         }
         
         // Add the actual linking URL to the cache so resourceLink resolves
-        processedResourcesByURI[r.actualUrl] = r
+        // ONLY if its not delegating, or we get a bunch of crap in here
+        if (!r.delegating) {
+            processedResourcesByURI[r.actualUrl] = r
+        }
         
         // Add the original source url to the cache as well, if it was an ad-hoc resource
         // As the original URL is used, we need this to resolve to the actualUrl for redirect
@@ -480,15 +490,19 @@ class ResourceService {
             s1 << "   Depends on modules: ${mod.dependsOn}\n"
             def res = []+mod.resources
             res.sort({ a,b -> a.actualUrl <=> b.actualUrl}).each { resource ->
-                s1 << "   Resource: ${resource.sourceUrl}\n"
+                s1 << "   Resource: ${resource.actualUrl}\n"
+                s1 << "             -- original Url: ${resource.originalUrl}\n"
                 s1 << "             -- local file: ${resource.processedFile}\n"
                 s1 << "             -- mime type: ${resource.contentType}\n"
-                s1 << "             -- processed Url: ${resource.actualUrl}\n"
+                s1 << "             -- source Url: ${resource.sourceUrl}\n"
+                s1 << "             -- source Extension: ${resource.sourceUrlExtension}\n"
+                s1 << "             -- query params: ${resource.queryParams}\n"
                 s1 << "             -- url for linking: ${resource.linkUrl}\n"
-                s1 << "             -- url override: ${resource.linkOverride}\n"
+                s1 << "             -- link override: ${resource.linkOverride}\n"
                 s1 << "             -- attributes: ${resource.attributes}\n"
                 s1 << "             -- tag attributes: ${resource.tagAttributes}\n"
                 s1 << "             -- disposition: ${resource.disposition}\n"
+                s1 << "             -- delegating?: ${resource.delegate ? 'Yes: '+resource.delegate.actualUrl : 'No'}\n"
             }
         }
         def s2 = new StringBuilder()
@@ -514,8 +528,8 @@ class ResourceService {
             log.debug '-'*50
             log.debug(s3)
             log.debug '-'*50
-        }
-        return s1.toString() + s2.toString()
+        } 
+        return s1.toString() + s2.toString() + s3.toString()
     }
     
     /**
