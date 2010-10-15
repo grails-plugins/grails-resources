@@ -6,13 +6,13 @@ import grails.util.Environment
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.springframework.web.util.WebUtils
-import org.grails.resources.ResourceModulesBuilder
 import org.apache.commons.io.FilenameUtils
 import javax.servlet.ServletRequest
 import grails.util.Environment
 
 import grails.spring.BeanBuilder
 import org.grails.plugin.resource.mapper.ResourceMappersFactory
+import org.grails.plugin.resource.module.*
 import java.lang.reflect.Modifier
 
 /**
@@ -423,31 +423,31 @@ class ResourceService {
         processedResourcesByURI.clear()
     }
     
-    void loadResourcesFromConfig() {
+    private loadResources() {
         forgetResources()
         
-        // Placeholder code, we might support lists of config closures in future
-        def modules = config.modules
-        if (!(modules instanceof Closure)) {
-            return
-        }
-        def moduleClosures = [modules]
-        if (log.debugEnabled) {
-            log.debug "Loading resource module definitions from Config... "+moduleClosures
-        }
-        moduleClosures?.each { clo ->
-            def builder = new ResourceModulesBuilder()
-            clo.delegate = builder
-            clo.resolveStrategy = Closure.DELEGATE_FIRST
-            clo()
-            
+        def declarations = ModuleDeclarationsFactory.getModuleDeclarations(grailsApplication)
+        
+        def modules = []
+        def builder = new ModulesBuilder(modules)
+
+        declarations.each { sourceClassName, dsl ->
             if (log.debugEnabled) {
-                log.debug "Resource module definitions for [${builder._modules}] found in Config..."
+                log.debug("evaluating resource modules from $sourceClassName")
             }
-            builder._modules.each { m ->
-                module(m.name, m.resources, m.depends)
-            }
+            
+            dsl.delegate = builder
+            dsl.resolveStrategy = Closure.DELEGATE_FIRST
+            dsl()
         }
+        
+        modules
+        
+        if (log.debugEnabled) {
+            log.debug("resource modules after evaluation: $modules")
+        }
+        
+        modules.each { m -> module(m.name, m.resources, m.dependencies) }
     }
     
     static removeQueryParams(uri) {
@@ -561,8 +561,8 @@ class ResourceService {
     }
     
     def reload() {
-        log.warn("reloading resource mappers")
+        log.warn("performing a full reload")
         resourceMappers = ResourceMappersFactory.createResourceMappers(grailsApplication, config.mappers)
-        loadResourcesFromConfig()
+        loadResources()
     }
 }

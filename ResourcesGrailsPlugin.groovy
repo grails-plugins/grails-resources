@@ -18,10 +18,12 @@ class ResourcesGrailsPlugin {
             "grails-app/resourceMappers/**/test/*"
     ]
 
-    def artefacts = [getResourceMapperArtefactHandler()]
+    def artefacts = [getResourceMapperArtefactHandler(), getResourcesArtefactHandler()]
     def watchedResources = [
         "file:./grails-app/resourceMappers/**/*.groovy",
         "file:./plugins/*/grails-app/resourceMappers/**/*.groovy",
+        "file:./grails-app/conf/*Resources.groovy",
+        "file:./plugins/*/grails-app/conf/*Resources.groovy"
     ]
 
     def author = "Marc Palmer"
@@ -90,9 +92,11 @@ class ResourcesGrailsPlugin {
     }
 
     def onChange = { event ->
-        if (handleChange(application, event, getResourceMapperArtefactHandler().TYPE, log)) {
-            log.info("reloading resources due to change of $event.source.name")
-            event.application.mainContext.resourceService.reload()
+        [getResourceMapperArtefactHandler().TYPE, getResourcesArtefactHandler().TYPE].find {
+            if (handleChange(application, event, it, log)) {
+                log.info("reloading resources due to change of $event.source.name")
+                event.application.mainContext.resourceService.reload()
+            }
         }
     }
 
@@ -124,6 +128,10 @@ class ResourcesGrailsPlugin {
      */
     static getResourceMapperArtefactHandler() {
         softLoadClass('org.grails.plugin.resources.artefacts.ResourceMapperArtefactHandler')
+    }
+
+    static getResourcesArtefactHandler() {
+        softLoadClass('org.grails.plugin.resources.artefacts.ResourcesArtefactHandler')
     }
 
     static softLoadClass(String className) {
