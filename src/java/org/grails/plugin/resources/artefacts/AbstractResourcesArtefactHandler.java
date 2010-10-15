@@ -1,5 +1,7 @@
 package org.grails.plugin.resources.artefacts;
 
+import org.codehaus.groovy.grails.commons.ArtefactHandlerAdapter;
+
 abstract public class AbstractResourcesArtefactHandler extends ArtefactHandlerAdapter {
     
     public AbstractResourcesArtefactHandler(String type, Class<?> grailsClassType, Class<?> grailsClassImpl, String artefactSuffix) {
