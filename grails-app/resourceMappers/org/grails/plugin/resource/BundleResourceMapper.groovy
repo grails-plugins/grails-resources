@@ -47,9 +47,7 @@ package org.grails.plugin.resource
  */
 class BundleResourceMapper {
     
-    static BUNDLE_DIR = "bundles"
-    
-    def priority = Integer.MAX_VALUE - 200
+    def priority = 500
     
     def resourceService
     

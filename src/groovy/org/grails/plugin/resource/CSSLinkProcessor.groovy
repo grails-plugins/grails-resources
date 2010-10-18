@@ -30,7 +30,10 @@ class CSSLinkProcessor {
         
         // Move existing to tmp file, then write to the correct file
         def origFile = new File(resource.processedFile.toString()+'.tmp')
-        origFile.delete()
+        
+        // Make sure it doesn't exist already
+        new File(origFile.toString()).delete() // On MS Windows if we don't do this origFile gets corrupt after delete
+        
         resource.processedFile.renameTo(origFile)
         def rewrittenFile = resource.processedFile
         if (log.debugEnabled) {
@@ -50,6 +53,8 @@ class CSSLinkProcessor {
                writer.println(fixedLine)
             }
         }  
+        
+        // Delete the temp file
         origFile.delete()      
     }
 }

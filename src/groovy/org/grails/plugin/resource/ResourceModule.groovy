@@ -73,7 +73,7 @@ class ResourceModule {
         if (attrs) {
             resattrs += attrs
         }
-        r.tagAttributes = attrs 
+        r.tagAttributes = attrs?.clone()
         r.attributes.putAll(args)
         return r        
     }

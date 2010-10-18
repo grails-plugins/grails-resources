@@ -2,6 +2,8 @@ package org.grails.plugin.resource
 
 import org.apache.commons.io.FilenameUtils
 
+import org.grails.plugin.resource.mapper.ResourceMapper
+
 /**
  * Holder for info about a resource declaration at runtime
  *
@@ -188,10 +190,10 @@ class ResourceMeta {
     }
     
     boolean excludesMapper(String mapperName) {
-        attributes["no$mapperName"]
+        attributes["no$mapperName".toString()]
     }
     
-    void wasProcessedByMapper(String mapperName) {
-        attributes["+$mapperName"] = true
+    void wasProcessedByMapper(ResourceMapper mapper) {
+        attributes["+${mapper.name}".toString()] = true
     }
 }

@@ -2,7 +2,7 @@ package org.grails.plugin.resource
 
 class CSSRewriterResourceMapper {
 
-    def priority = Integer.MAX_VALUE - 500
+    def priority = 1000
     
     def resourceService
     

@@ -4,7 +4,7 @@ import org.springframework.beans.factory.config.MethodInvokingFactoryBean
 
 class ResourcesGrailsPlugin {
 
-    def version = "1.0-alpha10"
+    def version = "1.0-alpha11"
     def grailsVersion = "1.2 > *"
     def dependsOn = [logging:'1.0 > *']
     def loadAfter = ['logging']
@@ -15,7 +15,8 @@ class ResourcesGrailsPlugin {
             "web-app/css/**/*.*",
             "web-app/js/**/*.*",
             "web-app/images/**/*.*",
-            "grails-app/resourceMappers/**/test/*"
+            "grails-app/resourceMappers/**/test/*",
+            "grails-app/conf/*Resources.groovy"
     ]
 
     def artefacts = [getResourceMapperArtefactHandler(), getResourcesArtefactHandler()]

@@ -60,6 +60,7 @@ class ResourceService {
             def d = getConfigParamOrDefault('work.dir', null)
             this.@workDir = d ? new File(d) : new File(WebUtils.getTempDir(ServletContextHolder.servletContext), "grails-resources")
         }
+        assert this.@workDir
         return this.@workDir
     }
     
@@ -202,7 +203,7 @@ class ResourceService {
         }
         def agg = type.newInstance()
         agg.sourceUrl = uri // Hack
-        agg.workDir = workDir
+        agg.workDir = getWorkDir()
         agg.actualUrl = uri
         agg.processedFile = makeFileForURI(uri)
         
@@ -248,7 +249,7 @@ class ResourceService {
                 if (log.debugEnabled) {
                     log.debug "Creating new implicit resource for ${uri}"
                 }
-                r = new ResourceMeta(sourceUrl: uri, workDir: workDir)
+                r = new ResourceMeta(sourceUrl: uri, workDir: getWorkDir())
             }
             // Do the processing
             // @todo we should really sync here on something specific to the resource
@@ -288,7 +289,8 @@ class ResourceService {
         def splitPoint = uri.lastIndexOf('/')
         def fileSystemDir = splitPoint > 0 ? makeFileSystemPathFromURI(uri[0..splitPoint-1]) : ''
         def fileSystemFile = makeFileSystemPathFromURI(uri[splitPoint+1..-1])
-        def staticDir = new File(workDir, fileSystemDir)
+//        println "Getting workDir: ${workDir} - this ${this}, this.getWorkDir = ${this.getWorkDir()}"
+        def staticDir = new File(getWorkDir(), fileSystemDir)
         
         // force the structure
         if (!staticDir.exists()) {
@@ -316,7 +318,7 @@ class ResourceService {
      */
     void prepareResource(ResourceMeta r, boolean adHocResource) {
         if (log.debugEnabled) {
-            log.debug "Preparing resource ${r.sourceUrl}"
+            log.debug "Preparing resource ${r.sourceUrl} (${r.dump()})"
         }
         if (r.delegating) {
             if (log.debugEnabled) {
@@ -360,12 +362,20 @@ class ResourceService {
                 log.debug "Applying mappers to ${r.processedFile}"
             }
         
-            resourceMappers.each {
-                it.invokeIfNotExcluded(r)
-            }
-        
-            if (log.debugEnabled) {
-                log.debug "Updating URI to resource cache for ${r.actualUrl} >> ${r.processedFile}"
+            // Apply all mappers / or only those until the resource becomes delegated
+            // Once delegated, its the delegate that needs to be processed, not the original
+            for (m in resourceMappers) {
+                if (log.debugEnabled) {
+                    log.debug "Applying mapper ${m.name} to ${r.processedFile} - delegating? ${r.delegating}"
+                }
+                if (r.delegating) {
+                    break;
+                }
+                m.invokeIfNotExcluded(r)
+                if (log.debugEnabled) {
+                    log.debug "Applied mapper ${m.name} to ${r.processedFile}"
+                }
+                r.wasProcessedByMapper(m)
             }
         } else {
             r.actualUrl = r.sourceUrl
@@ -374,15 +384,19 @@ class ResourceService {
         }
         
         // Add the actual linking URL to the cache so resourceLink resolves
-        // ONLY if its not delegating, or we get a bunch of crap in here
+        // ONLY if its not delegating, or we get a bunch of crap in here / hide the delegated resource
         if (!r.delegating) {
+    
+            if (log.debugEnabled) {
+                log.debug "Updating URI to resource cache for ${r.actualUrl} >> ${r.processedFile}"
+            }
             processedResourcesByURI[r.actualUrl] = r
-        }
         
-        // Add the original source url to the cache as well, if it was an ad-hoc resource
-        // As the original URL is used, we need this to resolve to the actualUrl for redirect
-        if (adHocResource) {
-            processedResourcesByURI[r.sourceUrl] = r
+            // Add the original source url to the cache as well, if it was an ad-hoc resource
+            // As the original URL is used, we need this to resolve to the actualUrl for redirect
+            if (adHocResource) {
+                processedResourcesByURI[r.sourceUrl] = r
+            }
         }
     }
         
