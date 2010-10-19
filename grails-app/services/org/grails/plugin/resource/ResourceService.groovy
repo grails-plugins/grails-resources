@@ -4,8 +4,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 import grails.util.Environment
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.springframework.web.util.WebUtils
+import org.springframework.beans.factory.InitializingBean
 import org.apache.commons.io.FilenameUtils
 import javax.servlet.ServletRequest
 import grails.util.Environment
@@ -19,7 +19,7 @@ import java.lang.reflect.Modifier
  * @todo Move all this code out into a standard Groovy bean class and declare the bean in plugin setup
  * so that if this is pulled into core, other plugins are not written to depend on this service
  */
-class ResourceService {
+class ResourceService implements InitializingBean {
 
     def pluginManager
     
@@ -53,12 +53,19 @@ class ResourceService {
     def resourceMappers
     
     def grailsApplication
+    def servletContext
+    
+    void afterPropertiesSet() {
+        if (!servletContext) {
+            servletContext = grailsApplication.mainContext.servletContext
+        }
+    }
     
     File getWorkDir() {
         // @todo this isn't threadsafe at startup if its lazy. We should change it.
         if (!this.@workDir) {
             def d = getConfigParamOrDefault('work.dir', null)
-            this.@workDir = d ? new File(d) : new File(WebUtils.getTempDir(ServletContextHolder.servletContext), "grails-resources")
+            this.@workDir = d ? new File(d) : new File(WebUtils.getTempDir(servletContext), "grails-resources")
         }
         assert this.@workDir
         return this.@workDir
@@ -330,7 +337,7 @@ class ResourceService {
         def uri = r.sourceUrl
         if (!uri.contains('://')) {
             if (!r.processedFile?.exists()) {
-                def origResource = ServletContextHolder.servletContext.getResourceAsStream(uri)
+                def origResource = servletContext.getResourceAsStream(uri)
                 if (!origResource) {
                     if (log.errorEnabled) {
                         log.error "Resource not found: ${uri} when preparing resource ${r.dump()}"
@@ -338,7 +345,7 @@ class ResourceService {
                     throw new FileNotFoundException("Cannot locate resource [$uri]")
                 }
         
-                r.contentType = ServletContextHolder.servletContext.getMimeType(uri)
+                r.contentType = servletContext.getMimeType(uri)
                 if (log.debugEnabled) {
                     log.debug "Resource [$uri] has content type [${r.contentType}]"
                 }
