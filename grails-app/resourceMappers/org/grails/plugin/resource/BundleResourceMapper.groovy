@@ -1,5 +1,6 @@
 package org.grails.plugin.resource
 
+
 /**
  *
  * Create bundle if doesn't exist
@@ -76,18 +77,7 @@ class BundleResourceMapper {
             }
 
             // After we update this, the resource's linkUrl will return the url of the bundle
-            bundleResource.add(resource) { b ->
-                // Append to the existing file
-                if (log.debugEnabled) {
-                    log.debug "Appending contents of ${resource.processedFile} to ${b.processedFile}"
-                }
-                // @todo would be nice to add a comment here indicating name of file pulled in
-                // BUT we don't really want to be content type specific...
-                // The sourceUrl shows the files.
-                b.processedFile.append(resource.processedFile.newInputStream())
-                b.processedFile.append("\n")
-                // @todo do we delete the original now?
-            }
+            bundleResource.add(resource)
         }
     }
 }

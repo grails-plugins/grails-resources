@@ -50,10 +50,34 @@ class ResourceService implements InitializingBean {
 
     def moduleNamesByBundle = [:]
     
+    def modulesInDependencyOrder = []
+    
     def resourceMappers
     
     def grailsApplication
     def servletContext
+    
+    void updateDependencyOrder() {
+        def modules = (modulesByName.collect { it.value }).findAll { !(it.name in [IMPLICIT_MODULE, SYNTHETIC_MODULE]) }
+        def ordered = modules.collect { it.name }
+
+        modules.each { m ->
+            def currentIdx = ordered.indexOf(m.name)
+            m.dependsOn?.each { dm ->
+                def idx = ordered.indexOf(dm)
+                if (idx > currentIdx) {
+                    ordered.remove(m.name)
+                    ordered.add(idx, m.name)
+                    currentIdx = idx
+                }
+            }
+        }
+        
+        ordered << IMPLICIT_MODULE
+        ordered << SYNTHETIC_MODULE 
+        
+        modulesInDependencyOrder = ordered
+    }
     
     void afterPropertiesSet() {
         if (!servletContext) {
@@ -256,7 +280,7 @@ class ResourceService implements InitializingBean {
                 if (log.debugEnabled) {
                     log.debug "Creating new implicit resource for ${uri}"
                 }
-                r = new ResourceMeta(sourceUrl: uri, workDir: getWorkDir())
+                r = new ResourceMeta(sourceUrl: uri, workDir: getWorkDir(), module:mod)
             }
             // Do the processing
             // @todo we should really sync here on something specific to the resource
@@ -336,6 +360,8 @@ class ResourceService implements InitializingBean {
         
         def uri = r.sourceUrl
         if (!uri.contains('://')) {
+            r.beginPrepare(this)
+            
             if (!r.processedFile?.exists()) {
                 def origResource = servletContext.getResourceAsStream(uri)
                 if (!origResource) {
@@ -393,17 +419,16 @@ class ResourceService implements InitializingBean {
         // Add the actual linking URL to the cache so resourceLink resolves
         // ONLY if its not delegating, or we get a bunch of crap in here / hide the delegated resource
         if (!r.delegating) {
-    
             if (log.debugEnabled) {
                 log.debug "Updating URI to resource cache for ${r.actualUrl} >> ${r.processedFile}"
             }
             processedResourcesByURI[r.actualUrl] = r
+        }
         
-            // Add the original source url to the cache as well, if it was an ad-hoc resource
-            // As the original URL is used, we need this to resolve to the actualUrl for redirect
-            if (adHocResource) {
-                processedResourcesByURI[r.sourceUrl] = r
-            }
+        // Add the original source url to the cache as well, if it was an ad-hoc resource
+        // As the original URL is used, we need this to resolve to the actualUrl for redirect
+        if (adHocResource || r.delegating) {
+            processedResourcesByURI[r.sourceUrl] = r.delegating ? r.delegate : r
         }
     }
         
@@ -536,6 +561,9 @@ class ResourceService implements InitializingBean {
             def res = syntheticResourcesByURI[uri]
             s3 << "Request URI: ${uri} => ${res.processedFile}\n"
         }
+        updateDependencyOrder()
+        def s4 = "Dependency load order: ${modulesInDependencyOrder}\n"
+        
         if (toLog) {
             log.debug '-'*50
             log.debug "Resource definitions"
@@ -549,8 +577,12 @@ class ResourceService implements InitializingBean {
             log.debug '-'*50
             log.debug(s3)
             log.debug '-'*50
+            log.debug "Module load order"
+            log.debug '-'*50
+            log.debug(s4)
+            log.debug '-'*50
         } 
-        return s1.toString() + s2.toString() + s3.toString()
+        return s1.toString() + s2.toString() + s3.toString() + s4.toString()
     }
     
     /**

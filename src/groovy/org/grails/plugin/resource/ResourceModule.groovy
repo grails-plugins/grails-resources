@@ -60,7 +60,7 @@ class ResourceModule {
                 url = '/'+url
             }
         }
-        def r = new ResourceMeta(sourceUrl: url , workDir: svc.workDir)
+        def r = new ResourceMeta(sourceUrl: url , workDir: svc.workDir, module:this)
         def ti = svc.getDefaultSettingsForURI(url, args.attrs?.type)
         if (!ti) {
             throw new IllegalArgumentException("Cannot create resource $url, is not a supported type")

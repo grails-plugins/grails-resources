@@ -13,6 +13,11 @@ import org.grails.plugin.resource.mapper.ResourceMapper
 class ResourceMeta {
 
     /**
+     * The owning module
+     */
+    ResourceModule module
+    
+    /**
      * Set on instantiation to be the dir that content is served from
      * 
      * @see ResourceService#workDir
@@ -85,6 +90,10 @@ class ResourceMeta {
     List requestProcessors = []
     
     private String _linkUrl
+    
+    // Hook for when preparation is starting
+    void beginPrepare(resourceService) {
+    }
     
     boolean isDelegating() {
         delegate != null
