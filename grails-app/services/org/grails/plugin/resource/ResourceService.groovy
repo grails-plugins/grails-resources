@@ -95,6 +95,11 @@ class ResourceService implements InitializingBean {
         return this.@workDir
     }
     
+    def extractURI(request) {
+        def uriStart = (request.contextPath+staticUrlPrefix).size()
+        return uriStart < request.requestURI.size() ? request.requestURI[uriStart..-1] : ''
+    }
+
     /**
      * Process a legacy URI that points to a normal resource, not produced with our
      * own tags, and likely not referencing a declared resource.
@@ -113,7 +118,7 @@ class ResourceService implements InitializingBean {
         if (log.debugEnabled) {
             log.debug "Handling ad-hoc resource ${request.requestURI}"
         }
-        def uri = ResourceService.removeQueryParams(request.requestURI[request.contextPath.size()..-1])
+        def uri = ResourceService.removeQueryParams(extractURI(request))
         // @todo query params are lost at this point for ad hoc resources, this needs fixing
         def res
         try {
@@ -156,7 +161,7 @@ class ResourceService implements InitializingBean {
             log.debug "Handling resource ${request.requestURI}"
         }
         // Find the ResourceMeta for the request, or create it
-        def uri = ResourceService.removeQueryParams(request.requestURI[(request.contextPath+staticUrlPrefix).size()..-1])
+        def uri = ResourceService.removeQueryParams(extractURI(request))
         def inf
         try {
             inf = getResourceMetaForURI(uri)
