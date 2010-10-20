@@ -42,7 +42,7 @@ class CSSLinkProcessor {
 
         // Replace all urls to resources we know about to their processed urls
         rewrittenFile.withPrintWriter("utf-8") { writer ->
-           origFile.eachLine { line ->
+           origFile.eachLine('UTF-8') { line ->
                def fixedLine = line.replaceAll(CSS_URL_PATTERN) { Object[] args ->
                    def prefix = args[1]
                    def originalUrl = args[2].trim()

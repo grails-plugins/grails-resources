@@ -29,6 +29,11 @@ class AggregatedResourceMeta extends ResourceMeta {
 
     @Override
     void beginPrepare(resourceService) {
+        def writer = processedFile.newWriter('UTF-8')
+        if (contentType == 'text/css') {
+            writer << '@charset "UTF-8"'
+        }
+        
         resourceService.updateDependencyOrder()
         def moduleOrder = resourceService.modulesInDependencyOrder
     
@@ -45,11 +50,8 @@ class AggregatedResourceMeta extends ResourceMeta {
                     if (log.debugEnabled) {
                         log.debug "Appending contents of ${r.processedFile} to ${processedFile}"
                     }
-                    // @todo would be nice to add a comment here indicating name of file pulled in
-                    // BUT we don't really want to be content type specific...
-                    // The sourceUrl shows the files.
-                    processedFile.append(r.processedFile.newInputStream())
-                    processedFile.append("\n")
+                    writer << r.processedFile.getText("UTF-8")
+                    writer << "\n"
                     
                     // Copy the most appropriate disposition i.e. head trumps defer
                     def idx = DISPOSITION_PRIORITIES.indexOf(r.disposition)
@@ -60,7 +62,7 @@ class AggregatedResourceMeta extends ResourceMeta {
                 }
             }
         }
-     
         
+        writer.close()
     }
 }
