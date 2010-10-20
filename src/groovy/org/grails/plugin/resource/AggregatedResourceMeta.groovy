@@ -51,7 +51,7 @@ class AggregatedResourceMeta extends ResourceMeta {
                         log.debug "Appending contents of ${r.processedFile} to ${processedFile}"
                     }
                     writer << r.processedFile.getText("UTF-8")
-                    writer << "\n"
+                    writer << "\r\n"
                     
                     // Copy the most appropriate disposition i.e. head trumps defer
                     def idx = DISPOSITION_PRIORITIES.indexOf(r.disposition)
@@ -63,6 +63,7 @@ class AggregatedResourceMeta extends ResourceMeta {
             }
         }
         
+        writer << "\r\n"
         writer.close()
     }
 }
