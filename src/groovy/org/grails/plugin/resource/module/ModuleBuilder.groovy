@@ -10,22 +10,24 @@ import org.slf4j.LoggerFactory
  */
 class ModuleBuilder {
     
-    private final _resources
-    private final _dependencies
+    private final _data
 
     private final log = LoggerFactory.getLogger(this.class.name)
     
-    ModuleBuilder(List resources, List dependencies) {
-        _resources = resources
-        _dependencies = dependencies
+    ModuleBuilder(def data) {
+        _data = data    
     }
         
     void dependsOn(String[] dependencies) {
-        _dependencies.addAll(dependencies.toList())
+        _data.dependencies.addAll(dependencies.toList())
     } 
     
+    void defaultBundle(value) {
+        _data.defaultBundle = value
+    }   
+    
     void resource(args) {
-        _resources << args
+        _data.resources << args
     }
     
     def missingMethod(String name, args) {

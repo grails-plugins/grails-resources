@@ -11,7 +11,8 @@ class ResourceModule {
     
     List<ResourceMeta> resources = []
     List<String> dependsOn = []
-
+    def defaultBundle
+    
     def pluginManager
     
     ResourceModule(name, ResourceService svc) {
@@ -53,6 +54,10 @@ class ResourceModule {
         dependsOn << name
     }
     
+    def getBundleTypes() {
+        ['css', 'js']
+    }
+    
     ResourceMeta newResourceFromArgs(Map args, ResourceService svc) {
         def url = args.remove('url')
         if (url) {
@@ -67,6 +72,16 @@ class ResourceModule {
         }
         r.disposition = args.remove('disposition') ?: ti.disposition
         r.linkOverride = args.remove('linkOverride')
+        r.bundle = args.remove('bundle')
+        if (!r.bundle && (r.sourceUrlExtension in bundleTypes)) {
+            if (defaultBundle == null) {
+                // use module name by default
+                r.bundle = name
+            } else if (defaultBundle) { 
+                // use supplied value as a default
+                r.bundle = defaultBundle.toString()
+            }
+        }
         r.prePostWrapper = args.remove('wrapper')
         def resattrs = ti.attrs?.clone() ?: [:]
         def attrs = args.remove('attrs')

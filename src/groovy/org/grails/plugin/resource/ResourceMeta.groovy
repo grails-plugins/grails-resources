@@ -54,6 +54,8 @@ class ResourceMeta {
      */
     String linkOverride
     
+    String bundle
+    
     /**
      * The original mime type
      */

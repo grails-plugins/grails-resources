@@ -11,14 +11,15 @@ import org.slf4j.LoggerFactory
 class ModulesBuilder implements GroovyInterceptable {
     
     private _modules
-    private _resources = []
-    private _dependencies = []
-    private _moduleBuilder = new ModuleBuilder(_resources, _dependencies)
+    private _collatedData
+    private _moduleBuilder
     
     private final log = LoggerFactory.getLogger(this.class.name)
     
     ModulesBuilder(List modules) {
         _modules = modules
+        _collatedData = [resources:[], dependencies:[]]
+        _moduleBuilder = new ModuleBuilder(_collatedData)
     }
     
     def invokeMethod(String name, args) {
@@ -30,7 +31,10 @@ class ModulesBuilder implements GroovyInterceptable {
             moduleDefinition.resolveStrategy = Closure.DELEGATE_FIRST
             moduleDefinition()
 
-            def module = [name: name, resources: _resources.clone(), dependencies: _dependencies.clone()]
+            def module = [name: name, 
+                resources: _collatedData.resources.clone(), 
+                defaultBundle: _collatedData.defaultBundle,
+                dependencies: _collatedData.dependencies.clone()]
             
             if (log.debugEnabled) {
                 log.debug("defined module '$module'")
@@ -40,8 +44,9 @@ class ModulesBuilder implements GroovyInterceptable {
             _modules << module
 
             // clear for next
-            _resources.clear()
-            _dependencies.clear()
+            _collatedData.clear()
+            _collatedData.resources = []
+            _collatedData.dependencies = []
 
         } else {
             throw new IllegalStateException("only 1 closure argument accepted (args were: $args)")

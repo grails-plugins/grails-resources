@@ -63,7 +63,7 @@ class BundleResourceMapper {
      * which would undoubtedly cause us all kinds of pain.
      */
     def map(resource, config) {
-        def bundleId = resource.attributes.bundle
+        def bundleId = resource.bundle
         if (bundleId) {
             // Find/create bundle for this extension type
             def bundle = "/bundle-$bundleId.${resource.sourceUrlExtension}"
