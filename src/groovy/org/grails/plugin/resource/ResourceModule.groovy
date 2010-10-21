@@ -27,7 +27,7 @@ class ResourceModule {
         if (args.url instanceof Map) {
             args.url = getResourceUrl(args.url)
         }
-        this.resources << newResourceFromArgs(args, svc)
+        this.resources << newResourceFromArgs(args, svc, true)
         lockDown()
     }
 
@@ -39,10 +39,10 @@ class ResourceModule {
                 if (args.url instanceof Map) {
                     args.url = getResourceUrl(args.url)
                 }
-                def r = newResourceFromArgs(args, svc)
+                def r = newResourceFromArgs(args, svc, resourceInfoList.size()==1)
                 this.resources << r
             } else if (i instanceof String) {
-                this.resources << newResourceFromArgs(url:i, svc)
+                this.resources << newResourceFromArgs(url:i, svc, resourceInfoList.size()==1)
             } else {
                 throw new IllegalArgumentException("Barf!")
             }
@@ -58,7 +58,7 @@ class ResourceModule {
         ['css', 'js']
     }
     
-    ResourceMeta newResourceFromArgs(Map args, ResourceService svc) {
+    ResourceMeta newResourceFromArgs(Map args, ResourceService svc, boolean singleResourceModule) {
         def url = args.remove('url')
         if (url) {
             if (!url.contains('://') && !url.startsWith('/')) {
@@ -73,7 +73,7 @@ class ResourceModule {
         r.disposition = args.remove('disposition') ?: ti.disposition
         r.linkOverride = args.remove('linkOverride')
         r.bundle = args.remove('bundle')
-        if (!r.bundle && (r.sourceUrlExtension in bundleTypes)) {
+        if (!singleResourceModule && !r.bundle && (r.sourceUrlExtension in bundleTypes)) {
             if (defaultBundle == null) {
                 // use module name by default
                 r.bundle = name
