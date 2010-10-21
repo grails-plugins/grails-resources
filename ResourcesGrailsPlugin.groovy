@@ -4,7 +4,7 @@ import org.springframework.beans.factory.config.MethodInvokingFactoryBean
 
 class ResourcesGrailsPlugin {
 
-    def version = "1.0-alpha12"
+    def version = "1.0-alpha13"
     def grailsVersion = "1.2 > *"
     def dependsOn = [logging:'1.0 > *']
     def loadAfter = ['logging']

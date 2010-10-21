@@ -31,7 +31,7 @@ class AggregatedResourceMeta extends ResourceMeta {
     void beginPrepare(resourceService) {
         def writer = processedFile.newWriter('UTF-8')
         if (contentType == 'text/css') {
-            writer << '@charset "UTF-8"'
+            writer << '@charset "UTF-8";\n'
         }
         
         resourceService.updateDependencyOrder()
