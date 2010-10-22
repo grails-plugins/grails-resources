@@ -49,7 +49,7 @@ class ModulesBuilder implements GroovyInterceptable {
             _collatedData.dependencies = []
 
         } else {
-            throw new IllegalStateException("only 1 closure argument accepted (args were: $args)")
+            throw new IllegalStateException("Only 1 closure argument is accepted (args were: $args)")
         }
     }
 
