@@ -28,9 +28,6 @@ class ResourceMappersFactory {
                     it.autowire = true 
                 }
                 
-                // We can't pass the specific config object for this mapper
-                // because we don't know it's name until we have an instance.
-                // The mapper extracts it's own config.
                 "$name"(ResourceMapper, ref(instanceName), mappersConfig) 
                 
                 beanNames << name

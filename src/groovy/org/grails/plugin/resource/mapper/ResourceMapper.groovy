@@ -66,13 +66,13 @@ class ResourceMapper {
         def excludingPattern = getExcludingPattern(resource)
         if (excludingPattern) {
             if (log.debugEnabled) {
-                log.debug "skipping ${resource.sourceUrl} due to excludes pattern ${excludes}"
+                log.debug "Skipping ${resource.sourceUrl} due to excludes pattern ${excludes}"
             }
             
             false
         } else if (resource.excludesMapper(name)) {
             if (log.debugEnabled) {
-                log.debug "skipping ${resource.sourceUrl} due definition excluding mapper"
+                log.debug "Skipping ${resource.sourceUrl} due definition excluding mapper"
             }
             
             false
@@ -84,19 +84,19 @@ class ResourceMapper {
     
     private invoke(ResourceMeta resource) {
         if (log.debugEnabled) {
-            log.debug "beginning mapping ${resource.dump()}"
+            log.debug "Beginning mapping ${resource.dump()}"
         }
         
         try {
             artefact.map(resource, config)
         } catch (MissingMethodException e) {
             if (artefact.class == e.type && e.method == "map") {
-                throw new Exception("the resource mapper '$name' does not implement the appropriate map method")
+                throw new Exception("The resource mapper '$name' does not implement the appropriate map method")
             }
         }
         
         if (log.debugEnabled) {
-            log.debug "done mapping ${resource.dump()}"
+            log.debug "Done mapping ${resource.dump()}"
         }
     }
     

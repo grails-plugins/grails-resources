@@ -452,22 +452,42 @@ class ResourceService implements InitializingBean {
         storeModule(new ResourceModule(name, this))
     }
 
+    /**
+     * @deprecated
+     */
     def module(String name, String url) {
-        storeModule(new ResourceModule(name, [url:url], this))
+        storeModule(new ResourceModule(name, [url:url], false, this))
     }
 
+    /**
+     * @deprecated
+     */
     def module(String name, Map urlInfo) {
-        storeModule(new ResourceModule(name, urlInfo, this))
+        storeModule(new ResourceModule(name, urlInfo, false, this))
     }
 
+    /**
+     * @deprecated
+     */
     def module(String name, List urlsOrInfos) {
-        storeModule(new ResourceModule(name, urlsOrInfos, this))
+        storeModule(new ResourceModule(name, urlsOrInfos, false, this))
     }
 
+    /**
+     * @deprecated
+     */
     def module(String name, List urlsOrInfos, List moduleDeps) {
-        def m = new ResourceModule(name, urlsOrInfos, this)
+        def m = new ResourceModule(name, urlsOrInfos, false, this)
         storeModule(m)
         moduleDeps?.each { d ->
+            m.addModuleDependency(d)
+        }
+    }
+    
+    def module(builderInfo) {
+        def m = new ResourceModule(builderInfo.name, builderInfo.resources, builderInfo.defaultBundle, this)
+        storeModule(m)
+        builderInfo.dependencies?.each { d ->
             m.addModuleDependency(d)
         }
     }
@@ -502,13 +522,11 @@ class ResourceService implements InitializingBean {
             dsl()
         }
         
-        modules
-        
         if (log.debugEnabled) {
             log.debug("resource modules after evaluation: $modules")
         }
         
-        modules.each { m -> module(m.name, m.resources, m.dependencies) }
+        modules.each { m -> module(m) }
     }
     
     static removeQueryParams(uri) {
@@ -541,11 +559,11 @@ class ResourceService implements InitializingBean {
             s1 << "   Depends on modules: ${mod.dependsOn}\n"
             def res = []+mod.resources
             res.sort({ a,b -> a.actualUrl <=> b.actualUrl}).each { resource ->
-                s1 << "   Resource: ${resource.actualUrl}\n"
+                s1 << "   Resource: ${resource.sourceUrl}\n"
                 s1 << "             -- original Url: ${resource.originalUrl}\n"
                 s1 << "             -- local file: ${resource.processedFile}\n"
                 s1 << "             -- mime type: ${resource.contentType}\n"
-                s1 << "             -- source Url: ${resource.sourceUrl}\n"
+                s1 << "             -- actual Url: ${resource.actualUrl}\n"
                 s1 << "             -- source Extension: ${resource.sourceUrlExtension}\n"
                 s1 << "             -- query params: ${resource.queryParams}\n"
                 s1 << "             -- url for linking: ${resource.linkUrl}\n"
@@ -633,7 +651,7 @@ class ResourceService implements InitializingBean {
     }
     
     def reload() {
-        log.warn("performing a full reload")
+        log.warn("Performing a full reload")
         resourceMappers = ResourceMappersFactory.createResourceMappers(grailsApplication, config.mappers)
         loadResources()
     }

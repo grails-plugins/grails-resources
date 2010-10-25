@@ -19,7 +19,6 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
             getResourceMetaForURI : {  uri, adHoc, postProc = null ->
                 def namepart = uri[uri.lastIndexOf('/')..-1]
                 def s = '/cached'+namepart
-                println "In mock svc returning res for $s"
                 new ResourceMeta(actualUrl: s)
             },
             config : [ rewrite: [css: true] ]

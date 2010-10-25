@@ -15,13 +15,15 @@ class ResourceModule {
     
     def pluginManager
     
-    ResourceModule(name, ResourceService svc) {
+    ResourceModule(name, svc) {
         this.name = name
         this.pluginManager = svc.pluginManager
+        this.defaultBundle = false
     }
     
-    ResourceModule(name, Map resourceInfo, ResourceService svc) {
+    ResourceModule(name, Map resourceInfo, defBundle, svc) {
         this(name, svc)
+        this.defaultBundle = defBundle
         def args = [:]
         args.putAll(resourceInfo)
         if (args.url instanceof Map) {
@@ -31,8 +33,9 @@ class ResourceModule {
         lockDown()
     }
 
-    ResourceModule(name, List resourceInfoList, ResourceService svc) {
+    ResourceModule(name, List resourceInfoList, defBundle, svc) {
         this(name, svc)
+        this.defaultBundle = defBundle
         resourceInfoList.each { i ->
             if (i instanceof Map) {
                 def args = i.clone()
@@ -58,7 +61,7 @@ class ResourceModule {
         ['css', 'js']
     }
     
-    ResourceMeta newResourceFromArgs(Map args, ResourceService svc, boolean singleResourceModule) {
+    ResourceMeta newResourceFromArgs(Map args, svc, boolean singleResourceModule) {
         def url = args.remove('url')
         if (url) {
             if (!url.contains('://') && !url.startsWith('/')) {
@@ -67,7 +70,7 @@ class ResourceModule {
         }
         def r = new ResourceMeta(sourceUrl: url , workDir: svc.workDir, module:this)
         def ti = svc.getDefaultSettingsForURI(url, args.attrs?.type)
-        if (!ti) {
+        if (ti == null) {
             throw new IllegalArgumentException("Cannot create resource $url, is not a supported type")
         }
         r.disposition = args.remove('disposition') ?: ti.disposition
