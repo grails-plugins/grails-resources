@@ -191,6 +191,7 @@ class ResourceService implements InitializingBean {
                 // Now set up the response
                 response.contentType = inf.contentType
                 response.setContentLength(inf.processedFile.size().toInteger())
+                response.setDateHeader('Last-Modified', inf.originalLastMod)
 
                 // Here we need to let the mapper add headers etc
                 if (inf.requestProcessors) {
@@ -207,7 +208,7 @@ class ResourceService implements InitializingBean {
                     }
                 }
                 
-                // Could we do something faster here?
+                // @todo Could we do something faster here? Feels wrong, buffer size is tiny in Groovy
                 response.outputStream << data
             } finally {
                 data?.close()
@@ -368,8 +369,8 @@ class ResourceService implements InitializingBean {
             r.beginPrepare(this)
             
             if (!r.processedFile?.exists()) {
-                def origResource = servletContext.getResourceAsStream(uri)
-                if (!origResource) {
+                def origResourceURL = servletContext.getResource(uri)
+                if (!origResourceURL) {
                     if (log.errorEnabled) {
                         log.error "Resource not found: ${uri} when preparing resource ${r.dump()}"
                     }
@@ -381,17 +382,22 @@ class ResourceService implements InitializingBean {
                     log.debug "Resource [$uri] has content type [${r.contentType}]"
                 }
 
+                def conn = origResourceURL.openConnection()
+                def origResource = origResourceURL.newInputStream()
                 try {
                     def f = makeFileForURI(uri)
                     // copy the file ready for mutation
                     r.processedFile = f
-            
+                    r.originalLastMod = conn.lastModified
+                    
                     r.actualUrl = r.sourceUrl
 
                     // Now copy in the resource from this app deployment into the cache, ready for mutation
                     r.processedFile << origResource
                 } finally {
-                    origResource?.close()
+                    conn = null
+                    origResource?.close()                    
+                    origResource = null
                 }
             }
 
@@ -415,6 +421,8 @@ class ResourceService implements InitializingBean {
                 }
                 r.wasProcessedByMapper(m)
             }
+            
+            r.endPrepare(this)
         } else {
             r.actualUrl = r.sourceUrl
 

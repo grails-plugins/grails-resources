@@ -42,6 +42,8 @@ class AggregatedResourceMeta extends ResourceMeta {
             disposIdx = Integer.MAX_VALUE
         }
         
+        def newestLastMod = 0
+        
         // Add the resources to the file in the order determined by module dependencies!
         moduleOrder.each { m ->
             resources.each { r ->
@@ -52,6 +54,10 @@ class AggregatedResourceMeta extends ResourceMeta {
                     }
                     writer << r.processedFile.getText("UTF-8")
                     writer << "\r\n"
+                    
+                    if (r.originalLastMod > newestLastMod) {
+                        newestLastMod = r.originalLastMod
+                    }
                     
                     // Copy the most appropriate disposition i.e. head trumps defer
                     def idx = DISPOSITION_PRIORITIES.indexOf(r.disposition)
@@ -65,5 +71,7 @@ class AggregatedResourceMeta extends ResourceMeta {
         
         writer << "\r\n"
         writer.close()
+        
+        this.originalLastMod = newestLastMod
     }
 }

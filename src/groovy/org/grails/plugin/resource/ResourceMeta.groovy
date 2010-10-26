@@ -80,6 +80,8 @@ class ResourceMeta {
     
     File processedFile
     
+    long originalLastMod
+    
     // For per-resource options like "nominify", 'nozip'
     Map attributes = [:]
     
@@ -95,6 +97,13 @@ class ResourceMeta {
     
     // Hook for when preparation is starting
     void beginPrepare(resourceService) {
+    }
+    
+    // Hook for when preparation is done
+    void endPrepare(resourceService) {
+        if (!delegating) {
+            processedFile.setLastModified(originalLastMod ?: System.currentTimeMillis() )
+        }
     }
     
     boolean isDelegating() {
