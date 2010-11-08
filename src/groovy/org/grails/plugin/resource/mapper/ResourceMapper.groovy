@@ -101,7 +101,10 @@ class ResourceMapper {
     }
     
     String getExcludingPattern(ResourceMeta resource) {
-        excludes.find { PATH_MATCHER.match(it, resource.sourceUrl) }
+        // The path matcher won't match **/* against a path starting with /, so it makes sense to remove it.
+        def sourceUrl = resource.sourceUrl.startsWith("/") ? resource.sourceUrl.substring(1) : resource.sourceUrl
+
+        excludes.find { PATH_MATCHER.match(it, sourceUrl) }
     }
     
     private toStringList(value) {
