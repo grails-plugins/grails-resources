@@ -509,6 +509,9 @@ class ResourceService implements InitializingBean {
         
     void forgetResources() {
         modulesByName.clear()
+        moduleNamesByBundle.clear()
+        modulesInDependencyOrder.clear()
+        syntheticResourcesByURI.clear()
         processedResourcesByURI.clear()
     }
     
