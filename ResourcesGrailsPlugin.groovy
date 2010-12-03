@@ -1,10 +1,11 @@
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean
+import org.springframework.core.io.FileSystemResource
 
 class ResourcesGrailsPlugin {
 
-    def version = "1.0-alpha13"
+    def version = "1.0-alpha14"
     def grailsVersion = "1.2 > *"
     def dependsOn = [logging:'1.0 > *']
     def loadAfter = ['logging']
@@ -24,7 +25,8 @@ class ResourcesGrailsPlugin {
         "file:./grails-app/resourceMappers/**/*.groovy",
         "file:./plugins/*/grails-app/resourceMappers/**/*.groovy",
         "file:./grails-app/conf/*Resources.groovy",
-        "file:./plugins/*/grails-app/conf/*Resources.groovy"
+        "file:./plugins/*/grails-app/conf/*Resources.groovy",
+        "file:./web-app/**/*.*" // Watch for resource changes
     ]
 
     def author = "Marc Palmer"
@@ -93,10 +95,14 @@ class ResourcesGrailsPlugin {
     }
 
     def onChange = { event ->
-        [getResourceMapperArtefactHandler().TYPE, getResourcesArtefactHandler().TYPE].find {
-            if (handleChange(application, event, it, log)) {
-                log.info("reloading resources due to change of $event.source.name")
-                event.application.mainContext.resourceService.reload()
+        if (event.source instanceof FileSystemResource) {
+            event.application.mainContext.resourceService.reload()
+        } else {
+            [getResourceMapperArtefactHandler().TYPE, getResourcesArtefactHandler().TYPE].each {
+                if (handleChange(application, event, it, log)) {
+                    log.info("reloading resources due to change of $event.source.name")
+                    event.application.mainContext.resourceService.reload()
+                }
             }
         }
     }
