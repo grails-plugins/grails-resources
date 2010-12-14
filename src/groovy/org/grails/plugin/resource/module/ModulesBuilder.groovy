@@ -11,8 +11,11 @@ import org.slf4j.LoggerFactory
 class ModulesBuilder implements GroovyInterceptable {
     
     private _modules
+    private _moduleOverrides
     private _collatedData
     private _moduleBuilder
+    
+    static METHODNAME_OVERRIDES = 'overrides'
     
     private final log = LoggerFactory.getLogger(this.class.name)
     
@@ -25,28 +28,44 @@ class ModulesBuilder implements GroovyInterceptable {
     def invokeMethod(String name, args) {
         if (args.size() == 1 && args[0] instanceof Closure) {
 
-            // build it
-            def moduleDefinition = args[0]
-            moduleDefinition.delegate = _moduleBuilder
-            moduleDefinition.resolveStrategy = Closure.DELEGATE_FIRST
-            moduleDefinition()
+            if (name != METHODNAME_OVERRIDES) {
+                
+                // build it
+                def moduleDefinition = args[0]
+                moduleDefinition.delegate = _moduleBuilder
+                moduleDefinition.resolveStrategy = Closure.DELEGATE_FIRST
+                moduleDefinition()
 
-            def module = [name: name, 
-                resources: _collatedData.resources.clone(), 
-                defaultBundle: _collatedData.defaultBundle,
-                dependencies: _collatedData.dependencies.clone()]
+                def module = [name: name, 
+                    resources: _collatedData.resources.clone(), 
+                    defaultBundle: _collatedData.defaultBundle,
+                    dependencies: _collatedData.dependencies.clone()]
             
-            if (log.debugEnabled) {
-                log.debug("defined module '$module'")
+                if (log.debugEnabled) {
+                    log.debug("Defined module '$module'")
+                }
+            
+                // add it
+                _modules << module
+
+                // clear for next
+                _collatedData.clear()
+                _collatedData.resources = []
+                _collatedData.dependencies = []
+                
+            } else {
+                
+                if (log.debugEnabled) {
+                    log.debug("Processing module overrides")
+                }
+                def nestedBuilder = new ModulesBuilder(_moduleOverrides == null ? [] : _moduleOverrides)
+                def moduleDefinition = args[0]
+                moduleDefinition.delegate = nestedBuilder
+                moduleDefinition.resolveStrategy = Closure.DELEGATE_FIRST
+                moduleDefinition()
+                // Copy these nested decls into separate data for post-processing
+                _moduleOverrides = nestedBuilder._modules
             }
-            
-            // add it
-            _modules << module
-
-            // clear for next
-            _collatedData.clear()
-            _collatedData.resources = []
-            _collatedData.dependencies = []
 
         } else {
             throw new IllegalStateException("Only 1 closure argument is accepted (args were: $args)")

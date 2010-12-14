@@ -13,6 +13,11 @@ import org.grails.plugin.resource.mapper.ResourceMapper
 class ResourceMeta {
 
     /**
+     * The optional module-unique id
+     */
+    String id
+    
+    /**
      * The owning module
      */
     ResourceModule module

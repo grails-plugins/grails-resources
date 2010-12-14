@@ -73,6 +73,7 @@ class ResourceModule {
         if (ti == null) {
             throw new IllegalArgumentException("Cannot create resource $url, is not a supported type")
         }
+        r.id = args.id
         r.disposition = args.remove('disposition') ?: ti.disposition
         r.linkOverride = args.remove('linkOverride')
         r.bundle = args.remove('bundle')

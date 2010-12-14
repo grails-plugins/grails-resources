@@ -532,9 +532,64 @@ class ResourceService implements InitializingBean {
             dsl.resolveStrategy = Closure.DELEGATE_FIRST
             dsl()
         }
+
+        // Always do app modules after
+        def appModules = ModuleDeclarationsFactory.getApplicationConfigDeclarations(grailsApplication)
+        if (appModules) {
+            if (log.debugEnabled) {
+                log.debug("evaluating resource modules from application Config")
+            }
+            appModules.delegate = builder
+            appModules.resolveStrategy = Closure.DELEGATE_FIRST
+            appModules()
+        }
         
         if (log.debugEnabled) {
             log.debug("resource modules after evaluation: $modules")
+        }
+        
+        // Now merge in any overrides
+        if (log.debugEnabled) {
+            log.debug "Merging in module overrides ${builder._moduleOverrides}"
+        }
+        builder._moduleOverrides.each { overriddenModule ->
+            if (log.debugEnabled) {
+                log.debug "Merging in module overrides for ${overriddenModule}"
+            }
+            def existingModule = modules.find { it.name == overriddenModule.name }
+            if (existingModule) {
+                if (overriddenModule.defaultBundle) {
+                    if (log.debugEnabled) {
+                        log.debug "Overriding module [${existingModule.name}] defaultBundle with [${overriddenModule.defaultBundle}]"
+                    }
+                    existingModule.defaultBundle = overriddenModule.defaultBundle
+                }
+                if (overriddenModule.dependencies) {
+                    if (log.debugEnabled) {
+                        log.debug "Overriding module [${existingModule.name}] dependencies with [${overriddenModule.dependencies}]"
+                    }
+                    // Replace, not merge
+                    existingModule.dependencies = overriddenModule.dependencies
+                }
+                overriddenModule.resources.each { res ->
+                    def existingRes = existingModule.resources.find { 
+                        it.id ? (it.id == res.id) : (it.url == res.id)
+                    }
+                    if (existingRes) {
+                        if (log.debugEnabled) {
+                            log.debug "Overriding ${overriddenModule.name} resource ${existingRes.id ?: existingRes.url} with "+
+                                "new settings: ${res}"
+                        }
+                        // Merge, not replace
+                        existingRes.putAll(res)
+                    }
+                } 
+            } else {
+                if (log.warnEnabled) {
+                    log.warn "Attempt to override resource module ${overriddenModule.name} but "+
+                        "there is nothing to override, this module does not exist"
+                }
+            }
         }
         
         modules.each { m -> module(m) }
@@ -571,6 +626,7 @@ class ResourceService implements InitializingBean {
             def res = []+mod.resources
             res.sort({ a,b -> a.actualUrl <=> b.actualUrl}).each { resource ->
                 s1 << "   Resource: ${resource.sourceUrl}\n"
+                s1 << "             -- id: ${resource.id}\n"
                 s1 << "             -- original Url: ${resource.originalUrl}\n"
                 s1 << "             -- local file: ${resource.processedFile}\n"
                 s1 << "             -- mime type: ${resource.contentType}\n"

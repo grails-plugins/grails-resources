@@ -49,21 +49,22 @@ class ModuleDeclarationsFactory {
         
         // compact
         moduleDeclarations = moduleDeclarations.findAll { it != null}
-        
-        // get the modules from app config (last so they take precedence)
-        def appModuleDeclarations = grailsApplication.config.grails.resources.modules
-        if (appModuleDeclarations instanceof Closure) {
-            moduleDeclarations["Config"] = appModuleDeclarations
-        } else {
-            if (appModuleDeclarations instanceof ConfigObject) {
-                log.warn("'grails.resources.modules' in config does not define any modules")
-            } else {
-                log.warn("'grails.resources.modules' in config is not a Closure")
-            }
-        }
-
+ 
         moduleDeclarations
     }
     
-    
+    static Closure getApplicationConfigDeclarations(grailsApplication, String environment = Environment.current.name) {
+       // get the modules from app config (last so they take precedence)
+       def appModuleDeclarations = grailsApplication.config.grails.resources.modules
+       if (appModuleDeclarations instanceof Closure) {
+           return appModuleDeclarations
+       } else {
+           if (appModuleDeclarations instanceof ConfigObject) {
+               log.warn("'grails.resources.modules' in config does not define any modules")
+           } else {
+               log.warn("'grails.resources.modules' in config is not a Closure")
+           }
+           return null
+       }        
+    }
 }
