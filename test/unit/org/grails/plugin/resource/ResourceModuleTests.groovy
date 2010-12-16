@@ -35,29 +35,29 @@ class ResourceModuleTests extends GrailsUnitTestCase {
 
     void testDefaultBundling() {
         def resources = [
-            [url:'simile/simile.css'],
-            [url:'simile/simile.js']
+            [url:'simile/simile.css', disposition:'head'],
+            [url:'simile/simile.js', disposition:'head']
         ]
         
         def m = new ResourceModule('testModule', resources, null, svc)
         
         assertEquals 2, m.resources.size()
         m.resources.each { r -> 
-            assertEquals 'testModule', r.bundle
+            assertEquals 'bundle_testModule_head', r.bundle
         }
     }
 
     void testDefaultBundleWithName() {
         def resources = [
-            [url:'simile/simile.css'],
-            [url:'simile/simile.js']
+            [url:'simile/simile.css', disposition:'defer'],
+            [url:'simile/simile.js', disposition:'defer']
         ]
         
         def m = new ResourceModule('testModule', resources, "frank-and-beans", svc)
 
         assertEquals 2, m.resources.size()
         m.resources.each { r -> 
-            assertEquals 'frank-and-beans', r.bundle
+            assertEquals 'frank-and-beans_defer', r.bundle
         }
     }
 }

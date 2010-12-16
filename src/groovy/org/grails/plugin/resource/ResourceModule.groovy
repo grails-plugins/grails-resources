@@ -90,7 +90,7 @@ class ResourceModule {
         if (canAutoBundle) {
             if (defaultBundle == null) {
                 // use module name by default
-                r.bundle = name
+                r.bundle = "bundle_$name"
             } else if (defaultBundle) { 
                 // use supplied value as a default
                 r.bundle = defaultBundle.toString()
