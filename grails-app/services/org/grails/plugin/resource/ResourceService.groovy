@@ -572,16 +572,18 @@ class ResourceService implements InitializingBean {
                     existingModule.dependencies = overriddenModule.dependencies
                 }
                 overriddenModule.resources.each { res ->
-                    def existingRes = existingModule.resources.find { 
+                    def existingResources = existingModule.resources.findAll { 
                         it.id ? (it.id == res.id) : (it.url == res.id)
                     }
-                    if (existingRes) {
+                    if (existingResources) {
                         if (log.debugEnabled) {
-                            log.debug "Overriding ${overriddenModule.name} resource ${existingRes.id ?: existingRes.url} with "+
+                            log.debug "Overriding ${overriddenModule.name} resources with id ${res.id} with "+
                                 "new settings: ${res}"
                         }
-                        // Merge, not replace
-                        existingRes.putAll(res)
+                        // Merge, not replace - for each matching resource
+                        existingResources.each { r ->
+                            r.putAll(res)
+                        }
                     }
                 } 
             } else {

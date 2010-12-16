@@ -18,8 +18,16 @@ class ModuleBuilder {
         _data = data    
     }
         
+    void dependsOn(List dependencies) {
+        _data.dependencies.addAll(dependencies)
+    } 
+
     void dependsOn(String[] dependencies) {
         _data.dependencies.addAll(dependencies.toList())
+    } 
+    
+    void dependsOn(String dependencies) {
+        dependsOn(dependencies.split(',')*.trim())
     } 
     
     void defaultBundle(value) {

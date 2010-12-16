@@ -80,7 +80,8 @@ class ResourceModule {
 
         // We cannot auto bundle this if attrs, wrapper are set, or its a single resource module, or its not
         // a bundle-able type
-        def canAutoBundle = !singleResourceModule && 
+        def canAutoBundle = 
+            (!singleResourceModule || (singleResourceModule && defaultBundle)) && // single resource with defaultbundle specified is OK
             !r.bundle && 
             !args.wrapper && 
             !args.attrs && 
@@ -97,7 +98,7 @@ class ResourceModule {
         }
         
         // Namespace bundle by disposition
-        if (r.bundle) {
+        if (r.bundle) { 
             r.bundle += '_'+r.disposition
         }
         

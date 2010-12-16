@@ -204,7 +204,16 @@ class ResourceTagLib {
             request.resourceDependencyTracker = trk
         }
         
-        def moduleNames = attrs.module ? [attrs.module] : attrs.modules.split(',')*.trim()
+        def moduleNames
+        if (attrs.module) {
+            moduleNames = [attrs.module]
+        } else {
+            if (attrs.modules instanceof List) {
+                moduleNames = attrs.modules
+            } else {
+                moduleNames = attrs.modules.split(',')*.trim()
+            }
+        }
         moduleNames?.each { name ->
             if (log.debugEnabled) {
                 log.debug "Checking if module [${name}] is already declared for this page..."
