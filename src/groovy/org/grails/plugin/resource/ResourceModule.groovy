@@ -77,7 +77,16 @@ class ResourceModule {
         r.disposition = args.remove('disposition') ?: ti.disposition
         r.linkOverride = args.remove('linkOverride')
         r.bundle = args.remove('bundle')
-        if (!singleResourceModule && !r.bundle && (r.sourceUrlExtension in bundleTypes)) {
+
+        // We cannot auto bundle this if attrs, wrapper are set, or its a single resource module, or its not
+        // a bundle-able type
+        def canAutoBundle = !singleResourceModule && 
+            !r.bundle && 
+            !args.wrapper && 
+            !args.attrs && 
+            (r.sourceUrlExtension in bundleTypes)
+            
+        if (canAutoBundle) {
             if (defaultBundle == null) {
                 // use module name by default
                 r.bundle = name
@@ -86,6 +95,12 @@ class ResourceModule {
                 r.bundle = defaultBundle.toString()
             }
         }
+        
+        // Namespace bundle by disposition
+        if (r.bundle) {
+            r.bundle += '_'+r.disposition
+        }
+        
         r.prePostWrapper = args.remove('wrapper')
         def resattrs = ti.attrs?.clone() ?: [:]
         def attrs = args.remove('attrs')

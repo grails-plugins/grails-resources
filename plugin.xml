@@ -1,4 +1,4 @@
-<plugin name='resources' version='1.0-alpha13' grailsVersion='1.2 &gt; *'>
+<plugin name='resources' version='1.0-RC1' grailsVersion='1.2 &gt; *'>
   <author>Marc Palmer</author>
   <authorEmail>marc@grailsrocks.com</authorEmail>
   <title>Resources</title>
@@ -10,6 +10,7 @@
     <resource>Config</resource>
     <resource>DataSource</resource>
     <resource>JQueryResources</resource>
+    <resource>OverrideResources</resource>
     <resource>ResourcesBootStrap</resource>
     <resource>TestOnlyResources</resource>
     <resource>UrlMappings</resource>
