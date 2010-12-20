@@ -43,13 +43,11 @@ class ResourceService implements InitializingBean {
     
     private File workDir
     
-    def modulesByName = [:]
+    def modulesByName = new ConcurrentHashMap()
 
     def processedResourcesByURI = new ConcurrentHashMap()
     def syntheticResourcesByURI = new ConcurrentHashMap()
 
-    def moduleNamesByBundle = [:]
-    
     def modulesInDependencyOrder = []
     
     def resourceMappers
@@ -261,6 +259,7 @@ class ResourceService implements InitializingBean {
         // not already been retrieved
         if (!r) {
             boolean synthetic = false
+            // @todo this needs thread-safety
             r = syntheticResourcesByURI[uri]
             if (r) {
                 synthetic = true
@@ -288,20 +287,24 @@ class ResourceService implements InitializingBean {
                 }
                 r = new ResourceMeta(sourceUrl: uri, workDir: getWorkDir(), module:mod)
             }
-            // Do the processing
-            // @todo we should really sync here on something specific to the resource
-            prepareResource(r, adHocResource)
+            
+            def continueProcessing = true // make this check its not already processing
+            if (continueProcessing) {
+                // Do the processing
+                // @todo we should really sync here on something specific to the resource
+                prepareResource(r, adHocResource)
         
-            // Only if the URI mapped to a real file, do we add the resource
-            // Prevents DoS with zillions of 404s
-            if (r.exists()) {
-                if (postProcessor) {
-                    postProcessor(r)
-                }
-                synchronized (mod.resources) {
-                    // Prevent concurrent requests resulting in multiple additions of same resource
-                    if (!mod.resources.find({ x -> x.sourceUrl == r.sourceUrl }) ) {
-                        mod.resources << r
+                // Only if the URI mapped to a real file, do we add the resource
+                // Prevents DoS with zillions of 404s
+                if (r.exists()) {
+                    if (postProcessor) {
+                        postProcessor(r)
+                    }
+                    synchronized (mod.resources) {
+                        // Prevent concurrent requests resulting in multiple additions of same resource
+                        if (!mod.resources.find({ x -> x.sourceUrl == r.sourceUrl }) ) {
+                            mod.resources << r
+                        }
                     }
                 }
             }
@@ -509,7 +512,6 @@ class ResourceService implements InitializingBean {
         
     void forgetResources() {
         modulesByName.clear()
-        moduleNamesByBundle.clear()
         modulesInDependencyOrder.clear()
         syntheticResourcesByURI.clear()
         processedResourcesByURI.clear()
@@ -594,7 +596,21 @@ class ResourceService implements InitializingBean {
             }
         }
         
+        // Create modules and prepare the resources
         modules.each { m -> module(m) }
+        
+        // Now pre-prepare the bundles
+        prepareSyntheticResources()
+    }
+    
+    /**
+     * Prepare the resources that were generated as a result of loading other modules
+     * e.g. the bundles
+     */
+    void prepareSyntheticResources() {
+        modulesByName[SYNTHETIC_MODULE].resources.each { r ->
+            prepareResource(r)
+        }
     }
     
     static removeQueryParams(uri) {

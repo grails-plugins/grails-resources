@@ -1,6 +1,7 @@
 package org.grails.plugin.resource
 
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Holder for info about a resource declaration at runtime
@@ -9,7 +10,8 @@ class ResourceModule {
     String name
     String cachedMarkup // Saves calling the tags every time
     
-    List<ResourceMeta> resources = []
+    List<ResourceMeta> resources = new CopyOnWriteArrayList<ResourceMeta>()
+
     List<String> dependsOn = []
     def defaultBundle
     
