@@ -608,7 +608,7 @@ class ResourceService implements InitializingBean {
      * e.g. the bundles
      */
     void prepareSyntheticResources() {
-        modulesByName[SYNTHETIC_MODULE].resources.each { r ->
+        modulesByName[SYNTHETIC_MODULE]?.resources.each { r ->
             prepareResource(r)
         }
     }
@@ -736,8 +736,12 @@ class ResourceService implements InitializingBean {
     }
     
     def reload() {
-        log.warn("Performing a full reload")
-        resourceMappers = ResourceMappersFactory.createResourceMappers(grailsApplication, config.mappers)
-        loadResources()
+        if (!getConfigParamOrDefault('debug', false)) {
+            log.info("Performing a full reload")
+            resourceMappers = ResourceMappersFactory.createResourceMappers(grailsApplication, config.mappers)
+            loadResources()
+        } else {
+            log.info("Skipping resource reload, grails.resources.debug is set to true")
+        }
     }
 }
