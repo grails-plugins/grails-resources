@@ -48,6 +48,8 @@ class ResourceService implements InitializingBean {
     def processedResourcesByURI = new ConcurrentHashMap()
     def syntheticResourcesByURI = new ConcurrentHashMap()
 
+    def allResources = Collections.synchronizedCollection([])
+
     def modulesInDependencyOrder = []
     
     def resourceMappers
@@ -368,6 +370,16 @@ class ResourceService implements InitializingBean {
         }
         
         def uri = r.sourceUrl
+
+        synchronized (allResources) {
+            if (allResources.find { existingRes -> existingRes.sourceUrl == uri }) {
+                // We can't allow this as the first one processed may be removed/moved and hence trigger FNFE
+                throw new IllegalArgumentException(
+                    "The same resource URI is declared twice, this is not permitted. Offending URI is [${uri}] from module ${r.module.name}"
+                )
+            }
+        }
+
         if (!uri.contains('://')) {
             r.beginPrepare(this)
             
@@ -446,6 +458,9 @@ class ResourceService implements InitializingBean {
         if (adHocResource || r.delegating) {
             processedResourcesByURI[r.sourceUrl] = r.delegating ? r.delegate : r
         }
+        
+        // We need to track all we've seen, to prevent dupes
+        allResources << r
     }
         
     void storeModule(ResourceModule m) {
