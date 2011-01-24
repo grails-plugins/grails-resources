@@ -515,7 +515,6 @@ class ResourceService implements InitializingBean {
         modulesInDependencyOrder.clear()
         syntheticResourcesByURI.clear()
         processedResourcesByURI.clear()
-        allResources.clear()
     }
     
     private loadResources() {
