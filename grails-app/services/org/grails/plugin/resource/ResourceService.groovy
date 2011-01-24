@@ -15,13 +15,13 @@ import org.grails.plugin.resource.mapper.ResourceMappersFactory
 import org.grails.plugin.resource.module.*
 import java.lang.reflect.Modifier
 
+import org.codehaus.groovy.grails.plugins.PluginManagerHolder
+
 /**
  * @todo Move all this code out into a standard Groovy bean class and declare the bean in plugin setup
  * so that if this is pulled into core, other plugins are not written to depend on this service
  */
 class ResourceService implements InitializingBean {
-
-    def pluginManager
     
     static transactional = false
 
@@ -83,6 +83,10 @@ class ResourceService implements InitializingBean {
         if (!servletContext) {
             servletContext = grailsApplication.mainContext.servletContext
         }
+    }
+    
+    protected getPluginManager() {
+        PluginManagerHolder.pluginManager
     }
     
     File getWorkDir() {
