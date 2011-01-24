@@ -16,15 +16,6 @@ class AggregatedResourceMeta extends ResourceMeta {
     static DISPOSITION_PRIORITIES = [ 'head', 'defer']
     
     void add(ResourceMeta r, Closure postProcessor = null) {
-        if (resources.find { existingRes -> 
-                println "Bundle check: ${existingRes.sourceUrl} >>> ${r.sourceUrl}"
-                existingRes.sourceUrl == r.sourceUrl }) {
-            // We can't allow this as the first one processed may be removed/moved and hence trigger FNFE
-            throw new IllegalArgumentException(
-                "The same resource URI is declared twice in the same bundle, this is not permitted. Offending URI is [${r.sourceUrl}] from module ${r.module.name}"
-            )
-        }
-
         resources << r
         
         // Update our aggregated sourceUrl
