@@ -743,14 +743,8 @@ class ResourceService implements InitializingBean {
     }
     
     def reload() {
-        def weAreGoingToRun = !getConfigParamOrDefault('debug', false) 
-
-        if (weAreGoingToRun) {
-            log.info("Performing a full reload")
-            resourceMappers = ResourceMappersFactory.createResourceMappers(grailsApplication, config.mappers)
-            loadResources()
-        } else {
-            log.info("Skipping resource reload, grails.resources.debug is set to true or running in TEST environment")
-        }
+        log.info("Performing a full reload")
+        resourceMappers = ResourceMappersFactory.createResourceMappers(grailsApplication, config.mappers)
+        loadResources()
     }
 }
