@@ -15,13 +15,13 @@ import org.grails.plugin.resource.mapper.ResourceMappersFactory
 import org.grails.plugin.resource.module.*
 import java.lang.reflect.Modifier
 
+import org.codehaus.groovy.grails.plugins.PluginManagerHolder
+
 /**
  * @todo Move all this code out into a standard Groovy bean class and declare the bean in plugin setup
  * so that if this is pulled into core, other plugins are not written to depend on this service
  */
 class ResourceService implements InitializingBean {
-
-    def pluginManager
     
     static transactional = false
 
@@ -91,6 +91,13 @@ class ResourceService implements InitializingBean {
         }
         assert this.@workDir
         return this.@workDir
+    }
+    
+    def getPluginManager() {
+        // The plugin manager bean configured in integration testing is not the real thing and causes errors.
+        // Using the pluginManager from the holder means that we always get a legit instance.
+        // http://jira.codehaus.org/browse/GRAILSPLUGINS-2712
+        PluginManagerHolder.pluginManager
     }
     
     def extractURI(request, adhoc) {
@@ -736,9 +743,7 @@ class ResourceService implements InitializingBean {
     }
     
     def reload() {
-        // @todo remove this environment check when servletContext in integ test issues in Grails are fixed
-        def weAreGoingToRun = (Environment.current != Environment.TEST) &&
-            !getConfigParamOrDefault('debug', false) 
+        def weAreGoingToRun = !getConfigParamOrDefault('debug', false) 
 
         if (weAreGoingToRun) {
             log.info("Performing a full reload")
