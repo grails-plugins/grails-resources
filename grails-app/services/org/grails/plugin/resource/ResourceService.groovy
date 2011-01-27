@@ -285,7 +285,7 @@ class ResourceService implements InitializingBean {
         def res = processedResourcesByURI.getOrCreateAdHocResource(uri) { -> 
 
             if (!adHocResource) {
-                throw new IllegalArgumentException("We can't create resources on the fly unless they are 'ad-hoc'!")
+                throw new IllegalArgumentException("We can't create resources on the fly unless they are 'ad-hoc'! Resource URI: $uri")
             }
             
             // If we don't already have it, its either not been declared in the DSL or its Synthetic and its

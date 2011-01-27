@@ -24,7 +24,7 @@ class CSSRewriterResourceMapper {
                 }
 
                 // This triggers the processing chain if necessary for any resource referenced by the CSS
-                def linkedToResource = resourceService.getResourceMetaForURI(uri, false) { res ->
+                def linkedToResource = resourceService.getResourceMetaForURI(uri, true) { res ->
                     // If there's no decl for the resource, create it with image disposition
                     // otherwise we pop out as a favicon...
                     res.disposition = 'image'
