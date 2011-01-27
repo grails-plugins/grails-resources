@@ -8,8 +8,8 @@ modules = {
     'jquery-ui' {
         dependsOn 'jquery'
         
-        resource id:'jquery-ui-js', url:[dir:'js/jquery-ui', file:'jquery-ui-1.8.2.custom.min.js?someargument=value'], nominify:true, bundle:'jq'
-        resource id:'jquery-ui-css', url:[dir:'js/jquery-ui', file:'jquery-ui-1.8.2.custom.css'], nominify:true, 
+        resource id:'jquery-ui-js', url:[dir:'js/jquery-ui', file:'jquery-ui-1.8.5.custom.min.js?someargument=value'], nominify:true, bundle:'jq'
+        resource id:'jquery-ui-css', url:[dir:'js/jquery-ui/themes/custom-theme', file:'jquery-ui-1.8.5.custom.css'], nominify:true, 
             attrs:[media:'screen, projection'], bundle:'jq'
     }
 }

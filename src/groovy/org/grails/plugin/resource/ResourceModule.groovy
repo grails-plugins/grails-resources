@@ -63,6 +63,17 @@ class ResourceModule {
         ['css', 'js']
     }
     
+    ResourceMeta addNewSyntheticResource(Class<ResourceMeta> type, String uri, resSvc) {
+        def agg = type.newInstance(module:this)
+        agg.sourceUrl = uri // Hack
+        agg.actualUrl = uri
+        agg.workDir = resSvc.workDir
+        
+        resources << agg
+        
+        agg
+    }
+    
     ResourceMeta newResourceFromArgs(Map args, svc, boolean singleResourceModule) {
         def url = args.remove('url')
         if (url) {

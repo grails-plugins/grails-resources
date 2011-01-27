@@ -10,6 +10,8 @@ class ResourcesBootStrap {
     
     def init = { servletContext ->
         resourceService.reload()
+        
+        resourceService.dumpResources()
     }
     
     def destroy = {

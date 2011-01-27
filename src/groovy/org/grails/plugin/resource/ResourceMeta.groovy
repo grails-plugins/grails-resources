@@ -127,7 +127,7 @@ class ResourceMeta {
         }
     }
     
-    String  getActualUrl() {
+    String getActualUrl() {
         if (!delegate) {
             return this.@actualUrl 
         } else {
@@ -220,5 +220,9 @@ class ResourceMeta {
     
     void wasProcessedByMapper(ResourceMapper mapper) {
         attributes["+${mapper.name}".toString()] = true
+    }
+    
+    String toString() {
+        "ResourceMeta for URI ${sourceUrl} served by ${actualUrl} (delegate: ${delegating ? delegate : 'none'})"
     }
 }

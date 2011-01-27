@@ -17,6 +17,8 @@ import java.lang.reflect.Modifier
 
 import org.codehaus.groovy.grails.plugins.PluginManagerHolder
 
+import org.grails.plugin.resource.util.ResourceMetaStore
+
 /**
  * @todo Move all this code out into a standard Groovy bean class and declare the bean in plugin setup
  * so that if this is pulled into core, other plugins are not written to depend on this service
@@ -45,7 +47,7 @@ class ResourceService implements InitializingBean {
     
     def modulesByName = new ConcurrentHashMap()
 
-    def processedResourcesByURI = new ConcurrentHashMap()
+    def processedResourcesByURI = new ResourceMetaStore()
     def syntheticResourcesByURI = new ConcurrentHashMap()
 
     def modulesInDependencyOrder = []
@@ -239,20 +241,38 @@ class ResourceService implements InitializingBean {
         processedResourcesByURI[uri]
     }
     
-    ResourceMeta newSyntheticResource(String uri, type) {
+    ResourceMeta newSyntheticResource(String uri, Class<ResourceMeta> type) {
         if (log.debugEnabled) {
             log.debug "Creating synthetic resource of type ${type} for URI [${uri}]"
         }
-        def agg = type.newInstance()
-        agg.sourceUrl = uri // Hack
-        agg.workDir = getWorkDir()
-        agg.actualUrl = uri
+        def synthModule = getOrCreateSyntheticOrImplicitModule(true)
+        def agg = synthModule.addNewSyntheticResource(type, uri, this)
         agg.processedFile = makeFileForURI(uri)
         
-        // Need to store this somewhere so GET requests can look in bundle as it is a synthetic resource
+        println "synthetic module resources: ${synthModule.resources}"
+        
+        // Need to store this somewhere so GET requests can look up bundle as it is a synthetic resource
         syntheticResourcesByURI[uri] = agg
         
         return agg
+    }
+    
+    ResourceModule getOrCreateSyntheticOrImplicitModule(boolean synthetic) {
+        def mod
+        def moduleName = synthetic ? SYNTHETIC_MODULE : IMPLICIT_MODULE
+        // We often get multiple simultaneous requests at startup and this causes
+        // multiple creates and loss of concurrently processed resources
+        synchronized (moduleName) {
+            mod = getModule(moduleName)
+            if (!mod) {
+                if (log.debugEnabled) {
+                    log.debug "Creating module: $moduleName"
+                }
+                defineModule(moduleName)
+                mod = getModule(moduleName)
+            }
+        }
+        return mod
     }
     
     /**
@@ -260,63 +280,52 @@ class ResourceService implements InitializingBean {
      * @returns The resource instance - which may have a null processedFile if the resource cannot be found
      */
     ResourceMeta getResourceMetaForURI(uri, adHocResource = true, Closure postProcessor = null) {
-        def r = findResourceForURI(uri)
 
-        // If we don't already have it, its either not been declared in the DSL or its Synthetic and its
-        // not already been retrieved
-        if (!r) {
+        // Declared resources will already exist, but ad-hoc or synthetic may need to be created
+        def res = processedResourcesByURI.getOrCreateAdHocResource(uri) { -> 
+
+            if (!adHocResource) {
+                throw new IllegalArgumentException("We can't create resources on the fly unless they are 'ad-hoc'!")
+            }
+            
+            // If we don't already have it, its either not been declared in the DSL or its Synthetic and its
+            // not already been retrieved
             boolean synthetic = false
-            // @todo this needs thread-safety
-            r = syntheticResourcesByURI[uri]
+            def r = syntheticResourcesByURI[uri]
             if (r) {
                 synthetic = true
             }
 
-            def mod
-            def moduleName = synthetic ? SYNTHETIC_MODULE : IMPLICIT_MODULE
-            // We often get multiple simultaneous requests at startup and this causes
-            // multiple creates and loss of concurrently processed resources
-            synchronized (moduleName) {
-                mod = getModule(moduleName)
-                if (!mod) {
-                    if (log.debugEnabled) {
-                        log.debug "Creating module: $moduleName"
-                    }
-                    defineModule(moduleName)
-                    mod = getModule(moduleName)
-                }
-            }
-        
+            def mod = getOrCreateSyntheticOrImplicitModule(synthetic)
+    
             if (!r) {
-                // Need to create ad-hoc resource
+                // Need to create ad-hoc resource, its not synthetic
                 if (log.debugEnabled) {
                     log.debug "Creating new implicit resource for ${uri}"
                 }
                 r = new ResourceMeta(sourceUrl: uri, workDir: getWorkDir(), module:mod)
             }
-            
-            def continueProcessing = true // make this check its not already processing
-            if (continueProcessing) {
-                // Do the processing
-                // @todo we should really sync here on something specific to the resource
-                prepareResource(r, adHocResource)
         
-                // Only if the URI mapped to a real file, do we add the resource
-                // Prevents DoS with zillions of 404s
-                if (r.exists()) {
-                    if (postProcessor) {
-                        postProcessor(r)
-                    }
-                    synchronized (mod.resources) {
-                        // Prevent concurrent requests resulting in multiple additions of same resource
-                        if (!mod.resources.find({ x -> x.sourceUrl == r.sourceUrl }) ) {
-                            mod.resources << r
-                        }
+            r = prepareResource(r, adHocResource)
+
+            // Only if the URI mapped to a real file, do we add the resource
+            // Prevents DoS with zillions of 404s
+            if (r.exists()) {
+                if (postProcessor) {
+                    postProcessor(r)
+                }
+                synchronized (mod.resources) {
+                    // Prevent concurrent requests resulting in multiple additions of same resource
+                    if (!mod.resources.find({ x -> x.sourceUrl == r.sourceUrl }) ) {
+                        mod.resources << r
                     }
                 }
             }
-        }
-        return r
+            
+            return r
+        } // end of closure
+
+        return res
     }
     
     /**
@@ -361,9 +370,10 @@ class ResourceService implements InitializingBean {
     }
     
     /**
-     * Execute the processing chain for the resource
+     * Execute the processing chain for the resource, returning list of URIs to add to uri -> resource mappings
+     * for this resource
      */
-    void prepareResource(ResourceMeta r, boolean adHocResource) {
+    ResourceMeta prepareResource(ResourceMeta r, boolean adHocResource) {
         if (log.debugEnabled) {
             log.debug "Preparing resource ${r.sourceUrl} (${r.dump()})"
         }
@@ -374,6 +384,12 @@ class ResourceService implements InitializingBean {
             return
         }
         
+        if (!adHocResource && findResourceForURI(r.sourceUrl)) {
+            throw new IllegalArgumentException(
+                "Skipping prepare resource for [${r.sourceUrl}] - You have multiple modules declaring this same resource."
+            )
+        }
+
         def uri = r.sourceUrl
         if (!uri.contains('://')) {
             r.beginPrepare(this)
@@ -439,20 +455,7 @@ class ResourceService implements InitializingBean {
             log.warn "Skipping mappers for ${r.actualUrl} because its an absolute URL."
         }
         
-        // Add the actual linking URL to the cache so resourceLink resolves
-        // ONLY if its not delegating, or we get a bunch of crap in here / hide the delegated resource
-        if (!r.delegating) {
-            if (log.debugEnabled) {
-                log.debug "Updating URI to resource cache for ${r.actualUrl} >> ${r.processedFile}"
-            }
-            processedResourcesByURI[r.actualUrl] = r
-        }
-        
-        // Add the original source url to the cache as well, if it was an ad-hoc resource
-        // As the original URL is used, we need this to resolve to the actualUrl for redirect
-        if (adHocResource || r.delegating) {
-            processedResourcesByURI[r.sourceUrl] = r.delegating ? r.delegate : r
-        }
+        return r
     }
         
     void storeModule(ResourceModule m) {
@@ -461,7 +464,9 @@ class ResourceService implements InitializingBean {
         }
         
         m.resources.each { r ->
-            prepareResource(r, false)
+            processedResourcesByURI.addDeclaredResource { ->
+                prepareResource(r, false)
+            }
         }
         modulesByName[m.name] = m
     }
@@ -518,13 +523,19 @@ class ResourceService implements InitializingBean {
     }
         
     void forgetResources() {
+        if (log.infoEnabled) {
+            log.info "Forgetting all known resources..."
+        }
         modulesByName.clear()
         modulesInDependencyOrder.clear()
         syntheticResourcesByURI.clear()
-        processedResourcesByURI.clear()
+        processedResourcesByURI = new ResourceMetaStore()
     }
     
     private loadResources() {
+        if (log.infoEnabled) {
+            log.info "Loading resource declarations..."
+        }
         forgetResources()
         
         def declarations = ModuleDeclarationsFactory.getModuleDeclarations(grailsApplication)
@@ -615,8 +626,15 @@ class ResourceService implements InitializingBean {
      * e.g. the bundles
      */
     void prepareSyntheticResources() {
-        modulesByName[SYNTHETIC_MODULE]?.resources.each { r ->
-            prepareResource(r)
+        def resources = modulesByName[SYNTHETIC_MODULE]?.resources
+
+        if (log.infoEnabled) {
+            log.info "Preparing declared synthetic resources: ${resources.sourceUrl}"
+        }
+        resources.each { r ->            
+            processedResourcesByURI.addDeclaredResource { ->
+                prepareResource(r, false)
+            }
         }
     }
     
@@ -669,12 +687,12 @@ class ResourceService implements InitializingBean {
         def s2 = new StringBuilder()
         processedResourcesByURI.keySet().sort().each { uri ->
             def res = processedResourcesByURI[uri]
-            s2 << "Request URI: ${uri} => ${res.processedFile}\n"
+            s2 << "Resource URI: ${uri} => ${res.processedFile}\n"
         }
         def s3 = new StringBuilder()
         syntheticResourcesByURI.keySet().sort().each { uri ->
             def res = syntheticResourcesByURI[uri]
-            s3 << "Request URI: ${uri} => ${res.processedFile}\n"
+            s3 << "Resource URI: ${uri} => ${res.processedFile}\n"
         }
         updateDependencyOrder()
         def s4 = "Dependency load order: ${modulesInDependencyOrder}\n"

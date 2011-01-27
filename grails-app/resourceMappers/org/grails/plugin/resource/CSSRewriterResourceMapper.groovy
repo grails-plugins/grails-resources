@@ -23,16 +23,16 @@ class CSSRewriterResourceMapper {
                     log.debug "Calculated URI of CSS resource [$originalUrl] as [$uri]"
                 }
 
-                try {
-                    // This triggers the processing chain if necessary for any resource referenced by the CSS
-                    def linkedToResource = resourceService.getResourceMetaForURI(uri, false) { res ->
-                        // If there's no decl for the resource, create it with image disposition
-                        // otherwise we pop out as a favicon...
-                        res.disposition = 'image'
-                    }
+                // This triggers the processing chain if necessary for any resource referenced by the CSS
+                def linkedToResource = resourceService.getResourceMetaForURI(uri, false) { res ->
+                    // If there's no decl for the resource, create it with image disposition
+                    // otherwise we pop out as a favicon...
+                    res.disposition = 'image'
+                }
 
+                if (linkedToResource) {
                     if (log.debugEnabled) {
-                        log.debug "Calculating URL of ${linkedToResource.dump()} relative to ${resource.dump()}"
+                        log.debug "Calculating URL of ${linkedToResource?.dump()} relative to ${resource.dump()}"
                     }
 
                     def fixedUrl = linkedToResource.relativeTo(resource)
@@ -43,13 +43,11 @@ class CSSRewriterResourceMapper {
                     }
 
                     return replacement
-                } catch (FileNotFoundException e) {
-                    // @todo We don't want to do this really... or do we? New exception type better probably
+                } else {
                     log.warn "Cannot resolve CSS resource, leaving link as is: ${originalUrl}"
                 }
             }
             return "${prefix}${originalUrl}${suffix}"
-
         }
     }
 }
