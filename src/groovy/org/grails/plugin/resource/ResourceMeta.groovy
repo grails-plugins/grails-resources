@@ -32,7 +32,7 @@ class ResourceMeta {
     /**
      * The original Url provided in the mapping declaration, verbatim
      */
-    final String originalUrl
+    String originalUrl
 
     /**
      * The app-relative url of the LOCAL source of this resource, minus query params
