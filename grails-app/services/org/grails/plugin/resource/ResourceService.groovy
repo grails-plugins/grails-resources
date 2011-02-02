@@ -136,7 +136,9 @@ class ResourceService implements InitializingBean {
         }
         
         if (Environment.current == Environment.DEVELOPMENT) {
-            response.setHeader('X-Grails-Resources-Original-Src', res.sourceUrl)
+            if (res) {
+                response.setHeader('X-Grails-Resources-Original-Src', res?.sourceUrl)
+            }
         }
         if (res?.exists()) {
             redirectToActualUrl(res, request, response)
@@ -178,7 +180,9 @@ class ResourceService implements InitializingBean {
         }
         
         if (Environment.current == Environment.DEVELOPMENT) {
-            response.setHeader('X-Grails-Resources-Original-Src', inf?.sourceUrl)
+            if (inf) {
+                response.setHeader('X-Grails-Resources-Original-Src', inf.sourceUrl)
+            }
         }
 
         // See if its an ad-hoc resource that has come here via a relative link
@@ -285,7 +289,8 @@ class ResourceService implements InitializingBean {
         def res = processedResourcesByURI.getOrCreateAdHocResource(uri) { -> 
 
             if (!adHocResource) {
-                throw new IllegalArgumentException("We can't create resources on the fly unless they are 'ad-hoc'! Resource URI: $uri")
+                throw new IllegalArgumentException(
+                    "We can't create resources on the fly unless they are 'ad-hoc'! Resource URI: $uri")
             }
             
             // If we don't already have it, its either not been declared in the DSL or its Synthetic and its
