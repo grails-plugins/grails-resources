@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite errors="0" failures="0" hostname="marcmacbook.local" name="org.grails.plugin.resource.URLUtilsTests" tests="1" time="0.045" timestamp="2011-03-04T11:42:02">
+  <properties />
+  <testcase classname="org.grails.plugin.resource.URLUtilsTests" name="testRelativeCSSUris" time="0.042" />
+  <system-out><![CDATA[--Output from testRelativeCSSUris--
+]]></system-out>
+  <system-err><![CDATA[--Output from testRelativeCSSUris--
+]]></system-err>
+</testsuite>

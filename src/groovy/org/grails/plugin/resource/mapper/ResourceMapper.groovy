@@ -7,6 +7,12 @@ import org.springframework.util.AntPathMatcher
 import org.slf4j.LoggerFactory
 import grails.util.GrailsNameUtils
 
+/**
+ * The artefact facade used by the service to communicate with resource mapper artefacts.
+ *
+ * @author Marc Palmer (marc@grailsrocks.com)
+ * @author Luke Daley (ld@ldaley.com)
+ */
 class ResourceMapper {
 
     static public final DEFAULT_PRIORITY = 0

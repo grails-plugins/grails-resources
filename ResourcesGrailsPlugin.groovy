@@ -3,6 +3,10 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean
 import org.springframework.core.io.FileSystemResource
 
+/**
+ * @author Marc Palmer (marc@grailsrocks.com)
+ * @author Luke Daley (ld@ldaley.com)
+ */
 class ResourcesGrailsPlugin {
 
     def version = "1.0-RC2-SNAPSHOT"

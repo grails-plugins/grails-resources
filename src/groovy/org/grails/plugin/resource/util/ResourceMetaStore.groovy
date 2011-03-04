@@ -11,6 +11,8 @@ import org.grails.plugin.resource.ResourceMeta
  * A special URI -> ResourceMeta store that is non-reentrant and will create
  * entries on demand, causing other threads to wait until the resource has been created
  * if creation has already started
+ *
+ * @author Marc Palmer (marc@grailsrocks.com)
  */
 class ResourceMetaStore {
     def log = LogFactory.getLog(this.class)

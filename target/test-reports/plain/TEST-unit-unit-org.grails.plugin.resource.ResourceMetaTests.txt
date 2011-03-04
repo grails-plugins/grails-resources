@@ -1,0 +1,16 @@
+Testsuite: org.grails.plugin.resource.ResourceMetaTests
+Tests run: 3, Failures: 0, Errors: 0, Time elapsed: 0.043 sec
+------------- Standard Output ---------------
+--Output from testMovingFileUpdatesActualUrlCorrectly--
+--Output from testRenamingFileUpdatesActualUrlCorrectly--
+--Output from testRelativePathCalculations--
+------------- ---------------- ---------------
+------------- Standard Error -----------------
+--Output from testMovingFileUpdatesActualUrlCorrectly--
+--Output from testRenamingFileUpdatesActualUrlCorrectly--
+--Output from testRelativePathCalculations--
+------------- ---------------- ---------------
+
+Testcase: testMovingFileUpdatesActualUrlCorrectly took 0.005 sec
+Testcase: testRenamingFileUpdatesActualUrlCorrectly took 0.007 sec
+Testcase: testRelativePathCalculations took 0.028 sec

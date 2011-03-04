@@ -4,6 +4,14 @@ import grails.util.Environment
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.apache.commons.io.FilenameUtils
 
+/**
+ * This taglib handles creation of all the links to resources, including the smart de-duping of them.
+ *
+ * This is also a general-purpose linking tag library for writing <head> links to resources. See resourceLink.
+ *
+ * @author Marc Palmer (marc@grailsrocks.com)
+ * @author Luke Daley (ld@ldaley.com)
+ */
 class ResourceTagLib {
     static namespace = "r"
     

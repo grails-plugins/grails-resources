@@ -20,8 +20,13 @@ import org.codehaus.groovy.grails.plugins.PluginManagerHolder
 import org.grails.plugin.resource.util.ResourceMetaStore
 
 /**
- * @todo Move all this code out into a standard Groovy bean class and declare the bean in plugin setup
- * so that if this is pulled into core, other plugins are not written to depend on this service
+ * This is where it all happens.
+ *
+ * This class loads resource declarations (see reload()) and receives requests from the servlet filter to
+ * serve resources. It will process the resource if necessary the first time, and then return the file.
+ *
+ * @author Marc Palmer (marc@grailsrocks.com)
+ * @author Luke Daley (ld@ldaley.com)
  */
 class ResourceService implements InitializingBean {
     

@@ -4,7 +4,10 @@ import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
- * Holder for info about a resource declaration at runtime
+ * Holder for info about a module declaration at runtime
+ *
+ * @author Marc Palmer (marc@grailsrocks.com)
+ * @author Luke Daley (ld@ldaley.com)
  */
 class ResourceModule {
     String name

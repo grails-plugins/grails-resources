@@ -1,0 +1,3 @@
+--Output from testCSSRewritingWithMovingFiles--
+--Output from testCSSRewritingWithRenamedFilesBySameUrl--
+--Output from testCSSRewritingWithInvalidURI--

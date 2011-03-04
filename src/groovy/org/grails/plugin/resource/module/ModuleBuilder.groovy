@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory
  * 
  * Is designed to be reused for multiple invocations. The caller is
  * responsible for clearing the given resources and dependencies between invocations.
+ *
+ * @author Marc Palmer (marc@grailsrocks.com)
+ * @author Luke Daley (ld@ldaley.com)
  */
 class ModuleBuilder {
     

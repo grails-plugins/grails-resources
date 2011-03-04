@@ -2,6 +2,12 @@ package org.grails.plugin.resource
 
 import org.apache.commons.logging.LogFactory
 
+/**
+ * This class is used to parse out and replace CSS links
+ * 
+ * @author Marc Palmer (marc@grailsrocks.com)
+ * @author Luke Daley (ld@ldaley.com)
+ */
 class CSSLinkProcessor {
     
     def log = LogFactory.getLog(CSSLinkProcessor)

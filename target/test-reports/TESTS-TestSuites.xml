@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites>
+  <testsuite errors="0" failures="0" hostname="marcmacbook.local" id="0" name="InitialisationSmokeTests" package="" tests="1" time="0.616" timestamp="2011-03-04T11:42:23">
+      <properties />
+
+      <testcase classname="InitialisationSmokeTests" name="testInitialisedOk" time="0.616" />
+
+      <system-out><![CDATA[--Output from testInitialisedOk--
+]]></system-out>
+
+      <system-err><![CDATA[--Output from testInitialisedOk--
+]]></system-err>
+
+  </testsuite>
+  <testsuite errors="0" failures="0" hostname="marcmacbook.local" id="1" name="CSSPreprocessorResourceMapperTests" package="org.grails.plugin.resource" tests="2" time="0.928" timestamp="2011-03-04T11:42:00">
+      <properties />
+
+      <testcase classname="org.grails.plugin.resource.CSSPreprocessorResourceMapperTests" name="testCSSPreprocessing" time="0.804" />
+
+      <testcase classname="org.grails.plugin.resource.CSSPreprocessorResourceMapperTests" name="testCSSPreprocessingWithInvalidURI" time="0.087" />
+
+      <system-out><![CDATA[--Output from testCSSPreprocessing--
+--Output from testCSSPreprocessingWithInvalidURI--
+WARN (resource.CSSPreprocessorResourceMapper): Cannot resolve CSS resource, leaving link as is: #default#VML
+WARN (resource.CSSPreprocessorResourceMapper): Cannot resolve CSS resource, leaving link as is: ####BULL
+]]></system-out>
+
+      <system-err><![CDATA[--Output from testCSSPreprocessing--
+--Output from testCSSPreprocessingWithInvalidURI--
+]]></system-err>
+
+  </testsuite>
+  <testsuite errors="0" failures="0" hostname="marcmacbook.local" id="2" name="CSSRewriterResourceMapperTests" package="org.grails.plugin.resource" tests="3" time="0.193" timestamp="2011-03-04T11:42:01">
+      <properties />
+
+      <testcase classname="org.grails.plugin.resource.CSSRewriterResourceMapperTests" name="testCSSRewritingWithMovingFiles" time="0.049" />
+
+      <testcase classname="org.grails.plugin.resource.CSSRewriterResourceMapperTests" name="testCSSRewritingWithRenamedFilesBySameUrl" time="0.05" />
+
+      <testcase classname="org.grails.plugin.resource.CSSRewriterResourceMapperTests" name="testCSSRewritingWithInvalidURI" time="0.09" />
+
+      <system-out><![CDATA[--Output from testCSSRewritingWithMovingFiles--
+--Output from testCSSRewritingWithRenamedFilesBySameUrl--
+--Output from testCSSRewritingWithInvalidURI--
+]]></system-out>
+
+      <system-err><![CDATA[--Output from testCSSRewritingWithMovingFiles--
+--Output from testCSSRewritingWithRenamedFilesBySameUrl--
+--Output from testCSSRewritingWithInvalidURI--
+]]></system-err>
+
+  </testsuite>
+  <testsuite errors="0" failures="0" hostname="marcmacbook.local" id="3" name="ResourceMetaTests" package="org.grails.plugin.resource" tests="3" time="0.043" timestamp="2011-03-04T11:42:01">
+      <properties />
+
+      <testcase classname="org.grails.plugin.resource.ResourceMetaTests" name="testMovingFileUpdatesActualUrlCorrectly" time="0.0050" />
+
+      <testcase classname="org.grails.plugin.resource.ResourceMetaTests" name="testRenamingFileUpdatesActualUrlCorrectly" time="0.0070" />
+
+      <testcase classname="org.grails.plugin.resource.ResourceMetaTests" name="testRelativePathCalculations" time="0.028" />
+
+      <system-out><![CDATA[--Output from testMovingFileUpdatesActualUrlCorrectly--
+--Output from testRenamingFileUpdatesActualUrlCorrectly--
+--Output from testRelativePathCalculations--
+]]></system-out>
+
+      <system-err><![CDATA[--Output from testMovingFileUpdatesActualUrlCorrectly--
+--Output from testRenamingFileUpdatesActualUrlCorrectly--
+--Output from testRelativePathCalculations--
+]]></system-err>
+
+  </testsuite>
+  <testsuite errors="0" failures="0" hostname="marcmacbook.local" id="4" name="ResourceModuleTests" package="org.grails.plugin.resource" tests="3" time="0.158" timestamp="2011-03-04T11:42:01">
+      <properties />
+
+      <testcase classname="org.grails.plugin.resource.ResourceModuleTests" name="testDefaultBundleFalse" time="0.134" />
+
+      <testcase classname="org.grails.plugin.resource.ResourceModuleTests" name="testDefaultBundling" time="0.011" />
+
+      <testcase classname="org.grails.plugin.resource.ResourceModuleTests" name="testDefaultBundleWithName" time="0.0090" />
+
+      <system-out><![CDATA[--Output from testDefaultBundleFalse--
+--Output from testDefaultBundling--
+--Output from testDefaultBundleWithName--
+]]></system-out>
+
+      <system-err><![CDATA[--Output from testDefaultBundleFalse--
+--Output from testDefaultBundling--
+--Output from testDefaultBundleWithName--
+]]></system-err>
+
+  </testsuite>
+  <testsuite errors="0" failures="0" hostname="marcmacbook.local" id="5" name="ResourceModulesBuilderTests" package="org.grails.plugin.resource" tests="3" time="0.153" timestamp="2011-03-04T11:42:01">
+      <properties />
+
+      <testcase classname="org.grails.plugin.resource.ResourceModulesBuilderTests" name="testDefaultBundleFalse" time="0.068" />
+
+      <testcase classname="org.grails.plugin.resource.ResourceModulesBuilderTests" name="testDefaultBundling" time="0.058" />
+
+      <testcase classname="org.grails.plugin.resource.ResourceModulesBuilderTests" name="testDefaultBundleWithName" time="0.023" />
+
+      <system-out><![CDATA[--Output from testDefaultBundleFalse--
+--Output from testDefaultBundling--
+--Output from testDefaultBundleWithName--
+]]></system-out>
+
+      <system-err><![CDATA[--Output from testDefaultBundleFalse--
+--Output from testDefaultBundling--
+--Output from testDefaultBundleWithName--
+]]></system-err>
+
+  </testsuite>
+  <testsuite errors="0" failures="0" hostname="marcmacbook.local" id="6" name="ResourceServiceTests" package="org.grails.plugin.resource" tests="1" time="0.027" timestamp="2011-03-04T11:42:01">
+      <properties />
+
+      <testcase classname="org.grails.plugin.resource.ResourceServiceTests" name="testDeclareModule" time="0.025" />
+
+      <system-out><![CDATA[--Output from testDeclareModule--
+]]></system-out>
+
+      <system-err><![CDATA[--Output from testDeclareModule--
+]]></system-err>
+
+  </testsuite>
+  <testsuite errors="0" failures="0" hostname="marcmacbook.local" id="7" name="ResourceTagLibTests" package="org.grails.plugin.resource" tests="1" time="0.702" timestamp="2011-03-04T11:42:01">
+      <properties />
+
+      <testcase classname="org.grails.plugin.resource.ResourceTagLibTests" name="testSomething" time="0.699" />
+
+      <system-out><![CDATA[--Output from testSomething--
+]]></system-out>
+
+      <system-err><![CDATA[--Output from testSomething--
+]]></system-err>
+
+  </testsuite>
+  <testsuite errors="0" failures="0" hostname="marcmacbook.local" id="8" name="URLUtilsTests" package="org.grails.plugin.resource" tests="1" time="0.045" timestamp="2011-03-04T11:42:02">
+      <properties />
+
+      <testcase classname="org.grails.plugin.resource.URLUtilsTests" name="testRelativeCSSUris" time="0.042" />
+
+      <system-out><![CDATA[--Output from testRelativeCSSUris--
+]]></system-out>
+
+      <system-err><![CDATA[--Output from testRelativeCSSUris--
+]]></system-err>
+
+  </testsuite>
+</testsuites>

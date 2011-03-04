@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite errors="0" failures="0" hostname="marcmacbook.local" name="org.grails.plugin.resource.ResourceMetaTests" tests="3" time="0.043" timestamp="2011-03-04T11:42:01">
+  <properties />
+  <testcase classname="org.grails.plugin.resource.ResourceMetaTests" name="testMovingFileUpdatesActualUrlCorrectly" time="0.0050" />
+  <testcase classname="org.grails.plugin.resource.ResourceMetaTests" name="testRenamingFileUpdatesActualUrlCorrectly" time="0.0070" />
+  <testcase classname="org.grails.plugin.resource.ResourceMetaTests" name="testRelativePathCalculations" time="0.028" />
+  <system-out><![CDATA[--Output from testMovingFileUpdatesActualUrlCorrectly--
+--Output from testRenamingFileUpdatesActualUrlCorrectly--
+--Output from testRelativePathCalculations--
+]]></system-out>
+  <system-err><![CDATA[--Output from testMovingFileUpdatesActualUrlCorrectly--
+--Output from testRenamingFileUpdatesActualUrlCorrectly--
+--Output from testRelativePathCalculations--
+]]></system-err>
+</testsuite>

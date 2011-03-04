@@ -1,5 +1,18 @@
 package org.grails.plugin.resource
 
+/**
+ * This mapper is the first phase of CSS rewriting.
+ *
+ * It will find any relative URIs in the CSS and convert them to a "resource:<originalURI-made-absolute>" 
+ * so that later after mappers have been applied, the URIs can be fixed up and restored to URIs relative to the
+ * new CSS output file's location. For example a bundle or "hashandcache" mapper may move the CSS file to a completely
+ * different place, thus breaking all the relative links to images.
+ *
+ * @see CSSRewriter mapper for phase 2 of the process.
+ *
+ * @author Marc Palmer (marc@grailsrocks.com)
+ * @author Luke Daley (ld@ldaley.com)
+ */
 class CSSPreprocessorResourceMapper {
 
     def priority = 100 // This has to be very close to the beginning

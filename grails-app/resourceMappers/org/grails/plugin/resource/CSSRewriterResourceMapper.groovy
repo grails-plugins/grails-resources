@@ -1,5 +1,16 @@
 package org.grails.plugin.resource
 
+/**
+ * This mapper is the second phase of CSS rewriting.
+ *
+ * It finds any "resource:" URIs and then re-relativizes the absolute URI that follows it, using the final
+ * locations of all the resources now that all the other CSS-processing mappers have been applied.
+ *
+ * @see CSSPreprocessor mapper for phase 1 of the process.
+ *
+ * @author Marc Palmer (marc@grailsrocks.com)
+ * @author Luke Daley (ld@ldaley.com)
+ */
 class CSSRewriterResourceMapper {
 
     def priority = 1000

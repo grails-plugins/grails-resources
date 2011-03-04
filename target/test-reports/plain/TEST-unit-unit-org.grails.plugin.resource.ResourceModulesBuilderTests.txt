@@ -1,0 +1,16 @@
+Testsuite: org.grails.plugin.resource.ResourceModulesBuilderTests
+Tests run: 3, Failures: 0, Errors: 0, Time elapsed: 0.153 sec
+------------- Standard Output ---------------
+--Output from testDefaultBundleFalse--
+--Output from testDefaultBundling--
+--Output from testDefaultBundleWithName--
+------------- ---------------- ---------------
+------------- Standard Error -----------------
+--Output from testDefaultBundleFalse--
+--Output from testDefaultBundling--
+--Output from testDefaultBundleWithName--
+------------- ---------------- ---------------
+
+Testcase: testDefaultBundleFalse took 0.068 sec
+Testcase: testDefaultBundling took 0.058 sec
+Testcase: testDefaultBundleWithName took 0.023 sec

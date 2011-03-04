@@ -5,6 +5,12 @@ import org.grails.plugin.resources.artefacts.ResourceMapperClass
 import java.lang.reflect.Modifier
 import org.slf4j.LoggerFactory
 
+/**
+ * This creates the ResourceMapper facades for each resource mapper artefact and puts them into the bean context
+ *
+ * @author Marc Palmer (marc@grailsrocks.com)
+ * @author Luke Daley (ld@ldaley.com)
+ */
 class ResourceMappersFactory {
 
     static List<ResourceMapper> createResourceMappers(grailsApplication, mappersConfig) {

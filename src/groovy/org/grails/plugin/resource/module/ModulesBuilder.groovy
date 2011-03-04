@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory
  * 
  * The caller provides a list at construction that will be populated during
  * DSL evaluation of maps defining the resource modules.
+ *
+ * @author Marc Palmer (marc@grailsrocks.com)
+ * @author Luke Daley (ld@ldaley.com)
  */
 class ModulesBuilder implements GroovyInterceptable {
     

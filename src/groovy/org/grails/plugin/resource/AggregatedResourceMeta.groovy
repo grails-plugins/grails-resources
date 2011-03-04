@@ -6,6 +6,9 @@ import org.apache.commons.io.FilenameUtils
 
 /**
  * Holder for info about a resource that is made up of other resources
+ *
+ * @author Marc Palmer (marc@grailsrocks.com)
+ * @author Luke Daley (ld@ldaley.com)
  */
 class AggregatedResourceMeta extends ResourceMeta {
 

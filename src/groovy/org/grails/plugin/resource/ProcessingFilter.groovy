@@ -4,6 +4,12 @@ import javax.servlet.*
 import org.springframework.web.context.support.WebApplicationContextUtils
 import grails.util.Environment
 
+/**
+ * This is the servlet filter that handles all static resource requests and delegates to the service
+ * to return them.
+ * 
+ * @author Marc Palmer (marc@grailsrocks.com)
+ */
 class ProcessingFilter implements Filter {
     def resourceService
     

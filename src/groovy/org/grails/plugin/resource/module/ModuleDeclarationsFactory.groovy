@@ -3,6 +3,11 @@ package org.grails.plugin.resource.module
 import grails.util.Environment
 import org.slf4j.LoggerFactory
 
+/**
+ * This factory collects up all the application and plugin resource module declarations
+ *
+ * @author Luke Daley (ld@ldaley.com)
+ */
 class ModuleDeclarationsFactory {
 
     static private final log = LoggerFactory.getLogger(ModuleDeclarationsFactory.name)

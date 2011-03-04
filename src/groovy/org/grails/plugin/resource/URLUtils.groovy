@@ -1,5 +1,8 @@
 package org.grails.plugin.resource
 
+/**
+ * @author Marc Palmer (marc@grailsrocks.com)
+ */
 class URLUtils {
     
     /**

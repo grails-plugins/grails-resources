@@ -9,6 +9,9 @@ import org.grails.plugin.resource.mapper.ResourceMapper
  *
  * This is actually non-trivial. A lot of data kept here. Be wary of what you think a "url" is. 
  * See the javadocs for each URL property.
+ *
+ * @author Marc Palmer (marc@grailsrocks.com)
+ * @author Luke Daley (ld@ldaley.com)
  */
 class ResourceMeta {
 
