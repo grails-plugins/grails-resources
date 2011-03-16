@@ -299,9 +299,6 @@ class ResourceTagLib {
         def name = attrs.name
         if (log.debugEnabled) {
             log.debug "renderModule ${attrs}"
-        }
-
-        if (log.debugEnabled) {
             log.debug "Getting info for module [${name}]"
         }
 
@@ -448,6 +445,8 @@ class ResourceTagLib {
         def info = resolveResourceAndURI(args)
         def res = info.resource
 
+        // We need the uri, but it isn't valid HTML, so don't render it
+        attrs.remove('uri')
         def o = new StringBuilder()
         o << "<img src=\"${info.uri.encodeAsHTML()}\" "
         if (res) {
