@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<testsuite errors="0" failures="0" hostname="marcmacbook.local" name="InitialisationSmokeTests" tests="1" time="0.616" timestamp="2011-03-04T11:42:23">
-  <properties />
-  <testcase classname="InitialisationSmokeTests" name="testInitialisedOk" time="0.616" />
-  <system-out><![CDATA[--Output from testInitialisedOk--
-]]></system-out>
-  <system-err><![CDATA[--Output from testInitialisedOk--
-]]></system-err>
-</testsuite>
