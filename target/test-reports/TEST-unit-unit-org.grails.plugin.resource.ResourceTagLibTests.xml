@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<testsuite errors="0" failures="0" hostname="marcmacbook.local" name="org.grails.plugin.resource.ResourceTagLibTests" tests="1" time="0.702" timestamp="2011-03-04T11:42:01">
-  <properties />
-  <testcase classname="org.grails.plugin.resource.ResourceTagLibTests" name="testSomething" time="0.699" />
-  <system-out><![CDATA[--Output from testSomething--
-]]></system-out>
-  <system-err><![CDATA[--Output from testSomething--
-]]></system-err>
-</testsuite>

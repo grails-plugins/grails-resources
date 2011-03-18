@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<testsuite errors="0" failures="0" hostname="marcmacbook.local" name="org.grails.plugin.resource.ResourceServiceTests" tests="1" time="0.027" timestamp="2011-03-04T11:42:01">
-  <properties />
-  <testcase classname="org.grails.plugin.resource.ResourceServiceTests" name="testDeclareModule" time="0.025" />
-  <system-out><![CDATA[--Output from testDeclareModule--
-]]></system-out>
-  <system-err><![CDATA[--Output from testDeclareModule--
-]]></system-err>
-</testsuite>

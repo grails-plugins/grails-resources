@@ -1,4 +1,0 @@
---Output from testCSSPreprocessing--
---Output from testCSSPreprocessingWithInvalidURI--
-WARN (resource.CSSPreprocessorResourceMapper): Cannot resolve CSS resource, leaving link as is: #default#VML
-WARN (resource.CSSPreprocessorResourceMapper): Cannot resolve CSS resource, leaving link as is: ####BULL
