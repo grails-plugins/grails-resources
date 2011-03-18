@@ -639,9 +639,9 @@ class ResourceService implements InitializingBean {
         def resources = modulesByName[SYNTHETIC_MODULE]?.resources
 
         if (log.infoEnabled) {
-            log.info "Preparing declared synthetic resources: ${resources.sourceUrl}"
+            log.info "Preparing declared synthetic resources: ${resources?.sourceUrl}"
         }
-        resources.each { r ->            
+        resources?.each { r ->            
             processedResourcesByURI.addDeclaredResource { ->
                 prepareResource(r, false)
             }
