@@ -1,0 +1,4 @@
+plugin.xml
+*.zip
+dependencies.groovy
+target
