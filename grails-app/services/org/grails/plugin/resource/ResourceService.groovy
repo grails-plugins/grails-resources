@@ -258,7 +258,9 @@ class ResourceService implements InitializingBean {
         def agg = synthModule.addNewSyntheticResource(type, uri, this)
         agg.processedFile = makeFileForURI(uri)
         
-        println "synthetic module resources: ${synthModule.resources}"
+        if (log.debugEnabled) {
+            log.debug "synthetic module resources: ${synthModule.resources}"
+        }
         
         // Need to store this somewhere so GET requests can look up bundle as it is a synthetic resource
         syntheticResourcesByURI[uri] = agg
