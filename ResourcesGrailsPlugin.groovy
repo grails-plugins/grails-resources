@@ -102,7 +102,8 @@ class ResourcesGrailsPlugin {
     boolean isResourceWeShouldProcess(File file) {
         // @todo Improve this, but for now tracing the ancestry of every file is seriously zzzz and overkill
         // when STS creats 100s of .class changes
-        return (file.parent.indexOf('WEB-INF') < 0) && (file.parent.indexOf('META-INF') < 0)
+        boolean shouldProcess = (file.parent.indexOf('WEB-INF') < 0) && (file.parent.indexOf('META-INF') < 0)
+        return shouldProcess
     }
     
     def onChange = { event ->
