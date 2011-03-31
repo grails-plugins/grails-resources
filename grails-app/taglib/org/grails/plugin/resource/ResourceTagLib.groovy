@@ -156,15 +156,6 @@ class ResourceTagLib {
             urlForExtension = url.file
         }
 
-        // Work out type from extension if not specified as an arg
-        if (!type) {
-            type = FilenameUtils.getExtension(urlForExtension)
-        }
-        
-        def typeInfo = SUPPORTED_TYPES[type]?.clone()  // must clone, we mutate this
-        if (!typeInfo) {
-            throwTagError "I can't work out the type of ${urlForExtension}. Please check the URL or specify [type] attribute"
-        }
 
         // If a disposition specificed, we may be ad hoc so use that, else rever to default for type
         if (disposition == null) {
@@ -174,6 +165,21 @@ class ResourceTagLib {
         resolveArgs.disposition = disposition
 
         info = resolveResourceAndURI(resolveArgs)
+
+        // Copy in the tag attributes from the resource's declaration
+        if (info.resource) {
+            attrs.putAll(info.resource.tagAttributes)
+        }
+        
+        // Work out type from extension if not specified as an arg
+        if (!type) {
+            type = FilenameUtils.getExtension(urlForExtension)
+        }
+        
+        def typeInfo = SUPPORTED_TYPES[type]?.clone()  // must clone, we mutate this
+        if (!typeInfo) {
+            throwTagError "I can't work out the type of ${urlForExtension}. Please check the URL or specify [type] attribute"
+        }
         
         // If we found a resource (i.e. not debug mode) and disposition is not what we're rendering, skip
         if (info.resource && (disposition != info.resource.disposition)) {
@@ -189,9 +195,11 @@ class ResourceTagLib {
             def writer = LINK_WRITERS[writerName ?: 'link']
             def wrapper = attrs.remove('wrapper')
 
+            println "Attrs: ${attrs}"
             // Allow attrs to overwrite any constants
             attrs.each { typeInfo.remove(it.key) }
 
+            println "TI: ${typeInfo}"
             def output = writer(info.uri, typeInfo, attrs)
             if (wrapper) {
                 out << wrapper(output)
@@ -343,7 +351,7 @@ class ResourceTagLib {
                 log.debug "Resource: ${r.sourceUrl} - disposition ${r.disposition} - rendering disposition ${renderingDisposition}"
             }
             if (r.disposition == renderingDisposition) {
-                def args = r.tagAttributes?.clone() ?: [:]
+                def args = [:]
                 // args.uri needs to be the source uri used to identify the resource locally
                 args.uri = debugMode ? r.originalUrl : "${r.actualUrl}"
                 args.wrapper = r.prePostWrapper

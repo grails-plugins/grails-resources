@@ -687,7 +687,7 @@ class ResourceService implements InitializingBean {
                 s1 << "             -- mime type: ${resource.contentType}\n"
                 s1 << "             -- actual Url: ${resource.actualUrl}\n"
                 s1 << "             -- source Extension: ${resource.sourceUrlExtension}\n"
-                s1 << "             -- query params: ${resource.queryParams}\n"
+                s1 << "             -- query params/fragment: ${resource.sourceUrlParamsAndFragment}\n"
                 s1 << "             -- url for linking: ${resource.linkUrl}\n"
                 s1 << "             -- link override: ${resource.linkOverride}\n"
                 s1 << "             -- attributes: ${resource.attributes}\n"

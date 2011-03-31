@@ -122,7 +122,9 @@ class ResourceModule {
         def resattrs = ti.attrs?.clone() ?: [:]
         def attrs = args.remove('attrs')
         if (attrs) {
-            resattrs += attrs
+            attrs.each { k, v ->
+                resattrs[k] = v
+            }
         }
         r.tagAttributes = attrs?.clone()
         r.attributes.putAll(args)
