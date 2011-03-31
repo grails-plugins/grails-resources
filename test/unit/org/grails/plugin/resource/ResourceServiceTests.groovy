@@ -23,7 +23,7 @@ class ResourceServiceTests extends GrailsUnitTestCase {
         super.tearDown()
     }
 
-    void testDeclareModule() {
+    void testSomething() {
         
     }
 

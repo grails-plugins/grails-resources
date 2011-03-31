@@ -23,7 +23,7 @@ class ResourceMetaStore {
     static CLOSED_LATCH = new CountDownLatch(0)
     
     /**
-     * Note that this is not re-entrant save, and is only to be called at app startup, before requests come in
+     * Note that this is not re-entrant safe, and is only to be called at app startup, before requests come in
      */
     void addDeclaredResource(Closure resourceCreator) {
         def resource = resourceCreator()
@@ -51,10 +51,10 @@ class ResourceMetaStore {
 
         // Add the original source url to the cache as well, if it was an ad-hoc resource
         // As the original URL is used, we need this to resolve to the actualUrl for redirect
-        if (adHocResource || resource.delegating) {
-            uris << resource.sourceUrl
-            resource = resource.delegating ? resource.delegate : resource
-        }
+//        if (adHocResource || resource.delegating) {
+        uris << resource.sourceUrl
+        resource = resource.delegating ? resource.delegate : resource
+//        }
         
         uris.each { u ->
             if (log.debugEnabled) {
