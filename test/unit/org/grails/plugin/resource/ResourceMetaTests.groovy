@@ -36,7 +36,34 @@ class ResourceMetaTests extends GrailsUnitTestCase {
         assertEquals "/jquery/images/bg.png.gz", r.linkUrl
     }
 
-    
+    void testCSSURLWithHackyMozillaAnchorCrapStripsAnchor() {
+        def r = new ResourceMeta()
+        r.workDir = new File('/tmp/test')
+        r.sourceUrl = "/jquery/images/bg.png#crackaddicts"
+        r.processedFile = new File('/tmp/test/jquery/images/bg.png')
+        r.updateActualUrlFromProcessedFile()
+        
+        // All results must be abs to the work dir, with leading /
+        assertEquals "Source url should have anchor stripped from it", "/jquery/images/bg.png", r.sourceUrl
+        assertEquals "/jquery/images/bg.png", r.actualUrl
+        assertEquals "#crackaddicts", r.sourceUrlParamsAndFragment
+        assertEquals "/jquery/images/bg.png#crackaddicts", r.linkUrl
+    }
+
+    void testCSSURLWithAnchorAndQueryParamsMaintained() {
+        def r = new ResourceMeta()
+        r.workDir = new File('/tmp/test')
+        r.sourceUrl = "/jquery/images/bg.png?you=got&to=be&kidding=true#crackaddicts"
+        r.processedFile = new File('/tmp/test/jquery/images/bg.png')
+        r.updateActualUrlFromProcessedFile()
+        
+        // All results must be abs to the work dir, with leading /
+        assertEquals "Source url should have anchor stripped from it", "/jquery/images/bg.png", r.sourceUrl
+        assertEquals "/jquery/images/bg.png", r.actualUrl
+        assertEquals "?you=got&to=be&kidding=true#crackaddicts", r.sourceUrlParamsAndFragment
+        assertEquals "/jquery/images/bg.png?you=got&to=be&kidding=true#crackaddicts", r.linkUrl
+    }
+
     void testRelativePathCalculations() {        
         def data = [
             // Expected, base, target

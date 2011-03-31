@@ -48,9 +48,9 @@ class ResourceMeta {
     String sourceUrlExtension
 
     /**
-     * The original queryParams of the resource, if any
+     * The original sourceUrlParamsAndFragment of the resource, if any
      */
-    String queryParams
+    String sourceUrlParamsAndFragment
     
     /**
      * The url of the local resource, after processing. (no query params)
@@ -140,16 +140,30 @@ class ResourceMeta {
 
     void setActualUrl(String url) {
         this.@actualUrl = url
-        _linkUrl = queryParams ? "${actualUrl}?${queryParams}" : url
+        _linkUrl = sourceUrlParamsAndFragment ? actualUrl + sourceUrlParamsAndFragment : url
     }
     
     
     void setSourceUrl(String url) {
-        def qidx = url.indexOf('?')
-
         this.@originalUrl = url // the full monty
-        sourceUrl = qidx >= 0 ? url[0..qidx-1] : url
-        queryParams = qidx >= 0 ? url[qidx+1..-1] : null
+        
+        def qidx = url.indexOf('?')
+        def hidx = url.indexOf('#')
+
+        def chopIdx = -1
+        // if there's hash we chop there, it comes before query
+        if (hidx >= 0 && qidx < 0) {
+            chopIdx = hidx
+        }
+        // if query params, we chop there even if have hash. Hash is after query params
+        if (qidx >= 0) {
+            chopIdx = qidx
+        }
+
+        sourceUrl = chopIdx >= 0 ? url[0..chopIdx-1] : url
+
+        // Strictly speaking this is query params plus fragment ...
+        sourceUrlParamsAndFragment = chopIdx >= 0 ? url[chopIdx..-1] : null
         
         sourceUrlExtension = FilenameUtils.getExtension(sourceUrl) ?: null
     }

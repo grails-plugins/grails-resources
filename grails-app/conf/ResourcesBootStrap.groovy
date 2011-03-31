@@ -13,7 +13,7 @@ class ResourcesBootStrap {
     def resourceService
     
     def init = { servletContext ->
-        resourceService.reload()
+        /*resourceService.reload()*/
         if (Environment.current == Environment.DEVELOPMENT) {
             resourceService.dumpResources()
         }

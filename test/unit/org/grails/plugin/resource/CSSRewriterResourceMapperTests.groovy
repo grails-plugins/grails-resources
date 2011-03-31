@@ -147,4 +147,5 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
 
         assertEquals expected, outcome
     }
+
 }
