@@ -1,3 +1,5 @@
+import grails.util.Environment
+
 import org.grails.plugin.resource.*
 
 /**
@@ -12,8 +14,9 @@ class ResourcesBootStrap {
     
     def init = { servletContext ->
         resourceService.reload()
-        
-        resourceService.dumpResources()
+        if (Environment.current == Environment.DEVELOPMENT) {
+            resourceService.dumpResources()
+        }
     }
     
     def destroy = {

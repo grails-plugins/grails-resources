@@ -9,7 +9,7 @@ import org.springframework.core.io.FileSystemResource
  */
 class ResourcesGrailsPlugin {
 
-    def version = "1.0-RC2-SNAPSHOT"
+    def version = "1.0-RC2"
     def grailsVersion = "1.2 > *"
     def dependsOn = [logging:'1.0 > *']
     def loadAfter = ['logging']
@@ -30,7 +30,7 @@ class ResourcesGrailsPlugin {
         "file:./plugins/*/grails-app/resourceMappers/**/*.groovy",
         "file:./grails-app/conf/*Resources.groovy",
         "file:./plugins/*/grails-app/conf/*Resources.groovy",
-        "file:./web-app/**/*.*" // Watch for resource changes
+        "file:./web-app/**/*.*" // Watch for resource changes, we need excludes here for WEB-INF+META-INF when grails impls this
     ]
 
     def author = "Marc Palmer"
@@ -96,11 +96,20 @@ class ResourcesGrailsPlugin {
 
     def doWithApplicationContext = { applicationContext ->
         applicationContext.resourceService.staticUrlPrefix = "/${uriPrefix}"
+        applicationContext.resourceService.reload()
     }
 
+    boolean isResourceWeShouldProcess(File file) {
+        // @todo Improve this, but for now tracing the ancestry of every file is seriously zzzz and overkill
+        // when STS creats 100s of .class changes
+        return (file.parent.indexOf('WEB-INF') < 0) && (file.parent.indexOf('META-INF') < 0)
+    }
+    
     def onChange = { event ->
         if (event.source instanceof FileSystemResource) {
-            event.application.mainContext.resourceService.reload()
+            if (isResourceWeShouldProcess(event.source.file)) {
+                event.application.mainContext.resourceService.reload()
+            }
         } else {
             [getResourceMapperArtefactHandler().TYPE, getResourcesArtefactHandler().TYPE].each {
                 if (handleChange(application, event, it, log)) {
