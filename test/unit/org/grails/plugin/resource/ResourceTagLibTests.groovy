@@ -24,9 +24,10 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
             getResourceMetaForURI: { uri, adhoc, postProc -> testMeta },
             staticUrlPrefix: '/static'
         ]
-        def output = tagLib.resourceLink(uri:'test.less', rel:'stylesheet/less', type:'css').toString()
+        def output = tagLib.resourceLink(uri:'/css/test.less', rel:'stylesheet/less', type:'css').toString()
         println "Output was: $output"
         assertTrue output.contains('rel="stylesheet/less"')
+        assertTrue output.contains('href="/static/css/test.less"')
     }
 
     void testResourceLinkWithRelOverrideFromResourceDecl() {
@@ -42,8 +43,31 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
             getResourceMetaForURI: { uri, adhoc, postProc -> testMeta },
             staticUrlPrefix: '/static'
         ]
-        def output = tagLib.resourceLink(uri:'test.less', type:'css').toString()
+        def output = tagLib.resourceLink(uri:'/css/test.less', type:'css').toString()
         println "Output was: $output"
         assertTrue output.contains('rel="stylesheet/less"')
+        assertTrue output.contains('href="/static/css/test.less"')
+    }
+
+    void testImgTagWithAttributes() {
+        def testMeta = new ResourceMeta()
+        testMeta.sourceUrl = '/images/test.png'
+        testMeta.actualUrl = '/images/test.png'
+        testMeta.contentType = "image/png"
+        testMeta.disposition = 'head'
+        testMeta.tagAttributes = [width:'100', height:'50', alt:'mugshot']
+        
+        tagLib.resourceService = [
+            isDebugMode: { r -> false },
+            getResourceMetaForURI: { uri, adhoc, postProc -> testMeta },
+            staticUrlPrefix: '/static'
+        ]
+        def output = tagLib.img(uri:'/images/test.png').toString()
+        println "Output was: $output"
+        assertTrue output.contains('width="100"')
+        assertTrue output.contains('height="50"')
+        assertTrue output.contains('alt="mugshot"')
+        assertTrue output.contains('src="/static/images/test.png"')
+        assertFalse output.contains('uri=')
     }
 }

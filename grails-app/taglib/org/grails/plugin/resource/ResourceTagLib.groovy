@@ -456,6 +456,7 @@ class ResourceTagLib {
         def info = resolveResourceAndURI(args)
         def res = info.resource
 
+        attrs.remove('uri')
         def o = new StringBuilder()
         o << "<img src=\"${info.uri.encodeAsHTML()}\" "
         if (res) {
