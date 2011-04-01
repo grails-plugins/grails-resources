@@ -374,7 +374,8 @@ class ResourceTagLib {
         }
         def ctxPath = request.contextPath
         def uri = attrs.remove('uri')
-        if (!uri || uri.indexOf('://') < 0) {
+        def abs = uri?.indexOf('://') >= 0
+        if (!uri || !abs) {
             uri = uri ? ctxPath+uri : g.resource(attrs).toString()
         }
         def debugMode = resourceService.isDebugMode(request)
@@ -407,7 +408,7 @@ class ResourceTagLib {
         def disposition = attrs.remove('disposition')
 
         // Chop off context path
-        def reluri = ResourceService.removeQueryParams(uri[ctxPath.size()..-1])
+        def reluri = ResourceService.removeQueryParams(abs ? uri : uri[ctxPath.size()..-1])
         
         // Get or create ResourceMeta
         def res = resourceService.getResourceMetaForURI(reluri, true, { res ->
