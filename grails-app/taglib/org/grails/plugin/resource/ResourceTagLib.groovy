@@ -167,7 +167,7 @@ class ResourceTagLib {
         info = resolveResourceAndURI(resolveArgs)
 
         // Copy in the tag attributes from the resource's declaration
-        if (info.resource) {
+        if (info.resource && info.resource.tagAttributes) {
             attrs.putAll(info.resource.tagAttributes)
         }
         
@@ -195,11 +195,9 @@ class ResourceTagLib {
             def writer = LINK_WRITERS[writerName ?: 'link']
             def wrapper = attrs.remove('wrapper')
 
-            println "Attrs: ${attrs}"
             // Allow attrs to overwrite any constants
             attrs.each { typeInfo.remove(it.key) }
 
-            println "TI: ${typeInfo}"
             def output = writer(info.uri, typeInfo, attrs)
             if (wrapper) {
                 out << wrapper(output)
@@ -376,7 +374,9 @@ class ResourceTagLib {
         }
         def ctxPath = request.contextPath
         def uri = attrs.remove('uri')
-        uri = uri ? ctxPath+uri : g.resource(attrs).toString()
+        if (!uri || uri.indexOf('://') < 0) {
+            uri = uri ? ctxPath+uri : g.resource(attrs).toString()
+        }
         def debugMode = resourceService.isDebugMode(request)
 
         // Get out quick and add param to tell filter we don't want any fancy stuff

@@ -70,4 +70,24 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         assertTrue output.contains('src="/static/images/test.png"')
         assertFalse output.contains('uri=')
     }
+    
+    def testDebugModeResourceLinkWithAbsoluteCDNURL() {
+
+        def url = 'https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js'
+        def testMeta = new ResourceMeta()
+        testMeta.sourceUrl = url
+        testMeta.actualUrl = url
+        testMeta.disposition = 'head'
+        
+        tagLib.request.contextPath = "/resourcestests"
+        
+        tagLib.resourceService = [
+            isDebugMode: { r -> true },
+            getResourceMetaForURI: { uri, adhoc, postProc -> testMeta },
+            staticUrlPrefix: '/static'
+        ]
+        def output = tagLib.resourceLink(uri:url, type:"js").toString()
+        println "Output was: $output"
+        assertTrue output.contains('src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js?_debugResources')
+    }
 }
