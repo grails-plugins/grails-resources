@@ -17,6 +17,8 @@ class CSSPreprocessorResourceMapper {
 
     def priority = 100 // This has to be very close to the beginning
     
+    static defaultIncludes = ['**/*.css']
+
     def resourceService
     
     /**

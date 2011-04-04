@@ -94,7 +94,7 @@ class ResourcesGrailsPlugin {
         }
     }
 
-    def doWithApplicationContext = { applicationContext ->
+    def doWithDynamicMethods = { applicationContext ->
         applicationContext.resourceService.staticUrlPrefix = "/${uriPrefix}"
         applicationContext.resourceService.reload()
     }

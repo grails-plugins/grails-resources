@@ -46,11 +46,27 @@ class ResourceMapper {
         }
     }()
 
+    @Lazy defaultIncludes = {
+        try {
+            toStringList(artefact.defaultIncludes)
+        } catch (MissingPropertyException e) {
+            ['**/*']
+        }
+    }()
+
     @Lazy excludes = {
         if (config.excludes) {
             toStringList(config.excludes) + defaultExcludes
         } else {
             defaultExcludes
+        }
+    }()
+    
+    @Lazy includes = {
+        if (config.includes) {
+            toStringList(config.includes) + defaultIncludes
+        } else {
+            defaultIncludes
         }
     }()
     
@@ -64,27 +80,37 @@ class ResourceMapper {
         this.artefact = artefact
         this.config = mappersConfig[getName()]
         
+        // @todo why are we doing this, why isn't logging plugin doing it?
+        // Even though we load after logging, it seems to not apply it to our artefacts
         log = LoggerFactory.getLogger('org.grails.plugin.resource.mapper.' + getName())
         artefact.metaClass.getLog = { it }.curry(log)
     }
 
     boolean invokeIfNotExcluded(ResourceMeta resource) {
+        def includingPattern = getIncludingPattern(resource)
         def excludingPattern = getExcludingPattern(resource)
+        if (!includingPattern) {
+            if (log.debugEnabled) {
+                log.debug "Skipping ${resource.sourceUrl} due to includes pattern ${includes} not including it"
+            }
+            return false
+        }
+        
         if (excludingPattern) {
             if (log.debugEnabled) {
                 log.debug "Skipping ${resource.sourceUrl} due to excludes pattern ${excludes}"
             }
             
-            false
+            return false
         } else if (resource.excludesMapper(name)) {
             if (log.debugEnabled) {
-                log.debug "Skipping ${resource.sourceUrl} due definition excluding mapper"
+                log.debug "Skipping ${resource.sourceUrl} due to definition excluding mapper"
             }
             
-            false
+            return false
         } else {
             invoke(resource)
-            true
+            return true
         }
     }
     
@@ -105,12 +131,22 @@ class ResourceMapper {
             log.debug "Done mapping ${resource.dump()}"
         }
     }
-    
+
+    String stripLeadingSlash(s) {
+        s.startsWith("/") ? s.substring(1) : s
+    }
+
     String getExcludingPattern(ResourceMeta resource) {
         // The path matcher won't match **/* against a path starting with /, so it makes sense to remove it.
-        def sourceUrl = resource.sourceUrl.startsWith("/") ? resource.sourceUrl.substring(1) : resource.sourceUrl
+        def sourceUrl = stripLeadingSlash(resource.sourceUrl)
 
         excludes.find { PATH_MATCHER.match(it, sourceUrl) }
+    }
+    
+    String getIncludingPattern(ResourceMeta resource) {
+        def sourceUrl = stripLeadingSlash(resource.sourceUrl)
+
+        includes.find { PATH_MATCHER.match(it, sourceUrl) }
     }
     
     private toStringList(value) {

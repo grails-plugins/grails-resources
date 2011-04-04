@@ -17,6 +17,8 @@ class CSSRewriterResourceMapper {
     
     def resourceService
     
+    static defaultIncludes = ['**/*.css']
+    
     /**
      * Find all url() and fix up the url if it is not absolute
      * NOTE: This needs to run after any plugins that move resources around, but before any that obliterate
