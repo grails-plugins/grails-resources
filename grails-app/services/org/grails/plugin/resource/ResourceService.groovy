@@ -397,9 +397,7 @@ class ResourceService implements InitializingBean {
         }
         
         if (!adHocResource && findResourceForURI(r.sourceUrl)) {
-            throw new IllegalArgumentException(
-                "Skipping prepare resource for [${r.sourceUrl}] - You have multiple modules declaring this same resource."
-            )
+            log.warn "Skipping prepare resource for [${r.sourceUrl}] - You have multiple modules declaring this same resource."
         }
 
         def uri = r.sourceUrl
