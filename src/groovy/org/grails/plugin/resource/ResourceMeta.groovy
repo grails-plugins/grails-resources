@@ -103,6 +103,12 @@ class ResourceMeta {
     
     private String _linkUrl
     
+    /**
+     * The URI of the resource that resulted in the processing of this resource, or null
+     * For resources ref'd in CSS or stuff loaded up by bundles for example
+     */
+    String declaringResource
+    
     // Hook for when preparation is starting
     void beginPrepare(resourceService) {
     }

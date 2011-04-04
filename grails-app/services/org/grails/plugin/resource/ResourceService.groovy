@@ -382,6 +382,22 @@ class ResourceService implements InitializingBean {
     }
     
     /**
+     * Returns the actual URL for loading the resource specified by the uri.
+     * By default this is a file in the app's WAR, but this could support other schemes
+     *
+     */
+    URL getOriginalResourceURLForURI(uri) {
+        servletContext.getResource(uri)
+    }
+    
+    /**
+     * Resolve mime type for a URI by file extension
+     */
+    String getMimeType(uri) {
+        servletContext.getMimeType(uri)
+    }
+    
+    /**
      * Execute the processing chain for the resource, returning list of URIs to add to uri -> resource mappings
      * for this resource
      */
@@ -407,23 +423,30 @@ class ResourceService implements InitializingBean {
             r.beginPrepare(this)
             
             if (!r.processedFile?.exists()) {
-                def origResourceURL = servletContext.getResource(uri)
+				def uriWithoutFragment = uri
+				if (uri.contains('#')) {
+					uriWithoutFragment = uri.substring(0, uri.indexOf('#'))
+				}
+
+                def origResourceURL = getOriginalResourceURLForURI(uriWithoutFragment)
                 if (!origResourceURL) {
                     if (log.errorEnabled) {
-                        log.error "Resource not found: ${uri} when preparing resource ${r.dump()}"
+                        def hint = r.declaringResource ? 
+                            "Resource was processed as a result of processing ${r.declaringResource}" : ''
+                        log.error "Resource not found: ${uriWithoutFragment} when preparing resource ${r.dump()}${hint}"
                     }
                     throw new FileNotFoundException("Cannot locate resource [$uri]")
                 }
         
-                r.contentType = servletContext.getMimeType(uri)
+                r.contentType = getMimeType(uriWithoutFragment)
                 if (log.debugEnabled) {
-                    log.debug "Resource [$uri] has content type [${r.contentType}]"
+                    log.debug "Resource [$uriWithoutFragment] has content type [${r.contentType}]"
                 }
 
                 def conn = origResourceURL.openConnection()
                 def origResource = origResourceURL.newInputStream()
                 try {
-                    def f = makeFileForURI(uri)
+                    def f = makeFileForURI(uriWithoutFragment)
                     // copy the file ready for mutation
                     r.processedFile = f
                     r.originalLastMod = conn.lastModified

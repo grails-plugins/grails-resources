@@ -26,6 +26,8 @@ class CSSRewriterResourceMapper {
      */
     def map(resource, config) {
 
+        def resURI = resource.sourceUrl
+
         def processor = new CSSLinkProcessor()
         processor.process(resource, resourceService) { prefix, originalUrl, suffix ->
             
@@ -41,6 +43,8 @@ class CSSRewriterResourceMapper {
                     // If there's no decl for the resource, create it with image disposition
                     // otherwise we pop out as a favicon...
                     res.disposition = 'image'
+                    // Record which resource caused this resource to be processed
+                    res.declaringResource = resURI
                 }
 
                 if (linkedToResource) {
