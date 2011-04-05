@@ -15,16 +15,23 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
     void testCSSRewritingWithMovingFiles() {
         mockLogging(CSSRewriterResourceMapper)
 
+        def r = new ResourceMeta(sourceUrl:'/css/main.css')
+
         def svc = [
-            getResourceMetaForURI : {  uri, adHoc, postProc = null ->
+            getResourceMetaForURI : {  uri, adHoc, declRes, postProc = null ->
                 def namepart = uri[uri.lastIndexOf('/')..-1]
                 def s = '/cached'+namepart
-                new ResourceMeta(actualUrl: s)
+                def newRes = new ResourceMeta(actualUrl: s)
+                r.declaringResource = declRes
+                if (postProc) postProc(newRes)
+                assertEquals 'CSS rewriter did not set declaring resource correctly', 
+                    r.sourceUrl, declRes
+                return newRes
             },
             config : [ rewrite: [css: true] ]
         ]
+
         def base = new File('./test-tmp/')
-        def r = new ResourceMeta(sourceUrl:'/css/main.css')
         r.workDir = base
         r.actualUrl = r.sourceUrl
         r.contentType = "text/css"
@@ -64,7 +71,7 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
         mockLogging(CSSRewriterResourceMapper)
 
         def svc = [
-            getResourceMetaForURI : {  uri, adHoc, postProc = null ->
+            getResourceMetaForURI : {  uri, adHoc, declRes, postProc = null ->
                 new ResourceMeta(actualUrl: uri, processedFile: new File(uri+'.gz'))
             },
             config : [ rewrite: [css: true] ]
@@ -112,7 +119,7 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
         mockLogging(CSSRewriterResourceMapper)
 
         def svc = [
-            getResourceMetaForURI : {  uri, adHoc, postProc = null ->
+            getResourceMetaForURI : {  uri, adHoc, declRes, postProc = null ->
                 new ResourceMeta(actualUrl: uri, processedFile: new File(uri+'.gz'))
             },
             config : [ rewrite: [css: true] ]

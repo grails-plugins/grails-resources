@@ -38,7 +38,7 @@ class ResourceMetaStore {
     }
 
     private addResource(resource, boolean adHocResource = false) {
-        def uris = []
+        def uris = new HashSet()
 
         // Add the actual linking URL to the cache so resourceLink resolves
         // ONLY if its not delegating, or we get a bunch of crap in here / hide the delegated resource
@@ -51,10 +51,8 @@ class ResourceMetaStore {
 
         // Add the original source url to the cache as well, if it was an ad-hoc resource
         // As the original URL is used, we need this to resolve to the actualUrl for redirect
-//        if (adHocResource || resource.delegating) {
         uris << resource.sourceUrl
         resource = resource.delegating ? resource.delegate : resource
-//        }
         
         uris.each { u ->
             if (log.debugEnabled) {

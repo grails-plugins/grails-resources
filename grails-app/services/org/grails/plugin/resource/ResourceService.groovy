@@ -1,4 +1,4 @@
-package org.grails.plugin.resource
+ package org.grails.plugin.resource
 
 import java.util.concurrent.ConcurrentHashMap
 
@@ -54,6 +54,7 @@ class ResourceService implements InitializingBean {
 
     def processedResourcesByURI = new ResourceMetaStore()
     def syntheticResourcesByURI = new ConcurrentHashMap()
+    def allResourcesByOriginalSourceURI = new ConcurrentHashMap()
 
     def modulesInDependencyOrder = []
     
@@ -290,7 +291,8 @@ class ResourceService implements InitializingBean {
      * Get the existing or create a new ad-hoc ResourceMeta for the URI.
      * @returns The resource instance - which may have a null processedFile if the resource cannot be found
      */
-    ResourceMeta getResourceMetaForURI(uri, adHocResource = true, Closure postProcessor = null) {
+    ResourceMeta getResourceMetaForURI(uri, Boolean adHocResource = true, String declaringResource, 
+            Closure postProcessor = null) {
 
         // Declared resources will already exist, but ad-hoc or synthetic may need to be created
         def res = processedResourcesByURI.getOrCreateAdHocResource(uri) { -> 
@@ -316,6 +318,7 @@ class ResourceService implements InitializingBean {
                     log.debug "Creating new implicit resource for ${uri}"
                 }
                 r = new ResourceMeta(sourceUrl: uri, workDir: getWorkDir(), module:mod)
+                r.declaringResource = declaringResource
             }
         
             r = prepareResource(r, adHocResource)
@@ -334,6 +337,7 @@ class ResourceService implements InitializingBean {
                 }
             }
             
+            allResourcesByOriginalSourceURI[r.sourceUrl] = r
             return r
         } // end of closure
 
@@ -357,7 +361,6 @@ class ResourceService implements InitializingBean {
         def splitPoint = uri.lastIndexOf('/')
         def fileSystemDir = splitPoint > 0 ? makeFileSystemPathFromURI(uri[0..splitPoint-1]) : ''
         def fileSystemFile = makeFileSystemPathFromURI(uri[splitPoint+1..-1])
-//        println "Getting workDir: ${workDir} - this ${this}, this.getWorkDir = ${this.getWorkDir()}"
         def staticDir = new File(getWorkDir(), fileSystemDir)
         
         // force the structure
@@ -413,8 +416,10 @@ class ResourceService implements InitializingBean {
         }
         
         if (!adHocResource && findResourceForURI(r.sourceUrl)) {
+            def existing = allResourcesByOriginalSourceURI[r.sourceUrl]
+            def modName = existing.module.name
             throw new IllegalArgumentException(
-                "Skipping prepare resource for [${r.sourceUrl}] - You have multiple modules declaring this same resource."
+                "Skipping prepare resource for [${r.sourceUrl}] - This resource is declared in module [${r.module.name}] as well as module [${modName}]"
             )
         }
 
@@ -431,9 +436,11 @@ class ResourceService implements InitializingBean {
                 def origResourceURL = getOriginalResourceURLForURI(uriWithoutFragment)
                 if (!origResourceURL) {
                     if (log.errorEnabled) {
-                        def hint = r.declaringResource ? 
-                            "Resource was processed as a result of processing ${r.declaringResource}" : ''
-                        log.error "Resource not found: ${uriWithoutFragment} when preparing resource ${r.dump()}${hint}"
+                        if (r.declaringResource) {
+                            log.error "While processing ${r.declaringResource}, a resource was required but not found: ${uriWithoutFragment}"
+                        } else {
+                            log.error "Resource not found: ${uriWithoutFragment}"
+                        }
                     }
                     throw new FileNotFoundException("Cannot locate resource [$uri]")
                 }
@@ -499,9 +506,11 @@ class ResourceService implements InitializingBean {
         }
         
         m.resources.each { r ->
+            def u = r.sourceUrl
             processedResourcesByURI.addDeclaredResource { ->
                 prepareResource(r, false)
             }
+            allResourcesByOriginalSourceURI[u] = r
         }
         modulesByName[m.name] = m
     }
@@ -564,6 +573,7 @@ class ResourceService implements InitializingBean {
         modulesByName.clear()
         modulesInDependencyOrder.clear()
         syntheticResourcesByURI.clear()
+        allResourcesByOriginalSourceURI.clear()
         processedResourcesByURI = new ResourceMetaStore()
     }
     

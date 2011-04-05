@@ -21,7 +21,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         
         tagLib.resourceService = [
             isDebugMode: { r -> false },
-            getResourceMetaForURI: { uri, adhoc, postProc -> testMeta },
+            getResourceMetaForURI: { uri, adhoc, declRes,  postProc -> testMeta },
             staticUrlPrefix: '/static'
         ]
         def output = tagLib.resourceLink(uri:'/css/test.less', rel:'stylesheet/less', type:'css').toString()
@@ -40,7 +40,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         
         tagLib.resourceService = [
             isDebugMode: { r -> false },
-            getResourceMetaForURI: { uri, adhoc, postProc -> testMeta },
+            getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
             staticUrlPrefix: '/static'
         ]
         def output = tagLib.resourceLink(uri:'/css/test.less', type:'css').toString()
@@ -59,7 +59,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         
         tagLib.resourceService = [
             isDebugMode: { r -> false },
-            getResourceMetaForURI: { uri, adhoc, postProc -> testMeta },
+            getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
             staticUrlPrefix: '/static'
         ]
         def output = tagLib.img(uri:'/images/test.png').toString()
@@ -83,7 +83,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         
         tagLib.resourceService = [
             isDebugMode: { r -> true },
-            getResourceMetaForURI: { uri, adhoc, postProc -> testMeta },
+            getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
             staticUrlPrefix: '/static'
         ]
         def output = tagLib.resourceLink(uri:url, type:"js").toString()

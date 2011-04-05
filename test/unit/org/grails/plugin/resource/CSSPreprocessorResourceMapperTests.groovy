@@ -60,7 +60,7 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
         mockLogging(CSSPreprocessorResourceMapper)
 
         def svc = [
-            getResourceMetaForURI : {  uri, adHoc, postProc = null ->
+            getResourceMetaForURI : {  uri, adHoc, declRes, postProc = null ->
                 new ResourceMeta(actualUrl: uri, processedFile: new File(uri+'.gz'))
             },
             config : [ rewrite: [css: true] ]

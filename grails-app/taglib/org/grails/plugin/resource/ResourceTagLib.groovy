@@ -411,7 +411,7 @@ class ResourceTagLib {
         def reluri = ResourceService.removeQueryParams(abs ? uri : uri[ctxPath.size()..-1])
         
         // Get or create ResourceMeta
-        def res = resourceService.getResourceMetaForURI(reluri, true, { res ->
+        def res = resourceService.getResourceMetaForURI(reluri, true, null, { res ->
             // If this is an ad hoc resource, we need to store if it can be deferred or not
             if (disposition != null) {
                 res.disposition = disposition
