@@ -291,7 +291,7 @@ class ResourceService implements InitializingBean {
      * Get the existing or create a new ad-hoc ResourceMeta for the URI.
      * @returns The resource instance - which may have a null processedFile if the resource cannot be found
      */
-    ResourceMeta getResourceMetaForURI(uri, Boolean adHocResource = true, String declaringResource, 
+    ResourceMeta getResourceMetaForURI(uri, Boolean adHocResource = true, String declaringResource = null, 
             Closure postProcessor = null) {
 
         // Declared resources will already exist, but ad-hoc or synthetic may need to be created
