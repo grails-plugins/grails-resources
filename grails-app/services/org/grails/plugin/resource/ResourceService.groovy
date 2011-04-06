@@ -1,4 +1,4 @@
- package org.grails.plugin.resource
+package org.grails.plugin.resource
 
 import java.util.concurrent.ConcurrentHashMap
 
@@ -32,6 +32,7 @@ class ResourceService implements InitializingBean {
     
     static transactional = false
 
+    
     static IMPLICIT_MODULE = "__@adhoc-files@__"
     static SYNTHETIC_MODULE = "__@synthetic-files@__"
     static REQ_ATTR_DEBUGGING = 'resources.debug'
@@ -291,7 +292,7 @@ class ResourceService implements InitializingBean {
      * Get the existing or create a new ad-hoc ResourceMeta for the URI.
      * @returns The resource instance - which may have a null processedFile if the resource cannot be found
      */
-    ResourceMeta getResourceMetaForURI(uri, Boolean adHocResource = true, String declaringResource, 
+    ResourceMeta getResourceMetaForURI(uri, Boolean adHocResource = true, String declaringResource = null, 
             Closure postProcessor = null) {
 
         // Declared resources will already exist, but ad-hoc or synthetic may need to be created
@@ -476,7 +477,15 @@ class ResourceService implements InitializingBean {
         
             // Apply all mappers / or only those until the resource becomes delegated
             // Once delegated, its the delegate that needs to be processed, not the original
+            def phase
             for (m in resourceMappers) {
+                if (m.phase != phase) {
+                    phase = m.phase
+                    if (log.debugEnabled) {
+                        log.debug "Entering mapper phase ${phase}"
+                    }
+                }
+                
                 if (log.debugEnabled) {
                     log.debug "Applying mapper ${m.name} to ${r.processedFile} - delegating? ${r.delegating}"
                 }

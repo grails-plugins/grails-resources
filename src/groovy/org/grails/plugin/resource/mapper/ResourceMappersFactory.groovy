@@ -41,16 +41,22 @@ class ResourceMappersFactory {
         }
         
         def ctx = bb.createApplicationContext()
-        beanNames.collect { ctx.getBean(it) }.sort(PRIORITY_COMPARATOR)
+        beanNames.collect { ctx.getBean(it) }.sort(PHASE_PRIORITY_COMPARATOR)
     }
     
-    static public final PRIORITY_COMPARATOR = [
+    static public final PHASE_PRIORITY_COMPARATOR = [
         compare: { ResourceMapper lhs, ResourceMapper rhs -> 
             if (lhs == null || rhs == null) {
                 throw new NullPointerException("compareTo() called with a null parameter")
             }
             
-            lhs.priority <=> rhs.priority ?: lhs.name <=> rhs.name
+            def phaseComp = lhs.phase <=> rhs.phase
+            if (phaseComp != 0) {
+                return phaseComp
+            } else {
+                // Same phase, compare priorities, fall back to name (arbitrary but makes order reliable with dupe priorities)
+                return lhs.priority <=> rhs.priority ?: lhs.name <=> rhs.name
+            }
         }
     ] as Comparator
 }

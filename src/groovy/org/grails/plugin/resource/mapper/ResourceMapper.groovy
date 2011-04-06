@@ -15,12 +15,21 @@ import grails.util.GrailsNameUtils
  */
 class ResourceMapper {
 
-    static public final DEFAULT_PRIORITY = 0
-    static public final PATH_MATCHER = new AntPathMatcher()
+    static final DEFAULT_PRIORITY = 0
+    static final PATH_MATCHER = new AntPathMatcher()
     
     final artefact
     final config
     final log
+    
+    @Lazy phase = {
+        try {
+            artefact.phase
+        } catch (MissingPropertyException e) {
+            println "BOOM"
+            throw new IllegalArgumentException("Resource mapper ${artefact.name} must have a phase property defined")
+        }
+    }
     
     @Lazy priority = {
         try {
