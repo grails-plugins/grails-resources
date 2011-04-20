@@ -1,5 +1,7 @@
 package org.grails.plugin.resource
 
+import org.grails.plugin.resource.mapper.MapperPhase
+
 /**
  * This mapper is the second phase of CSS rewriting.
  *
@@ -13,7 +15,9 @@ package org.grails.plugin.resource
  */
 class CSSRewriterResourceMapper {
 
-    def priority = 1000
+//    def priority = 1000
+    
+    def phase = MapperPhase.LINKREALISATION
     
     def resourceService
     

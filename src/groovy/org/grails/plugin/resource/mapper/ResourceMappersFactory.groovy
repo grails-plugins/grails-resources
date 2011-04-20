@@ -41,11 +41,7 @@ class ResourceMappersFactory {
         }
         
         def ctx = bb.createApplicationContext()
-        beanNames.collect { ctx.getBean(it) }.sort(PHASE_PRIORITY_COMPARATOR)
-    }
-    
-    static public final PHASE_PRIORITY_COMPARATOR = [
-        compare: { ResourceMapper lhs, ResourceMapper rhs -> 
+        def mapperOrdering = beanNames.collect { ctx.getBean(it) }.sort { ResourceMapper lhs, ResourceMapper rhs -> 
             if (lhs == null || rhs == null) {
                 throw new NullPointerException("compareTo() called with a null parameter")
             }
@@ -58,5 +54,20 @@ class ResourceMappersFactory {
                 return lhs.priority <=> rhs.priority ?: lhs.name <=> rhs.name
             }
         }
-    ] as Comparator
+        
+        // Let's throw people a bone with some nice debug
+        if (log.debugEnabled) {
+            def s = new StringBuilder()
+            def phase
+            mapperOrdering.each { m ->
+                if (m.phase != phase) {
+                    s << "Phase: ${m.phase}\n"
+                    phase = m.phase
+                }
+                s << "  ${m.priority ?: 0}: ${m.name}\n"
+            }
+            log.debug "Resource mappers will be run in the following order:\n$s"
+        }
+        return mapperOrdering
+    }
 }

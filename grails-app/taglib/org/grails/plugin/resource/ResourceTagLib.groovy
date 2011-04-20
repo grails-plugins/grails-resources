@@ -178,7 +178,7 @@ class ResourceTagLib {
         
         def typeInfo = SUPPORTED_TYPES[type]?.clone()  // must clone, we mutate this
         if (!typeInfo) {
-            throwTagError "I can't work out the type of ${urlForExtension}. Please check the URL or specify [type] attribute"
+            throwTagError "I can't work out the type of ${urlForExtension} with type [${type}]. Please check the URL, resource definition or specify [type] attribute"
         }
         
         // If we found a resource (i.e. not debug mode) and disposition is not what we're rendering, skip

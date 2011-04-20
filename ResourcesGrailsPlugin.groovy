@@ -9,7 +9,7 @@ import org.springframework.core.io.FileSystemResource
  */
 class ResourcesGrailsPlugin {
 
-    def version = "1.0-RC2"
+    def version = "1.0-RC3"
     def grailsVersion = "1.2 > *"
     def dependsOn = [logging:'1.0 > *']
     def loadAfter = ['logging']

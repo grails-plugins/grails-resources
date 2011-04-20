@@ -1,5 +1,6 @@
 package org.grails.plugin.resource
 
+import org.grails.plugin.resource.mapper.MapperPhase
 
 /**
  * This mapper creates synthetic AggregatedResourceMeta instances for any bundle
@@ -13,7 +14,9 @@ package org.grails.plugin.resource
  */
 class BundleResourceMapper {
     
-    def priority = 500
+//    def priority = 500
+    
+    def phase = MapperPhase.AGGREGATION
     
     def resourceService
     

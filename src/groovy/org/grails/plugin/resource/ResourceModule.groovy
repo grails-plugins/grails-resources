@@ -31,6 +31,11 @@ class ResourceModule {
         this.defaultBundle = defBundle
         def args = [:]
         args.putAll(resourceInfo)
+
+        if (args.url == null) {
+            throw new IllegalArgumentException("Cannot create resource with arguments ${args}, url is not set")
+        }
+
         if (args.url instanceof Map) {
             args.url = getResourceUrl(args.url)
         }
@@ -52,7 +57,7 @@ class ResourceModule {
             } else if (i instanceof String) {
                 this.resources << newResourceFromArgs(url:i, svc, resourceInfoList.size()==1)
             } else {
-                throw new IllegalArgumentException("Barf!")
+                throw new IllegalArgumentException("I don't understand this resource: ${i}")
             }
         }
         lockDown()
@@ -83,6 +88,9 @@ class ResourceModule {
             if (!url.contains('://') && !url.startsWith('/')) {
                 url = '/'+url
             }
+        }
+        if (url == null) {
+            throw new IllegalArgumentException("Cannot create resource $url, url is not set")
         }
         def r = new ResourceMeta(sourceUrl: url , workDir: svc.workDir, module:this)
         def ti = svc.getDefaultSettingsForURI(url, args.attrs?.type)

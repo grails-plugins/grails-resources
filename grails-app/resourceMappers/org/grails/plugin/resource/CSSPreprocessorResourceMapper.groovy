@@ -1,5 +1,7 @@
 package org.grails.plugin.resource
 
+import org.grails.plugin.resource.mapper.MapperPhase
+
 /**
  * This mapper is the first phase of CSS rewriting.
  *
@@ -15,8 +17,8 @@ package org.grails.plugin.resource
  */
 class CSSPreprocessorResourceMapper {
 
-    def priority = 100 // This has to be very close to the beginning
-    
+    def phase = MapperPhase.LINKNORMALISATION
+
     static defaultIncludes = ['**/*.css']
 
     def resourceService
