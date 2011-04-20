@@ -26,7 +26,6 @@ class ResourceMapper {
         try {
             artefact.phase
         } catch (MissingPropertyException e) {
-            println "BOOM"
             throw new IllegalArgumentException("Resource mapper ${name} must have a phase property defined")
         }
     }()
