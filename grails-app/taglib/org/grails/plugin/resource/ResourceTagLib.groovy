@@ -354,6 +354,11 @@ class ResourceTagLib {
                 args.uri = debugMode ? r.originalUrl : "${r.actualUrl}"
                 args.wrapper = r.prePostWrapper
                 args.disposition = r.disposition
+                
+                if (r.tagAttributes) {
+                    args.putAll(r.tagAttributes) // Copy the attrs originally provided e.g. type override
+                }
+                
                 if (log.debugEnabled) {
                     log.debug "Rendering one of the module's resource links: ${args}"
                 }
