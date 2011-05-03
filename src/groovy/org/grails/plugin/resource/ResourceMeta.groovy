@@ -151,7 +151,9 @@ class ResourceMeta {
     
     
     void setSourceUrl(String url) {
-        this.@originalUrl = url // the full monty
+        if (this.@originalUrl == null) {
+            this.@originalUrl = url // the full monty
+        }
         
         def qidx = url.indexOf('?')
         def hidx = url.indexOf('#')

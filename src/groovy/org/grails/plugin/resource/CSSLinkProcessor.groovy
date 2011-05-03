@@ -31,6 +31,9 @@ class CSSLinkProcessor {
     void process(ResourceMeta resource, resourceService, Closure urlMapper) {
         
         if (!isCSSRewriteCandidate(resource, resourceService)) {
+            if (log.debugEnabled) {
+                log.debug "CSS link processor skipping ${resource} because its not a CSS rewrite candidate"
+            }
             return
         }
         

@@ -29,27 +29,52 @@ class CSSPreprocessorResourceMapper {
      * the content i.e. before minify or gzip
      */
     def map(resource, config) {
+        if (resource instanceof AggregatedResourceMeta) {
+            if (log.debugEnabled) {
+                log.debug "CSS Preprocessor skipping ${resource} because it is aggregated (already processed each file in it)"
+            }
+            return null
+        }
+        
         def processor = new CSSLinkProcessor()
         
+        if (log.debugEnabled) {
+            log.debug "CSS Preprocessor munging ${resource}"
+        }
+
         processor.process(resource, resourceService) { prefix, originalUrl, suffix ->
+            
+            if (log.debugEnabled) {
+                log.debug "CSS Preprocessor munging url $originalUrl"
+            }
             
             // We don't do absolutes or full URLs - perhaps we should do "/" at some point? If app 
             // is mapped to root context then some people might do this but its lame
+            // Also skip already-processed resources (i.e. bundled CSS)
             if (originalUrl.startsWith('/') || (originalUrl.indexOf('://') > 0)) {
+                if (log.debugEnabled) {
+                    log.debug "CSS Preprocessor leaving $originalUrl as is"
+                }
                 return "${prefix}${originalUrl}${suffix}"
             }
 
             def uri
             try {
-                uri = 'resource:'+URLUtils.relativeURI(resource.sourceUrl, originalUrl)
+                uri = 'resource:'+URLUtils.relativeURI(resource.originalUrl, originalUrl)
+                if (log.debugEnabled) {
+                    log.debug "CSS Preprocessor converted $originalUrl to $uri temporarily"
+                }
             } catch (URISyntaxException sex) {
                 if (log.warnEnabled) {
-                    log.warn "Cannot resolve CSS resource, leaving link as is: ${originalUrl}"
+                    log.warn "Cannot resolve CSS resource [${originalUrl}] relative to [${resource.originalUrl}], leaving link as is: ${originalUrl}"
                 }
             }
 
             if (uri) {
                 if (uri.indexOf('/../') >= 0) {
+                    if (log.debugEnabled) {
+                        log.debug "CSS Preprocessor falling back to $originalUrl because $uri is above root"
+                    }
                     uri = originalUrl // Fall back to original, its above processed root
                 }
                 if (log.debugEnabled) {
@@ -61,5 +86,6 @@ class CSSPreprocessorResourceMapper {
             }
 
         }
+        return null
     }
 }

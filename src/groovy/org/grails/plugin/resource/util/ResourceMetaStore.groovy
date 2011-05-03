@@ -67,15 +67,25 @@ class ResourceMetaStore {
      * A threadsafe synchronous method to get an existing resource or create an ad-hoc resource
      */
     ResourceMeta getOrCreateAdHocResource(String uri, Closure resourceCreator) {
+        if (log.debugEnabled) {
+            log.debug "getOrCreateAdHocResource for ${uri}"
+        }
+
         def latch = latches.get(uri)
 
         if (latch == null) {
+            if (log.debugEnabled) {
+                log.debug "getOrCreateAdHocResource for ${uri}, latch is null"
+            }
             def thisLatch = new CountDownLatch(1)
             def otherLatch = latches.putIfAbsent(uri, thisLatch)
             if (otherLatch == null) {
                 // process resource
                 def resource
                 try {
+                    if (log.debugEnabled) {
+                        log.debug "getOrCreateAdHocResource for ${uri}, creating resource as not found"
+                    }
                     resource = resourceCreator()
                     if (log.debugEnabled) {
                         log.debug "Creating resource for URI $uri returned ${resource}"
@@ -94,10 +104,16 @@ class ResourceMetaStore {
                 thisLatch.countDown()
                 return resource                
             } else {
+                if (log.debugEnabled) {
+                    log.debug "getOrCreateAdHocResource for ${uri}, waiting for latch, another thread has crept in and is creating resource"
+                }
                 otherLatch.await()
                 return resourcesByURI[uri]
             }
         } else {
+            if (log.debugEnabled) {
+                log.debug "getOrCreateAdHocResource for ${uri}, waiting for latch, another thread is creating resource"
+            }
             latch.await()
             return resourcesByURI[uri]
         }

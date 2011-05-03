@@ -136,7 +136,7 @@ class ResourceService implements InitializingBean {
         // @todo query params are lost at this point for ad hoc resources, this needs fixing
         def res
         try {
-            res = getResourceMetaForURI(uri, true)
+            res = getResourceMetaForURI(uri, false)
         } catch (FileNotFoundException fnfe) {
             response.sendError(404, fnfe.message)
             return
@@ -180,23 +180,25 @@ class ResourceService implements InitializingBean {
         def uri = ResourceService.removeQueryParams(extractURI(request, false))
         def inf
         try {
-            inf = getResourceMetaForURI(uri)
+            inf = getResourceMetaForURI(uri, false)
         } catch (FileNotFoundException fnfe) {
             response.sendError(404, fnfe.message)
             return
         }
         
-        if (Environment.current == Environment.DEVELOPMENT) {
-            if (inf) {
-                response.setHeader('X-Grails-Resources-Original-Src', inf.sourceUrl)
+        if (inf) {
+            if (Environment.current == Environment.DEVELOPMENT) {
+                if (inf) {
+                    response.setHeader('X-Grails-Resources-Original-Src', inf.sourceUrl)
+                }
             }
-        }
 
-        // See if its an ad-hoc resource that has come here via a relative link
-        // @todo make this development mode only by default?
-        if (inf.actualUrl != uri) {
-            redirectToActualUrl(inf, request, response)
-            return
+            // See if its an ad-hoc resource that has come here via a relative link
+            // @todo make this development mode only by default?
+            if (inf.actualUrl != uri) {
+                redirectToActualUrl(inf, request, response)
+                return
+            }
         }
 
         // If we have a file, go for it
@@ -299,8 +301,8 @@ class ResourceService implements InitializingBean {
         def res = processedResourcesByURI.getOrCreateAdHocResource(uri) { -> 
 
             if (!adHocResource) {
-                throw new IllegalArgumentException(
-                    "We can't create resources on the fly unless they are 'ad-hoc'! Resource URI: $uri")
+                log.warn("We can't create resources on the fly unless they are 'ad-hoc', we're going to 404. Resource URI: $uri")
+                return null
             }
             
             // If we don't already have it, its either not been declared in the DSL or its Synthetic and its
@@ -479,6 +481,14 @@ class ResourceService implements InitializingBean {
             // Once delegated, its the delegate that needs to be processed, not the original
             def phase
             for (m in resourceMappers) {
+                if (r.delegating) {
+                    break;
+                }
+
+                if (log.debugEnabled) {
+                    log.debug "Running mapper ${m.name} (${m.artefact})"
+                }
+                
                 if (m.phase != phase) {
                     phase = m.phase
                     if (log.debugEnabled) {
@@ -488,9 +498,6 @@ class ResourceService implements InitializingBean {
                 
                 if (log.debugEnabled) {
                     log.debug "Applying mapper ${m.name} to ${r.processedFile} - delegating? ${r.delegating}"
-                }
-                if (r.delegating) {
-                    break;
                 }
                 m.invokeIfNotExcluded(r)
                 if (log.debugEnabled) {
