@@ -138,7 +138,7 @@ class ResourceService implements InitializingBean {
         // @todo query params are lost at this point for ad hoc resources, this needs fixing
         def res
         try {
-            res = getResourceMetaForURI(uri, false)
+            res = getResourceMetaForURI(uri, true)
         } catch (FileNotFoundException fnfe) {
             response.sendError(404, fnfe.message)
             return
