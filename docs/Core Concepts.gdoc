@@ -1,0 +1,49 @@
+h1. Core Concepts
+
+h2. Declared resources
+
+Normally you will declare most of your resources (or plugins that provide
+libraries will do this for you), and the Resources framework will know about
+your application's core resources in advance.
+
+These resources will be processed at startup up and be ready to go from the
+moment your application is able to receive requests.
+
+You reference these resources in your views using the resource tags e.g.
+r:use, r:img, r:resource, r:resourceLink.
+
+h2. Ad-hoc resources
+
+Some resources are not declared in advance. These are typically images that
+you use throughout your HTML but do not wish to declare in advance, as well as
+those referenced by CSS files you have declared.
+
+These are called "ad-hoc" resources because you have provided no formal
+resource definition for them. As such they assume default behaviour for their
+resource type, and if you need to alter this behaviour (for example provide
+extra HTML attributes for them), you should declare them explicitly.
+
+You link to ad-hoc resources either implicitly by including, for example, a
+CSS file that references other image resources, or by using the r:img,
+r:resource or r:resourceLink tags.
+
+h2. Legacy resources
+
+With existing applications and plugins that do not use the Resources
+framework, the r:xxx tags are not used and few if any resources are declared.
+
+In this eventuality, Resources framework intercepts these requests and issues
+redirects to the processed versions of these resources. This means that
+regular <img> tags, CSS, <script> tags and so on continue to use processed
+resources, albeit with an intermediary redirect.
+
+This is rather inefficient, but may still convey performance improvements to
+apps with zero effort, with the caveat that the redirect requests will always
+occur (although these are similar to an ETag If-None-Match request).
+
+Leaving your code "as-is" with these legacy resources is in no way
+recommended, but serves as a starting point to using the Resources framework,
+and helps you identify which resources need to be either declared or linked to
+using r:xxx tags to create ad-hoc resources for them without redirect.
+
+
