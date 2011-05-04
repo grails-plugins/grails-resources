@@ -47,6 +47,8 @@ class ResourceService implements InitializingBean {
         js:[disposition: 'defer']
     ]
 
+    def grailsLinkGenerator
+    
     def staticUrlPrefix
     
     private File workDir
@@ -385,6 +387,13 @@ class ResourceService implements InitializingBean {
             assert f.delete()
         }
         return f
+    }
+    
+    /**
+     * Take g.resource style args and create a link to that original resource in the app
+     */
+    String buildLinkToOriginalResource(Map args) {
+        grailsLinkGenerator.resource(args)
     }
     
     /**

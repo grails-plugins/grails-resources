@@ -3,6 +3,8 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean
 import org.springframework.core.io.FileSystemResource
 
+import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
+
 /**
  * @author Marc Palmer (marc@grailsrocks.com)
  * @author Luke Daley (ld@ldaley.com)
@@ -54,6 +56,12 @@ class ResourcesGrailsPlugin {
     def getAdHocPatterns() {
         def patterns = resourcesConfig.adhoc.patterns
         patterns instanceof List ? patterns : DEFAULT_ADHOC_PATTERNS
+    }
+    
+    def doWithSpring = { ->
+        if (!springConfig.containsBean('grailsLinkGenerator')) {
+            grailsLinkGenerator(HalfBakedLegacyLinkGenerator)
+        }
     }
     
     def doWithWebDescriptor = { webXml ->
