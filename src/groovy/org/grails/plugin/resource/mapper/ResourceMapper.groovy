@@ -30,6 +30,14 @@ class ResourceMapper {
         }
     }()
     
+    @Lazy operation = {
+        try {
+            artefact.operation
+        } catch (MissingPropertyException e) {
+            null
+        }
+    }()
+    
     @Lazy priority = {
         try {
             artefact.priority
@@ -110,7 +118,7 @@ class ResourceMapper {
             }
             
             return false
-        } else if (resource.excludesMapper(name)) {
+        } else if (resource.excludesMapperOrOperation(name, operation)) {
             if (log.debugEnabled) {
                 log.debug "Skipping ${resource.sourceUrl} due to definition excluding mapper"
             }

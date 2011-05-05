@@ -112,6 +112,37 @@ class ResourceTagLib {
     }
     
     /**
+     *
+     * @attr uri
+     * @attr type
+     */
+    def doResourceLink = { attrs ->
+        def uri = attrs.remove('uri')
+        def type = attrs.remove('type')
+        if (!type) {
+            type = FilenameUtils.getExtension(uri)
+        }
+        
+        // Work out type from extension if not specified as an arg
+        if (!type) {
+            type = FilenameUtils.getExtension(urlForExtension)
+        }
+        
+        def typeInfo = SUPPORTED_TYPES[type]?.clone()
+        if (!typeInfo) {
+            throwTagError "I can't work out the type of ${urlForExtension} with type [${type}]. Please check the URL, resource definition or specify [type] attribute"
+        }
+        
+        def writerName = typeInfo.remove('writer')
+        def writer = LINK_WRITERS[writerName ?: 'link']
+
+        // Allow attrs to overwrite any constants
+        attrs.each { typeInfo.remove(it.key) }
+
+        out << writer(uri, typeInfo, attrs)
+    }
+    
+    /**
      * Render an appropriate resource link for a resource - WHETHER IT IS PROCESSED BY THIS PLUGIN OR NOT.
      *
      * IMPORTANT: The point is that devs can use this for smart links in <head> whether or not they are using the resource
@@ -164,21 +195,13 @@ class ResourceTagLib {
         }
         resolveArgs.disposition = disposition
 
+        println "REsource args $resolveArgs"
         info = resolveResourceAndURI(resolveArgs)
 
+        println "REsource info $info"
         // Copy in the tag attributes from the resource's declaration
         if (info.resource && info.resource.tagAttributes) {
             attrs.putAll(info.resource.tagAttributes)
-        }
-        
-        // Work out type from extension if not specified as an arg
-        if (!type) {
-            type = FilenameUtils.getExtension(urlForExtension)
-        }
-        
-        def typeInfo = SUPPORTED_TYPES[type]?.clone()  // must clone, we mutate this
-        if (!typeInfo) {
-            throwTagError "I can't work out the type of ${urlForExtension} with type [${type}]. Please check the URL, resource definition or specify [type] attribute"
         }
         
         // If we found a resource (i.e. not debug mode) and disposition is not what we're rendering, skip
@@ -190,15 +213,17 @@ class ResourceTagLib {
         
         // Don't do resource check if this isn't a defer/head resource
         if (!(disposition in ['defer', 'head']) || 
-                notAlreadyIncludedResource(info.debug ? info.uri : info.resource.linkUrl)) {
-            def writerName = typeInfo.remove('writer')
-            def writer = LINK_WRITERS[writerName ?: 'link']
+                notAlreadyIncludedResource(info.resource?.linkUrl ?: info.uri)) {
+            attrs.type = type
+            if (info.debug) {
+                attrs.uri = info.resource?.linkUrl
+            }
+            if (!attrs.uri) {
+                attrs.uri = info.uri
+            }
+            def output = doResourceLink(attrs).toString()
+
             def wrapper = attrs.remove('wrapper')
-
-            // Allow attrs to overwrite any constants
-            attrs.each { typeInfo.remove(it.key) }
-
-            def output = writer(info.uri, typeInfo, attrs)
             if (wrapper) {
                 out << wrapper(output)
             } else {
@@ -381,7 +406,7 @@ class ResourceTagLib {
         def uri = attrs.remove('uri')
         def abs = uri?.indexOf('://') >= 0
         if (!uri || !abs) {
-            uri = uri ? ctxPath+uri : g.resource(attrs).toString()
+            uri = ctxPath + (uri ?: resourceService.buildLinkToOriginalResource(attrs))
         }
         def debugMode = resourceService.isDebugMode(request)
 

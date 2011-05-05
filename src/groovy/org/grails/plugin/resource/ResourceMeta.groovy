@@ -239,8 +239,12 @@ class ResourceMeta {
         setActualUrl(p)
     }
     
-    boolean excludesMapper(String mapperName) {
-        attributes["no$mapperName".toString()]
+    boolean excludesMapperOrOperation(String mapperName, String operationName) {
+        def ok = attributes["no$mapperName".toString()]
+        if (ok && operationName) {
+            ok = attributes["no$operationName".toString()]
+        }
+        return ok
     }
     
     void wasProcessedByMapper(ResourceMapper mapper) {
