@@ -390,14 +390,15 @@ class ResourceService implements InitializingBean {
     }
     
     /**
-     * Take g.resource style args and create a link to that original resource in the app
+     * Take g.resource style args and create a link to that original resource in the app, relative to the app context path
      */
     String buildLinkToOriginalResource(Map args) {
+        args.contextPath = '' // make it relative
         grailsLinkGenerator.resource(args)
     }
-    
+
     /**
-     * Returns the actual URL for loading the resource specified by the uri.
+     * Returns the actual URL for loading the resource specified by the uri
      * By default this is a file in the app's WAR, but this could support other schemes
      *
      */

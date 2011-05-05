@@ -71,6 +71,8 @@ class ResourceTagLib {
     
     def resourceService
     
+    def grailsLinkGenerator
+    
     boolean notAlreadyIncludedResource(url) {
         url = url.toString()
         if (log.debugEnabled) {
@@ -406,7 +408,18 @@ class ResourceTagLib {
         def uri = attrs.remove('uri')
         def abs = uri?.indexOf('://') >= 0
         if (!uri || !abs) {
-            uri = ctxPath + (uri ?: resourceService.buildLinkToOriginalResource(attrs))
+            if (uri) {
+                uri = ctxPath + uri
+            } else {
+                // Grails 1.4 we have to use the link generator to avoid stack overflow calling back into us
+                // via g.resource
+                if (grailsLinkGenerator)
+                    attrs.contextPath = ''
+                    uri = grailsLinkGenerator.resource(attrs)
+                } else {
+                    uri = g.resource(attrs).toString()
+                }
+            }
         }
         def debugMode = resourceService.isDebugMode(request)
 

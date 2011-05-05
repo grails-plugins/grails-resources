@@ -55,6 +55,14 @@ class ResourceMappersFactory {
             }
         }
         
+        def operations = mapperOrdering.operation
+        mapperOrdering.each { m ->
+            if (m.name in operations) {
+                throw new IllegalArgumentException(
+                    "The mapper ${m.name} is not valid because there is an operation with the same name. Please change the name of the mapper.")
+            }
+        }
+        
         // Let's throw people a bone with some nice debug
         if (log.debugEnabled) {
             def s = new StringBuilder()

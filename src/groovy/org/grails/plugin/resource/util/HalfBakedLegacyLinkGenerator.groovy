@@ -6,8 +6,11 @@ import grails.util.Environment
 /**
  * This is a horrible hack to replicate what we need from g.resource() for pre-Grails 1.4 apps
  * where in Grails 1.4 we now have the wonderful grailsLinkGenerator bean
+ *
+ * NOTE this is a lame implementation that NEVER adds servletContextPath!
  */
 class HalfBakedLegacyLinkGenerator {
+    
     String resource(Map args) {
         getResourceUrl(args)
     }
