@@ -1,6 +1,11 @@
 The Plan
 ========
 
+Refactor
+=========
+
+- ResourceService needs to become ResourcesManager class in src/groovy, added to spring ctx as grailsResourcesManager
+- change package on all source to org.grails.plugin.resources.* from the singular org.grails.plugin.resource
 
 Adapting existing stuff
 =======================
