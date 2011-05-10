@@ -197,10 +197,8 @@ class ResourceTagLib {
         }
         resolveArgs.disposition = disposition
 
-        println "REsource args $resolveArgs"
         info = resolveResourceAndURI(resolveArgs)
 
-        println "REsource info $info"
         // Copy in the tag attributes from the resource's declaration
         if (info.resource && info.resource.tagAttributes) {
             attrs.putAll(info.resource.tagAttributes)
