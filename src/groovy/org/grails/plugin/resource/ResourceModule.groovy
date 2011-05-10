@@ -90,7 +90,7 @@ class ResourceModule {
             }
         }
         if (url == null) {
-            throw new IllegalArgumentException("Cannot create resource $url, url is not set")
+            throw new IllegalArgumentException("Cannot create resource with arguments ${args}, url is not set")
         }
         def r = new ResourceMeta(sourceUrl: url , workDir: svc.workDir, module:this)
         def ti = svc.getDefaultSettingsForURI(url, args.attrs?.type)

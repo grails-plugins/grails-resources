@@ -92,7 +92,11 @@ class ResourceMetaStore {
                     }
                 } catch (Throwable t) {
                     latches[uri] = CLOSED_LATCH // so that future calls for broken (not found) resources don't block forever
-                    throw t
+                    if (t instanceof FileNotFoundException) {
+                        log.warn t.message
+                    } else {
+                        throw t
+                    }
                 }
 
                 // It may be null if it is not found / broken in some way

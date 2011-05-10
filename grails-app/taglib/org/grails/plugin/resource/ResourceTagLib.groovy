@@ -413,7 +413,7 @@ class ResourceTagLib {
             } else {
                 // Grails 1.4 we have to use the link generator to avoid stack overflow calling back into us
                 // via g.resource
-                if (grailsLinkGenerator)
+                if (grailsLinkGenerator) {
                     attrs.contextPath = ''
                     uri = grailsLinkGenerator.resource(attrs)
                 } else {

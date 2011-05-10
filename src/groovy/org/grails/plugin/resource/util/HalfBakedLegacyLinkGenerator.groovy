@@ -11,6 +11,8 @@ import grails.util.Environment
  */
 class HalfBakedLegacyLinkGenerator {
     
+    def pluginManager
+    
     String resource(Map args) {
         getResourceUrl(args)
     }

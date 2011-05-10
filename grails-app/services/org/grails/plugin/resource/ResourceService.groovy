@@ -326,7 +326,7 @@ class ResourceService implements InitializingBean {
                 r.declaringResource = declaringResource
             }
         
-            r = prepareResource(r, adHocResource)
+            r = prepareResource(r, adHocResource)            
 
             // Only if the URI mapped to a real file, do we add the resource
             // Prevents DoS with zillions of 404s
@@ -534,7 +534,11 @@ class ResourceService implements InitializingBean {
         m.resources.each { r ->
             def u = r.sourceUrl
             processedResourcesByURI.addDeclaredResource { ->
-                prepareResource(r, false)
+                try {
+                    prepareResource(r, false)
+                } catch (FileNotFoundException fnfe) {
+                    log.warn fnfe.message
+                }
             }
             allResourcesByOriginalSourceURI[u] = r
         }
@@ -704,7 +708,11 @@ class ResourceService implements InitializingBean {
         }
         resources?.each { r ->            
             processedResourcesByURI.addDeclaredResource { ->
-                prepareResource(r, false)
+                try {
+                    prepareResource(r, false)
+                } catch (FileNotFoundException fnfe) {
+                    log.warn fnfe.message
+                }
             }
         }
     }

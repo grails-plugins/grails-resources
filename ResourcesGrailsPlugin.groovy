@@ -60,7 +60,9 @@ class ResourcesGrailsPlugin {
     
     def doWithSpring = { ->
         if (!springConfig.containsBean('grailsLinkGenerator')) {
-            grailsLinkGenerator(HalfBakedLegacyLinkGenerator)
+            grailsLinkGenerator(HalfBakedLegacyLinkGenerator) {
+                pluginManager = ref('pluginManager')
+            }
         }
     }
     
