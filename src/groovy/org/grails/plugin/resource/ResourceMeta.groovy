@@ -240,11 +240,11 @@ class ResourceMeta {
     }
     
     boolean excludesMapperOrOperation(String mapperName, String operationName) {
-        def ok = attributes["no$mapperName".toString()]
-        if (ok && operationName) {
-            ok = attributes["no$operationName".toString()]
+        def exclude = attributes["no$mapperName".toString()]
+        if (!exclude && operationName) {
+            exclude = attributes["no$operationName".toString()]
         }
-        return ok
+        return exclude
     }
     
     void wasProcessedByMapper(ResourceMapper mapper) {

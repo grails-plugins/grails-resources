@@ -45,6 +45,66 @@ class ResourceMapperTests extends GrailsUnitTestCase {
         assertTrue m.invokeIfNotExcluded(testMeta2)
 
     }
+
+    void testResourceExclusionOfMapper() {
+          def artefact = new DummyMapper()
+          artefact.defaultIncludes = ['**/*.*']
+          artefact.name = 'minify'
+          artefact.map = { res, config ->
+          }
+
+          def m = new ResourceMapper(artefact, [minify:[:]])
+
+          def artefact2 = new DummyMapper()
+          artefact2.defaultIncludes = ['**/*.*']
+          artefact2.name = 'other'
+          artefact2.map = { res, config ->
+          }
+
+          def m2 = new ResourceMapper(artefact2, [other:[:]])
+
+          def testMeta = new ResourceMeta()
+          testMeta.sourceUrl = '/images/test.png'
+          testMeta.actualUrl = '/images/test.png'
+          testMeta.contentType = "image/png"
+          testMeta.attributes.nominify = true
+
+          assertFalse m.invokeIfNotExcluded(testMeta)
+          assertTrue m2.invokeIfNotExcluded(testMeta)
+    }
+
+    void testResourceExclusionOfOperation() {
+          def artefact = new DummyMapper()
+          artefact.defaultIncludes = ['**/*.*']
+          artefact.name = 'yuicssminifier'
+          artefact.operation = 'minify'
+          artefact.map = { res, config ->
+          }
+
+          def m = new ResourceMapper(artefact, [minify:[:]])
+
+          def artefact2 = new DummyMapper()
+          artefact2.defaultIncludes = ['**/*.*']
+          artefact2.name = 'googlecssminifier'
+          artefact2.operation = 'minify'
+          artefact2.map = { res, config ->
+          }
+
+          def m2 = new ResourceMapper(artefact2, [other:[:]])
+
+          def testMeta = new ResourceMeta()
+          testMeta.sourceUrl = '/images/test.css'
+          testMeta.actualUrl = '/images/test.css'
+          testMeta.contentType = "text/css"
+          testMeta.attributes.nominify = true
+
+          assertFalse m.invokeIfNotExcluded(testMeta)
+          assertFalse m2.invokeIfNotExcluded(testMeta)
+
+          testMeta.attributes.nominify = false
+          assertTrue m.invokeIfNotExcluded(testMeta)
+          assertTrue m2.invokeIfNotExcluded(testMeta)
+    }
 }
 
 class DummyMapper {
@@ -52,4 +112,5 @@ class DummyMapper {
     def defaultIncludes
     def name
     def map
+    def operation
 }
