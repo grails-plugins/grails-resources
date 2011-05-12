@@ -3,6 +3,7 @@ package org.grails.plugin.resource
 import grails.util.Environment
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.apache.commons.io.FilenameUtils
+import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
 
 /**
  * This taglib handles creation of all the links to resources, including the smart de-duping of them.
@@ -409,16 +410,13 @@ class ResourceTagLib {
             if (uri) {
                 uri = ctxPath + uri
             } else {
-                // Grails 1.4 we have to use the link generator to avoid stack overflow calling back into us
+                // use the link generator to avoid stack overflow calling back into us
                 // via g.resource
-                if (grailsLinkGenerator) {
-                    attrs.contextPath = ''
-                    uri = grailsLinkGenerator.resource(attrs)
-                } else {
-                    uri = g.resource(attrs).toString()
-                }
+                attrs.contextPath = ctxPath
+                uri = grailsLinkGenerator.resource(attrs)
             }
         }
+        
         def debugMode = resourceService.isDebugMode(request)
 
         // Get out quick and add param to tell filter we don't want any fancy stuff

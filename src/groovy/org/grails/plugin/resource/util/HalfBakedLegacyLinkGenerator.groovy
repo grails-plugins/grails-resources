@@ -62,6 +62,10 @@ class HalfBakedLegacyLinkGenerator {
             }
         }
 
+        if (args.contextPath) {
+            s << args.contextPath
+        }
+        
         def dir = args['dir']
         if (args.plugin) {
             s << pluginManager.getPluginPath(args.plugin) ?: ''

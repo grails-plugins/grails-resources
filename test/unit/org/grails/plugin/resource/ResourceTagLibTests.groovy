@@ -2,6 +2,8 @@ package org.grails.plugin.resource
 
 import grails.test.*
 
+import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
+
 class ResourceTagLibTests extends TagLibUnitTestCase {
     protected void setUp() {
         super.setUp()
@@ -13,6 +15,54 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         super.tearDown()
     }
 
+    void testLinkResolutionForGrails1_4() {
+        tagLib.grailsLinkGenerator = [
+            resource: { attrs ->
+                "${attrs.contextPath}/${attrs.dir}/${attrs.file}"
+            }
+        ]
+        tagLib.resourceService = [
+            isDebugMode: { r -> false },
+            getResourceMetaForURI: { uri, adhoc, declRes,  postProc -> 
+                assertEquals "/images/favicon.ico", uri
+                def r = new ResourceMeta()
+                r.with {
+                    sourceUrl = uri
+                    actualUrl = uri
+                }
+                return r
+            },
+            staticUrlPrefix: '/static'
+        ]
+
+        tagLib.request.contextPath = "/CTX"
+        
+        def res = tagLib.resolveResourceAndURI(dir:'images', file:'favicon.ico')
+        assertEquals "/CTX/static/images/favicon.ico", res.uri
+    }
+    
+    void testLinkResolutionForGrails1_3AndEarlier() {
+        tagLib.grailsLinkGenerator = new HalfBakedLegacyLinkGenerator()
+        tagLib.resourceService = [
+            isDebugMode: { r -> false },
+            getResourceMetaForURI: { uri, adhoc, declRes,  postProc -> 
+                assertEquals "/images/favicon.ico", uri
+                def r = new ResourceMeta()
+                r.with {
+                    sourceUrl = uri
+                    actualUrl = uri
+                }
+                return r
+            },
+            staticUrlPrefix: '/static'
+        ]
+
+        tagLib.request.contextPath = "/CTX"
+
+        def res = tagLib.resolveResourceAndURI(dir:'images', file:'favicon.ico')
+        assertEquals "/CTX/static/images/favicon.ico", res.uri
+    }
+    
     void testResourceLinkWithRelOverride() {
         def testMeta = new ResourceMeta()
         testMeta.sourceUrl = '/css/test.less'

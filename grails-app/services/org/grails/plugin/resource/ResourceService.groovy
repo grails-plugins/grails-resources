@@ -173,7 +173,7 @@ class ResourceService implements InitializingBean {
     /**
      * Process a URI where the input URI matches a cached and declared resource URI,
      * without any redirects. This is the real deal
-     */
+     */ 
     void processDeclaredResource(request, response) {
         if (log.debugEnabled) {
             log.debug "Handling resource ${request.requestURI}"
@@ -393,7 +393,7 @@ class ResourceService implements InitializingBean {
      * Take g.resource style args and create a link to that original resource in the app, relative to the app context path
      */
     String buildLinkToOriginalResource(Map args) {
-        args.contextPath = '' // make it relative
+        args.contextPath = '' // make it relative, otherwise we get absolute links from Grails 1.4
         grailsLinkGenerator.resource(args)
     }
 

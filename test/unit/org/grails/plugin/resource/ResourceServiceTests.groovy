@@ -40,4 +40,24 @@ class ResourceServiceTests extends GrailsUnitTestCase {
         assertEquals '/somehack.xml#whatever', meta.linkUrl
     }
 
+    void testBuildResourceURIForGrails1_4() {
+        def r = new ResourceMeta()
+        r.sourceUrl = '/somehack.xml#whatever'
+        
+        def meta = svc.prepareResource(r, true)
+        assertNotNull meta
+        assertEquals '/somehack.xml', meta.actualUrl
+        assertEquals '/somehack.xml#whatever', meta.linkUrl
+    }
+
+    void testBuildResourceURIForGrails1_3AndLower() {
+        def r = new ResourceMeta()
+        r.sourceUrl = '/somehack.xml#whatever'
+        
+        def meta = svc.prepareResource(r, true)
+        assertNotNull meta
+        assertEquals '/somehack.xml', meta.actualUrl
+        assertEquals '/somehack.xml#whatever', meta.linkUrl
+    }
+
 }
