@@ -119,8 +119,9 @@ class ResourceTagLib {
     def doResourceLink = { attrs ->
         def uri = attrs.remove('uri')
         def type = attrs.remove('type')
+        def urlForExtension = ResourceService.removeQueryParams(uri)
         if (!type) {
-            type = FilenameUtils.getExtension(uri)
+            type = FilenameUtils.getExtension(urlForExtension)
         }
         
         def typeInfo = SUPPORTED_TYPES[type]?.clone()
@@ -169,22 +170,18 @@ class ResourceTagLib {
         
         def resolveArgs = [:]
         def type = attrs.remove('type')
-        def urlForExtension
         
         if (url == null) {
             if (attrs.uri) {
                 // Might be app-relative resource URI 
                 resolveArgs.uri = attrs.remove('uri')
-                urlForExtension = ResourceService.removeQueryParams(resolveArgs.uri)
             } else {
                 resolveArgs.plugin = attrs.remove('plugin')
                 resolveArgs.dir = attrs.remove('dir')
                 resolveArgs.file = attrs.remove('file')
-                urlForExtension = resolveArgs.file
             }
         } else if (url instanceof Map) {
             resolveArgs.putAll(url)
-            urlForExtension = url.file
         }
 
 

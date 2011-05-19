@@ -720,6 +720,7 @@ class ResourceService implements InitializingBean {
                 s1 << "             -- source Extension: ${resource.sourceUrlExtension}\n"
                 s1 << "             -- query params/fragment: ${resource.sourceUrlParamsAndFragment}\n"
                 s1 << "             -- url for linking: ${resource.linkUrl}\n"
+                s1 << "             -- content length: ${resource.contentLength} (original ${resource.originalContentLength})\n"
                 s1 << "             -- link override: ${resource.linkOverride}\n"
                 s1 << "             -- attributes: ${resource.attributes}\n"
                 s1 << "             -- tag attributes: ${resource.tagAttributes}\n"

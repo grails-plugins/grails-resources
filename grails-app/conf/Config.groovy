@@ -16,6 +16,8 @@ log4j = {
     
 }
 
+//grails.resources.processing.enabled = false
+
 environments {
     development {
         grails.serverURL = "http://localhost:8080/resources"

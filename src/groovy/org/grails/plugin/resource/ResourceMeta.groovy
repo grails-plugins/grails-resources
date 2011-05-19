@@ -110,28 +110,49 @@ class ResourceMeta {
     
     private String _linkUrl
     
+    private Boolean _resourceExists
+    
     /**
      * The URI of the resource that resulted in the processing of this resource, or null
      * For resources ref'd in CSS or stuff loaded up by bundles for example
      */
     String declaringResource
     
-    Integer contentLength
+    final Integer contentLength
     
+    final Integer originalContentLength
+
     boolean isOriginalAbsolute() {
         sourceUrl.indexOf(':/') > 0
     }
     
+    void updateContentLength() {
+        if (processedFile) {
+            this.@contentLength = processedFile.size().toInteger()
+        } else if (originalResource?.URL.protocol in ['jndi', 'file']) {
+            this.@contentLength = originalResource?.URL.openConnection().contentLength        
+        } else {
+            this.@contentLength = 0
+        }
+    }
+
     void setOriginalResource(Resource res) {
         this.originalResource = res
         this.originalLastMod = res.lastModified()
+        _resourceExists = res.exists()
+        this.@originalContentLength = originalResource?.URL.openConnection().contentLength        
+        updateContentLength()
+    }
+    
+    void setProcessedFile(File f) {
+        this.processedFile = f
+        _resourceExists = f.exists()
+        updateContentLength()
     }
 
     private void copyOriginalResourceToWorkArea() {
         def inputStream = this.originalResource.inputStream
         try {
-            setActualUrl(this.sourceUrl)
-
             // Now copy in the resource from this app deployment into the cache, ready for mutation
             this.processedFile << inputStream
         } finally {
@@ -144,7 +165,7 @@ class ResourceMeta {
      * the processedFile will be null and the original resource is used
      */
     InputStream newInputStream() {
-        return processedFile ? processedFile.newInputStream() : originalResource.inputStream()
+        return processedFile ? processedFile.newInputStream() : originalResource.inputStream
     }
     
     // Hook for when preparation is starting
@@ -152,8 +173,7 @@ class ResourceMeta {
         def uri = this.sourceUrl
         if (!uri.contains('://')) {
 
-            def resourceExists = this.originalResource?.exists()
-            if (!resourceExists) {
+            if (!exists()) {
         		def uriWithoutFragment = uri
         		if (uri.contains('#')) {
         			uriWithoutFragment = uri.substring(0, uri.indexOf('#'))
@@ -173,21 +193,24 @@ class ResourceMeta {
 
                 this.contentType = resourceService.getMimeType(uriWithoutFragment)
                 if (log.debugEnabled) {
-                    log.debug "Resource [$uriWithoutFragment] has content type [${this.contentType}]"
+                    log.debug "Resource [$uriWithoutFragment] ($origResourceURL) has content type [${this.contentType}]"
                 }
 
                 setOriginalResource(new UrlResource(origResourceURL))
 
                 if (resourceService.processingEnabled) {
+                    setActualUrl(uriWithoutFragment)
+
                     setProcessedFile(resourceService.makeFileForURI(uriWithoutFragment))
                     // copy the file ready for mutation
                     this.copyOriginalResourceToWorkArea()
                 } else {
-                    setActualUrl(this.sourceUrl)
+                    setActualUrl(uriWithoutFragment)
                 }
             }
 
         } else {
+            setOriginalResource(new UrlResource(this.sourceUrl))
             setActualUrl(this.sourceUrl)
 
             log.warn "Skipping mappers for ${this.actualUrl} because its an absolute URL."
@@ -200,7 +223,7 @@ class ResourceMeta {
             if (processedFile) {
                 processedFile.setLastModified(originalLastMod ?: System.currentTimeMillis() )
             }
-            contentLength = processedFile ? processedFile.size().toInteger() : 0
+            updateContentLength()
         }
     }
     
@@ -209,7 +232,7 @@ class ResourceMeta {
     }
     
     boolean exists() {
-        processedFile != null
+        _resourceExists
     }
     
     String getLinkUrl() {
