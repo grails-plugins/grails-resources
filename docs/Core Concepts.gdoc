@@ -10,7 +10,7 @@ These resources will be processed at startup up and be ready to go from the
 moment your application is able to receive requests.
 
 You reference these resources in your views using the resource tags e.g.
-r:use, r:img, r:resource, r:resourceLink.
+r:require, r:img, r:resource, r:resourceLink.
 
 h2. Ad-hoc resources
 

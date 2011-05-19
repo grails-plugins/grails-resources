@@ -10,8 +10,8 @@
 </r:script>
 
 <!-- Here we pull in our smart links, and capture them just for sake of demo page output -->
-<r:use modules="jquery-ui, jqueryGoogle"/>
-<r:use module="app"/>
+<r:require modules="jquery-ui, jqueryGoogle"/>
+<r:require module="app"/>
 <!-- This tests resource duplication detection for explicit resourceLink -->
 <r:resourceLink dir="css" file="main.css"/>
 <!-- This tests resource tag enhancement for legacy usage -->

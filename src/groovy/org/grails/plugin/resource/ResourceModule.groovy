@@ -97,7 +97,10 @@ class ResourceModule {
         if (ti == null) {
             throw new IllegalArgumentException("Cannot create resource $url, is not a supported type")
         }
-        r.id = args.id
+
+        // Default the resource id for overrides to the url if no id supplied
+        r.id = args.id ?: url
+
         r.disposition = args.remove('disposition') ?: ti.disposition
         r.linkOverride = args.remove('linkOverride')
         r.bundle = args.remove('bundle')

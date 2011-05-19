@@ -2,3 +2,5 @@ plugin.xml
 *.zip
 dependencies.groovy
 target
+/stacktrace.log
+/test-tmp/

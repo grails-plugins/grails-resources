@@ -66,6 +66,8 @@ class ResourceService implements InitializingBean {
     def grailsApplication
     def servletContext
     
+    boolean processingEnabled
+    
     void updateDependencyOrder() {
         def modules = (modulesByName.collect { it.value }).findAll { !(it.name in [IMPLICIT_MODULE, SYNTHETIC_MODULE]) }
         def ordered = modules.collect { it.name }
@@ -92,6 +94,8 @@ class ResourceService implements InitializingBean {
         if (!servletContext) {
             servletContext = grailsApplication.mainContext.servletContext
         }
+        
+        processingEnabled = config.processing.enabled instanceof Boolean ? config.processing.enabled : true
     }
     
     File getWorkDir() {
@@ -439,8 +443,9 @@ class ResourceService implements InitializingBean {
         def uri = r.sourceUrl
         if (!uri.contains('://')) {
             r.beginPrepare(this)
-            
-            if (!r.processedFile?.exists()) {
+
+            def resourceExists = r.processedFile?.exists()
+            if (processingEnabled && !resourceExists) {
 				def uriWithoutFragment = uri
 				if (uri.contains('#')) {
 					uriWithoutFragment = uri.substring(0, uri.indexOf('#'))
@@ -481,42 +486,10 @@ class ResourceService implements InitializingBean {
                     origResource = null
                 }
             }
-
-            // Now iterate over the mappers...
-            if (log.debugEnabled) {
-                log.debug "Applying mappers to ${r.processedFile}"
-            }
-        
-            // Apply all mappers / or only those until the resource becomes delegated
-            // Once delegated, its the delegate that needs to be processed, not the original
-            def phase
-            for (m in resourceMappers) {
-                if (r.delegating) {
-                    break;
-                }
-
-                if (log.debugEnabled) {
-                    log.debug "Running mapper ${m.name} (${m.artefact})"
-                }
-                
-                if (m.phase != phase) {
-                    phase = m.phase
-                    if (log.debugEnabled) {
-                        log.debug "Entering mapper phase ${phase}"
-                    }
-                }
-                
-                if (log.debugEnabled) {
-                    log.debug "Applying mapper ${m.name} to ${r.processedFile} - delegating? ${r.delegating}"
-                }
-                m.invokeIfNotExcluded(r)
-                if (log.debugEnabled) {
-                    log.debug "Applied mapper ${m.name} to ${r.processedFile}"
-                }
-                r.wasProcessedByMapper(m)
-            }
             
-            r.endPrepare(this)
+            if (processingEnabled) {
+                applyMappers(r)
+            }
         } else {
             r.actualUrl = r.sourceUrl
 
@@ -526,6 +499,45 @@ class ResourceService implements InitializingBean {
         return r
     }
         
+    void applyMappers(ResourceMeta r) {
+
+        // Now iterate over the mappers...
+        if (log.debugEnabled) {
+            log.debug "Applying mappers to ${r.processedFile}"
+        }
+    
+        // Apply all mappers / or only those until the resource becomes delegated
+        // Once delegated, its the delegate that needs to be processed, not the original
+        def phase
+        for (m in resourceMappers) {
+            if (r.delegating) {
+                break;
+            }
+
+            if (log.debugEnabled) {
+                log.debug "Running mapper ${m.name} (${m.artefact})"
+            }
+            
+            if (m.phase != phase) {
+                phase = m.phase
+                if (log.debugEnabled) {
+                    log.debug "Entering mapper phase ${phase}"
+                }
+            }
+            
+            if (log.debugEnabled) {
+                log.debug "Applying mapper ${m.name} to ${r.processedFile} - delegating? ${r.delegating}"
+            }
+            m.invokeIfNotExcluded(r)
+            if (log.debugEnabled) {
+                log.debug "Applied mapper ${m.name} to ${r.processedFile}"
+            }
+            r.wasProcessedByMapper(m)
+        }
+        
+        r.endPrepare(this)        
+    }
+    
     void storeModule(ResourceModule m) {
         if (log.debugEnabled) {
             log.debug "Storing resource module definition ${m.dump()}"

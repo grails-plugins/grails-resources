@@ -1,6 +1,8 @@
 package org.grails.plugin.resource
 
 import grails.util.Environment
+import grails.util.GrailsUtil
+
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.apache.commons.io.FilenameUtils
 import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
@@ -55,19 +57,14 @@ class ResourceTagLib {
     ]
 
     static SUPPORTED_TYPES = [
-        css:[type:"text/css", rel:'stylesheet'],
+        css:[type:"text/css", rel:'stylesheet', media:'screen, projector'],
         js:[type:'text/javascript', writer:'js'],
 
-        gif:[type:'image/x-icon', rel:'shortcut icon'],
-        jpg:[type:'image/x-icon', rel:'shortcut icon'],
-        png:[type:'image/x-icon', rel:'shortcut icon'],
-        ico:[type:'image/x-icon', rel:'shortcut icon'],
-        appleicon:[rel:'apple-touch-icon'],
-        /*
-        Be nice to do this later but we need dynamic resource impl'd first
-        rss:[type:'application/rss+xml', rel:'alternate'], 
-        atom:[type:'application/atom+xml', rel:'alternate'], 
-        */
+        gif:[rel:'shortcut icon'],
+        jpg:[rel:'shortcut icon'],
+        png:[rel:'shortcut icon'],
+        ico:[rel:'shortcut icon'],
+        appleicon:[rel:'apple-touch-icon']
     ]
     
     def resourceService
@@ -126,14 +123,9 @@ class ResourceTagLib {
             type = FilenameUtils.getExtension(uri)
         }
         
-        // Work out type from extension if not specified as an arg
-        if (!type) {
-            type = FilenameUtils.getExtension(urlForExtension)
-        }
-        
         def typeInfo = SUPPORTED_TYPES[type]?.clone()
         if (!typeInfo) {
-            throwTagError "I can't work out the type of ${urlForExtension} with type [${type}]. Please check the URL, resource definition or specify [type] attribute"
+            throwTagError "I can't work out the type of ${uri} with type [${type}]. Please check the URL, resource definition or specify [type] attribute"
         }
         
         def writerName = typeInfo.remove('writer')
@@ -161,8 +153,13 @@ class ResourceTagLib {
      * the url.
      */
     def resourceLink = { attrs ->
+        GrailsUtil.deprecated "Tag [r:resourceLink] is deprecated please use [r:external] instead"
+        out << external(attrs)
+    }
+
+    def external = { attrs ->
         if (log.debugEnabled) {
-            log.debug "resourceLink with $attrs"
+            log.debug "external with $attrs"
         }
 
         def url = attrs.remove('url')
@@ -233,11 +230,16 @@ class ResourceTagLib {
         }
     }
     
+    def use = { attrs ->
+        GrailsUtil.deprecated "Tag [r:use] is deprecated please use [r:require] instead"
+        out << r.require(attrs)
+    }
+    
     /**
      * Indicate that a page requires a named resource module
      * This is stored in the request until layoutResources is called, we then sort out what needs rendering or not later
      */
-    def use = { attrs ->
+    def require = { attrs ->
         def trk = request.resourceDependencyTracker
         if (!trk) {
             trk = [ResourceService.IMPLICIT_MODULE] // Always include this
@@ -388,7 +390,7 @@ class ResourceTagLib {
                 if (log.debugEnabled) {
                     log.debug "Rendering one of the module's resource links: ${args}"
                 }
-                s << resourceLink(args)
+                s << external(args)
                 s << '\n'
             }
         }
@@ -470,7 +472,7 @@ class ResourceTagLib {
     }
      
     /**
-     * Get the URL for an ad-hoc resource - NOT for declared resources
+     * Get the URL for a resource
      * @todo this currently won't work for absolute="true" invocations, it should just passthrough these
      */
     def resource = { attrs ->
@@ -501,7 +503,8 @@ class ResourceTagLib {
         o << "<img src=\"${info.uri.encodeAsHTML()}\" "
         if (res) {
             def attribs = res.tagAttributes.clone()
-            attribs.putAll(attrs)
+    		def excludes = ['dir', 'uri', 'file', 'plugin']
+            attribs += attrs.findAll { !(it.key in excludes) }
             attrs = attribs
         }
         writeAttrs(attrs, o)
