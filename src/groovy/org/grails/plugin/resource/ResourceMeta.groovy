@@ -1,5 +1,8 @@
 package org.grails.plugin.resource
 
+import org.slf4j.LoggerFactory
+import org.springframework.core.io.Resource
+import org.springframework.core.io.UrlResource
 import org.apache.commons.io.FilenameUtils
 
 import org.grails.plugin.resource.mapper.ResourceMapper
@@ -14,6 +17,8 @@ import org.grails.plugin.resource.mapper.ResourceMapper
  * @author Luke Daley (ld@ldaley.com)
  */
 class ResourceMeta {
+
+    final log = LoggerFactory.getLogger(ResourceMeta)
 
     /**
      * The optional module-unique id
@@ -86,6 +91,8 @@ class ResourceMeta {
         delegate = target
     }
     
+    Resource originalResource
+    
     File processedFile
     
     long originalLastMod
@@ -109,14 +116,91 @@ class ResourceMeta {
      */
     String declaringResource
     
+    Integer contentLength
+    
+    boolean isOriginalAbsolute() {
+        sourceUrl.indexOf(':/') > 0
+    }
+    
+    void setOriginalResource(Resource res) {
+        this.originalResource = res
+        this.originalLastMod = res.lastModified()
+    }
+
+    private void copyOriginalResourceToWorkArea() {
+        def inputStream = this.originalResource.inputStream
+        try {
+            setActualUrl(this.sourceUrl)
+
+            // Now copy in the resource from this app deployment into the cache, ready for mutation
+            this.processedFile << inputStream
+        } finally {
+            inputStream?.close()                    
+        }
+    }
+
+    /**
+     * Return a new input stream for serving the resource - if processing is disabled 
+     * the processedFile will be null and the original resource is used
+     */
+    InputStream newInputStream() {
+        return processedFile ? processedFile.newInputStream() : originalResource.inputStream()
+    }
+    
     // Hook for when preparation is starting
     void beginPrepare(resourceService) {
+        def uri = this.sourceUrl
+        if (!uri.contains('://')) {
+
+            def resourceExists = this.originalResource?.exists()
+            if (!resourceExists) {
+        		def uriWithoutFragment = uri
+        		if (uri.contains('#')) {
+        			uriWithoutFragment = uri.substring(0, uri.indexOf('#'))
+        		}
+
+                def origResourceURL = resourceService.getOriginalResourceURLForURI(uriWithoutFragment)
+                if (!origResourceURL) {
+                    if (log.errorEnabled) {
+                        if (this.declaringResource) {
+                            log.error "While processing ${this.declaringResource}, a resource was required but not found: ${uriWithoutFragment}"
+                        } else {
+                            log.error "Resource not found: ${uriWithoutFragment}"
+                        }
+                    }
+                    throw new FileNotFoundException("Cannot locate resource [$uri]")
+                }
+
+                this.contentType = resourceService.getMimeType(uriWithoutFragment)
+                if (log.debugEnabled) {
+                    log.debug "Resource [$uriWithoutFragment] has content type [${this.contentType}]"
+                }
+
+                setOriginalResource(new UrlResource(origResourceURL))
+
+                if (resourceService.processingEnabled) {
+                    setProcessedFile(resourceService.makeFileForURI(uriWithoutFragment))
+                    // copy the file ready for mutation
+                    this.copyOriginalResourceToWorkArea()
+                } else {
+                    setActualUrl(this.sourceUrl)
+                }
+            }
+
+        } else {
+            setActualUrl(this.sourceUrl)
+
+            log.warn "Skipping mappers for ${this.actualUrl} because its an absolute URL."
+        }
     }
     
     // Hook for when preparation is done
     void endPrepare(resourceService) {
         if (!delegating) {
-            processedFile.setLastModified(originalLastMod ?: System.currentTimeMillis() )
+            if (processedFile) {
+                processedFile.setLastModified(originalLastMod ?: System.currentTimeMillis() )
+            }
+            contentLength = processedFile ? processedFile.size().toInteger() : 0
         }
     }
     

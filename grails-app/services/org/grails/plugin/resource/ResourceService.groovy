@@ -212,11 +212,11 @@ class ResourceService implements InitializingBean {
             if (log.debugEnabled) {
                 log.debug "Returning processed resource ${request.requestURI}"
             }
-            def data = inf.processedFile.newInputStream()
+            def data = inf.newInputStream()
             try {
                 // Now set up the response
                 response.contentType = inf.contentType
-                response.setContentLength(inf.processedFile.size().toInteger())
+                response.setContentLength(inf.contentLength)
                 response.setDateHeader('Last-Modified', inf.originalLastMod)
 
                 // Here we need to let the mapper add headers etc
@@ -440,62 +440,16 @@ class ResourceService implements InitializingBean {
             )
         }
 
-        def uri = r.sourceUrl
-        if (!uri.contains('://')) {
-            r.beginPrepare(this)
+        r.beginPrepare(this)
 
-            def resourceExists = r.processedFile?.exists()
-            if (processingEnabled && !resourceExists) {
-				def uriWithoutFragment = uri
-				if (uri.contains('#')) {
-					uriWithoutFragment = uri.substring(0, uri.indexOf('#'))
-				}
-
-                def origResourceURL = getOriginalResourceURLForURI(uriWithoutFragment)
-                if (!origResourceURL) {
-                    if (log.errorEnabled) {
-                        if (r.declaringResource) {
-                            log.error "While processing ${r.declaringResource}, a resource was required but not found: ${uriWithoutFragment}"
-                        } else {
-                            log.error "Resource not found: ${uriWithoutFragment}"
-                        }
-                    }
-                    throw new FileNotFoundException("Cannot locate resource [$uri]")
-                }
-        
-                r.contentType = getMimeType(uriWithoutFragment)
-                if (log.debugEnabled) {
-                    log.debug "Resource [$uriWithoutFragment] has content type [${r.contentType}]"
-                }
-
-                def conn = origResourceURL.openConnection()
-                def origResource = origResourceURL.newInputStream()
-                try {
-                    def f = makeFileForURI(uriWithoutFragment)
-                    // copy the file ready for mutation
-                    r.processedFile = f
-                    r.originalLastMod = conn.lastModified
-                    
-                    r.actualUrl = r.sourceUrl
-
-                    // Now copy in the resource from this app deployment into the cache, ready for mutation
-                    r.processedFile << origResource
-                } finally {
-                    conn = null
-                    origResource?.close()                    
-                    origResource = null
-                }
-            }
-            
-            if (processingEnabled) {
+        if (processingEnabled) {
+            if (!r.originalAbsolute) {
                 applyMappers(r)
             }
-        } else {
-            r.actualUrl = r.sourceUrl
-
-            log.warn "Skipping mappers for ${r.actualUrl} because its an absolute URL."
         }
         
+        r.endPrepare(this)        
+
         return r
     }
         
@@ -534,8 +488,6 @@ class ResourceService implements InitializingBean {
             }
             r.wasProcessedByMapper(m)
         }
-        
-        r.endPrepare(this)        
     }
     
     void storeModule(ResourceModule m) {
