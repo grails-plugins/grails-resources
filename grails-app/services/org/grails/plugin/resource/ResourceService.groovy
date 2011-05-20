@@ -133,7 +133,6 @@ class ResourceService implements InitializingBean {
     boolean canProcessAdHocResource(uri) {
         // Apply our own url filtering rules because servlet mapping uris are too lame
         boolean included = adHocIncludes.find { p ->
-            println "Checking include: ${p} matches ${uri}"
             PATH_MATCHER.match(p, uri) 
         }
         if (log.debugEnabled) {
@@ -528,11 +527,11 @@ class ResourceService implements InitializingBean {
             if (log.debugEnabled) {
                 log.debug "Applying mapper ${m.name} to ${r.processedFile} - delegating? ${r.delegating}"
             }
-            m.invokeIfNotExcluded(r)
+            def appliedMapper = m.invokeIfNotExcluded(r)
             if (log.debugEnabled) {
                 log.debug "Applied mapper ${m.name} to ${r.processedFile}"
             }
-            r.wasProcessedByMapper(m)
+            r.wasProcessedByMapper(m, appliedMapper)
         }
     }
     
@@ -768,6 +767,7 @@ class ResourceService implements InitializingBean {
                 s1 << "             -- url for linking: ${resource.linkUrl}\n"
                 s1 << "             -- content length: ${resource.contentLength} (original ${resource.originalContentLength})\n"
                 s1 << "             -- link override: ${resource.linkOverride}\n"
+                s1 << "             -- excluded mappers: ${resource.excludedMappers?.join(', ')}\n"
                 s1 << "             -- attributes: ${resource.attributes}\n"
                 s1 << "             -- tag attributes: ${resource.tagAttributes}\n"
                 s1 << "             -- disposition: ${resource.disposition}\n"

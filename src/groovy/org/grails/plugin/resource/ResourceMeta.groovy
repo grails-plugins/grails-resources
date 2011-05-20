@@ -122,6 +122,8 @@ class ResourceMeta {
     
     final Integer originalContentLength
 
+    Set excludedMappers
+    
     boolean isOriginalAbsolute() {
         sourceUrl.indexOf(':/') > 0
     }
@@ -155,6 +157,7 @@ class ResourceMeta {
         try {
             // Now copy in the resource from this app deployment into the cache, ready for mutation
             this.processedFile << inputStream
+            _resourceExists = this.processedFile.exists()
         } finally {
             inputStream?.close()                    
         }
@@ -347,15 +350,22 @@ class ResourceMeta {
     }
     
     boolean excludesMapperOrOperation(String mapperName, String operationName) {
-        def exclude = attributes["no$mapperName".toString()]
+        if (!excludedMappers) {
+            return false
+        }
+        
+        def exclude = excludedMappers.contains("*")
+        if (!exclude) {
+            exclude = excludedMappers.contains(mapperName)
+        }
         if (!exclude && operationName) {
-            exclude = attributes["no$operationName".toString()]
+            exclude = excludedMappers.contains(operationName)
         }
         return exclude
     }
     
-    void wasProcessedByMapper(ResourceMapper mapper) {
-        attributes["+${mapper.name}".toString()] = true
+    void wasProcessedByMapper(ResourceMapper mapper, boolean processed = true) {
+        attributes["processed.by.${mapper.name}".toString()] = processed
     }
     
     String toString() {

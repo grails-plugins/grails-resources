@@ -104,7 +104,15 @@ class ResourceModule {
         r.disposition = args.remove('disposition') ?: ti.disposition
         r.linkOverride = args.remove('linkOverride')
         r.bundle = args.remove('bundle')
-
+        r.excludedMappers = args.remove('exclude')
+        if (r.excludedMappers) {
+            if (r.excludedMappers instanceof List) {
+                r.excludedMappers = r.excludedMappers as Set
+            } else if (!(r.excludedMappers instanceof Set)) {
+                r.excludedMappers = r.excludedMappers.toString().split(',')*.trim() as Set
+            }
+        } 
+        
         // We cannot auto bundle this if attrs, wrapper are set, or its a single resource module, or its not
         // a bundle-able type
         def canAutoBundle = 

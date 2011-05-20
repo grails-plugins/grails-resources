@@ -30,7 +30,7 @@ environments {
             'app' {
                 dependsOn 'blueprint'
                 resource url:'css/main.css', bundle:'app'
-                resource url:'js/application.js', bundle:'app'
+                resource url:'js/application.js', exclude:["bundle"]
                 resource url:'images/grails_logo.png', attrs:[width:200, height:100], disposition:'inline'
             }
             'jqueryGoogle' { 

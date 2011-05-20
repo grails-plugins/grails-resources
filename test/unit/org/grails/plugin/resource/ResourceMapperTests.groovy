@@ -67,7 +67,7 @@ class ResourceMapperTests extends GrailsUnitTestCase {
           testMeta.sourceUrl = '/images/test.png'
           testMeta.actualUrl = '/images/test.png'
           testMeta.contentType = "image/png"
-          testMeta.attributes.nominify = true
+          testMeta.excludedMappers = ['minify'] as Set
 
           assertFalse m.invokeIfNotExcluded(testMeta)
           assertTrue m2.invokeIfNotExcluded(testMeta)
@@ -96,12 +96,12 @@ class ResourceMapperTests extends GrailsUnitTestCase {
           testMeta.sourceUrl = '/images/test.css'
           testMeta.actualUrl = '/images/test.css'
           testMeta.contentType = "text/css"
-          testMeta.attributes.nominify = true
+          testMeta.excludedMappers = ['minify'] as Set
 
           assertFalse m.invokeIfNotExcluded(testMeta)
           assertFalse m2.invokeIfNotExcluded(testMeta)
 
-          testMeta.attributes.nominify = false
+          testMeta.excludedMappers = null
           assertTrue m.invokeIfNotExcluded(testMeta)
           assertTrue m2.invokeIfNotExcluded(testMeta)
     }
