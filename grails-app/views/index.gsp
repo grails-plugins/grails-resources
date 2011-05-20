@@ -2,8 +2,8 @@
 <head>
 <g:set var="output">
 <!-- icon tests -->
-<r:resourceLink uri="/images/favicon.ico"/>
-<r:resourceLink uri="/images/springsource.png" type="appleicon"/>
+<r:external uri="/images/favicon.ico"/>
+<r:external uri="/images/springsource.png" type="appleicon"/>
 
 <r:script disposition="head">
     document.write("<title>This is a test</title>");
@@ -13,11 +13,11 @@
 <r:require modules="jquery-ui, jqueryGoogle"/>
 <r:require module="app"/>
 <!-- This tests resource duplication detection for explicit resourceLink -->
-<r:resourceLink dir="css" file="main.css"/>
+<r:external dir="css" file="main.css"/>
 <!-- This tests resource tag enhancement for legacy usage -->
-<r:resourceLink dir="css" file="legacy.css"/>
+<r:external dir="css" file="legacy.css"/>
 <!-- This tests ad hoc resource deferral -->
-<r:resourceLink dir="js" file="core.js"/>
+<r:external dir="js" file="core.js"/>
 <r:layoutResources/>
 </g:set>
 

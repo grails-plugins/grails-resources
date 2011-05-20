@@ -9,6 +9,7 @@ import org.springframework.beans.factory.InitializingBean
 import org.apache.commons.io.FilenameUtils
 import javax.servlet.ServletRequest
 import grails.util.Environment
+import org.springframework.util.AntPathMatcher
 
 import grails.spring.BeanBuilder
 import org.grails.plugin.resource.mapper.ResourceMappersFactory
@@ -33,6 +34,7 @@ class ResourceService implements InitializingBean {
     static transactional = false
 
     
+    static final PATH_MATCHER = new AntPathMatcher()
     static IMPLICIT_MODULE = "__@adhoc-files@__"
     static SYNTHETIC_MODULE = "__@synthetic-files@__"
     static REQ_ATTR_DEBUGGING = 'resources.debug'
@@ -68,6 +70,9 @@ class ResourceService implements InitializingBean {
     
     boolean processingEnabled
     
+    List adHocIncludes
+    List adHocExcludes 
+    
     void updateDependencyOrder() {
         def modules = (modulesByName.collect { it.value }).findAll { !(it.name in [IMPLICIT_MODULE, SYNTHETIC_MODULE]) }
         def ordered = modules.collect { it.name }
@@ -95,7 +100,12 @@ class ResourceService implements InitializingBean {
             servletContext = grailsApplication.mainContext.servletContext
         }
         
-        processingEnabled = config.processing.enabled instanceof Boolean ? config.processing.enabled : true
+        processingEnabled = getConfigParamOrDefault('processing.enabled', true)
+        adHocIncludes = getConfigParamOrDefault('adhoc.includes', ['**/*.*'])
+        adHocIncludes = adHocIncludes.collect { it.startsWith('/') ? it : '/'+it }
+
+        adHocExcludes = getConfigParamOrDefault('adhoc.excludes', [])
+        adHocExcludes = adHocExcludes.collect { it.startsWith('/') ? it : '/'+it }
     }
     
     File getWorkDir() {
@@ -120,6 +130,26 @@ class ResourceService implements InitializingBean {
         return uriStart < request.requestURI.size() ? request.requestURI[uriStart..-1] : ''
     }
 
+    boolean canProcessAdHocResource(uri) {
+        // Apply our own url filtering rules because servlet mapping uris are too lame
+        boolean included = adHocIncludes.find { p ->
+            println "Checking include: ${p} matches ${uri}"
+            PATH_MATCHER.match(p, uri) 
+        }
+        if (log.debugEnabled) {
+            log.debug "Ad-hoc resource ${uri} passed includes? ${included}"
+        }
+
+        if (included) {
+            included = !(adHocExcludes.find { PATH_MATCHER.match(it, uri) })
+            if (log.debugEnabled) {
+                log.debug "Ad-hoc resource ${uri} passed excludes? ${included}"
+            }
+        }
+        
+        return included
+    }
+
     /**
      * Process a legacy URI that points to a normal resource, not produced with our
      * own tags, and likely not referencing a declared resource.
@@ -139,24 +169,31 @@ class ResourceService implements InitializingBean {
             log.debug "Handling ad-hoc resource ${request.requestURI}"
         }
         def uri = ResourceService.removeQueryParams(extractURI(request, true))
-        // @todo query params are lost at this point for ad hoc resources, this needs fixing
-        def res
-        try {
-            res = getResourceMetaForURI(uri, true)
-        } catch (FileNotFoundException fnfe) {
-            response.sendError(404, fnfe.message)
-            return
-        }
         
-        if (Environment.current == Environment.DEVELOPMENT) {
-            if (res) {
-                response.setHeader('X-Grails-Resources-Original-Src', res?.sourceUrl)
+        // Only handle it if it should be included in processing
+        if (canProcessAdHocResource(uri)) {
+            if (log.debugEnabled) {
+                log.debug "Attempting to render ad-hoc resource ${request.requestURI}"
             }
-        }
-        if (res?.exists()) {
-            redirectToActualUrl(res, request, response)
-        } else {
-            response.sendError(404)
+            // @todo query params are lost at this point for ad hoc resources, this needs fixing?
+            def res
+            try {
+                res = getResourceMetaForURI(uri, true)
+            } catch (FileNotFoundException fnfe) {
+                response.sendError(404, fnfe.message)
+                return
+            }
+        
+            if (Environment.current == Environment.DEVELOPMENT) {
+                if (res) {
+                    response.setHeader('X-Grails-Resources-Original-Src', res?.sourceUrl)
+                }
+            }
+            if (res?.exists()) {
+                redirectToActualUrl(res, request, response)
+            } else {
+                response.sendError(404)
+            }
         }
     }
     
@@ -307,7 +344,16 @@ class ResourceService implements InitializingBean {
         def res = processedResourcesByURI.getOrCreateAdHocResource(uri) { -> 
 
             if (!adHocResource) {
-                log.warn("We can't create resources on the fly unless they are 'ad-hoc', we're going to 404. Resource URI: $uri")
+                if (log.warnEnabled) {
+                    log.warn("We can't create resources on the fly unless they are 'ad-hoc', we're going to 404. Resource URI: $uri")
+                }
+                return null
+            }
+            
+            if (!canProcessAdHocResource(uri)) {
+                if (log.debugEnabled) {
+                    log.debug("Skipping ad-hoc resource $uri as it is excluded")
+                }
                 return null
             }
             
@@ -774,6 +820,7 @@ class ResourceService implements InitializingBean {
      * default value if no explicit value was set in config
      */
     def getConfigParamOrDefault(String key, defaultValue) {
+        // Witness my evil. Can you tell what it is yet?
         def param = key.tokenize('.').inject(config) { conf, v -> conf[v] }
 
         if (param instanceof ConfigObject) {

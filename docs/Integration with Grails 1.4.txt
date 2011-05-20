@@ -26,12 +26,14 @@ All other resource-linking tags should be fine, deferring to g:resource
 Work
 =============
 DONE * Killswitch
-* data: url bugfix
+DONE * data: url bugfix
 * other critical bug fixes
 DONE * deprecate r:use & r:resourceLink ---> r:require
 * finalize noXXXX convention
-* final releases of cached&zipped
 * final 1.0 release of resources
+* final releases of cached&zipped
+
+* Document plugin with gdoc + expose on github
 * overhaul plugin portal docs
 
 Documentation
@@ -43,4 +45,3 @@ DONE * Update docs for g:javascript
 DONE * Add docs for g:external
 DONE * Add guide documentation to grails core, linking to plugin docs
 
-* Document plugin with gdoc + expose on github

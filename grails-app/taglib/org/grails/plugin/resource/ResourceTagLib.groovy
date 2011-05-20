@@ -457,13 +457,13 @@ class ResourceTagLib {
         })
         
         // We need to handle a) absolute links here for CDN, and b) base url
-        def linkUrl = res.linkUrl
+        def linkUrl = res ? res.linkUrl : uri
         def baseUrl = '' // @todo get from config
         if (linkUrl.contains('://') || baseUrl) {
             // @todo do we need to toggle http/https here based on current request protocol?
             return [uri:baseUrl ? baseUrl+linkUrl : linkUrl, resource:res]
         } else {
-            uri = ctxPath+resourceService.staticUrlPrefix+res.linkUrl
+            uri = ctxPath+resourceService.staticUrlPrefix+linkUrl
             return [uri:uri, resource:res]
         }
     }

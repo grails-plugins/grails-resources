@@ -24,6 +24,8 @@ environments {
         
         grails.resources.test.excludes = ['/images/**']
         
+        grails.resources.adhoc.excludes = ['**/js/core.js']
+        
         grails.resources.modules = {
             'app' {
                 dependsOn 'blueprint'
