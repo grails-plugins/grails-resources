@@ -337,13 +337,13 @@ class ResourceService implements InitializingBean {
      * Get the existing or create a new ad-hoc ResourceMeta for the URI.
      * @returns The resource instance - which may have a null processedFile if the resource cannot be found
      */
-    ResourceMeta getResourceMetaForURI(uri, Boolean adHocResource = true, String declaringResource = null, 
+    ResourceMeta getResourceMetaForURI(uri, Boolean createAdHocResourceIfNeeded = true, String declaringResource = null, 
             Closure postProcessor = null) {
 
         // Declared resources will already exist, but ad-hoc or synthetic may need to be created
         def res = processedResourcesByURI.getOrCreateAdHocResource(uri) { -> 
 
-            if (!adHocResource) {
+            if (!createAdHocResourceIfNeeded) {
                 if (log.warnEnabled) {
                     log.warn("We can't create resources on the fly unless they are 'ad-hoc', we're going to 404. Resource URI: $uri")
                 }
@@ -376,7 +376,7 @@ class ResourceService implements InitializingBean {
                 r.declaringResource = declaringResource
             }
         
-            r = prepareResource(r, adHocResource)            
+            r = prepareResource(r, true)            
 
             // Only if the URI mapped to a real file, do we add the resource
             // Prevents DoS with zillions of 404s
