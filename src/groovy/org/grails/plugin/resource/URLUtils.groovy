@@ -16,7 +16,18 @@ class URLUtils {
      *
      * It's quite ugly in there.
      */
-    static relativeURI(base, target) {
+    static String relativeURI(base, target) {
          new URI(base).resolve(new URI(target)).normalize().toString()
+    }
+    
+    /**
+     * Works out if url is relative, such that it would need to be corrected if
+     * the file containing the url is moved
+     */
+    static Boolean isRelativeURL(url) {
+        !url.startsWith('/') && 
+        !url.startsWith('data:') && 
+        !url.startsWith('#') && 
+        !(url.indexOf('://') >= 0)
     }
 }

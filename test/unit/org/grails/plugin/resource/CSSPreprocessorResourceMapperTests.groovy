@@ -8,12 +8,17 @@ import grails.test.*
 
 class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
     
+
+    void setUp() {
+        super.setUp()
+        mockLogging(CSSPreprocessorResourceMapper)
+        
+    }
     /**
      * This simulates a test where the image resources are moved to a new flat dir
      * but the CSS is *not* moved, to force recalculation of paths
      */
     void testCSSPreprocessing() {
-        mockLogging(CSSPreprocessorResourceMapper)
 
         def svc = [
             config : [ rewrite: [css: true] ]
@@ -52,13 +57,12 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
     
         assertEquals expected, outcome
     }
+
     /**
      * This simulates CSS that uses some MS IE css behaviour hacks that can cause problems
      * as they are not valid URLs
      */
     void testCSSPreprocessingWithInvalidURI() {
-        mockLogging(CSSPreprocessorResourceMapper)
-
         def svc = [
             getResourceMetaForURI : {  uri, adHoc, declRes, postProc = null ->
                 new ResourceMeta(actualUrl: uri, processedFile: new File(uri+'.gz'))
@@ -93,6 +97,51 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
 .bg2 { background: url(####BULL) }
 """
 
+        assertEquals expected, outcome
+    }
+    
+    /**
+     * This simulates CSS that uses some MS IE css behaviour hacks that can cause problems
+     * as they are not valid URLs
+     */
+    void testCSSPreprocessingDoesNothingToDataURLs() {
+        def svc = [
+            getResourceMetaForURI : {  uri, adHoc, declRes, postProc = null ->
+                new ResourceMeta(actualUrl: uri, processedFile: new File(uri+'.gz'))
+            },
+            config : [ rewrite: [css: true] ]
+        ]
+
+        def base = new File('./test-tmp/')
+
+        def r = new ResourceMeta(sourceUrl:'/css/main.css')
+        r.workDir = base
+        r.actualUrl = r.sourceUrl
+        r.contentType = 'text/css'
+        r.processedFile = new File(base, 'css/main.css')
+        r.processedFile.parentFile.mkdirs()
+        r.processedFile.delete()
+
+        def css = """
+@font-face {
+ font-family: 'BlaBlaBla';
+ src: url("data:font/opentype;base64,ABCDEF123456789ABCDEF123456789") format('opentype');
+}
+"""
+        r.processedFile << new ByteArrayInputStream(css.bytes)
+
+        new CSSPreprocessorResourceMapper().with {
+            resourceService = svc
+            map(r, new ConfigObject())
+        }
+
+        def outcome = r.processedFile.text
+        def expected = """
+@font-face {
+ font-family: 'BlaBlaBla';
+ src: url("data:font/opentype;base64,ABCDEF123456789ABCDEF123456789") format('opentype');
+}
+"""
         assertEquals expected, outcome
     }
 }

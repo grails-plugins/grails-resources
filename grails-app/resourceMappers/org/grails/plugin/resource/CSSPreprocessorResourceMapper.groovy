@@ -51,7 +51,7 @@ class CSSPreprocessorResourceMapper {
             // We don't do absolutes or full URLs - perhaps we should do "/" at some point? If app 
             // is mapped to root context then some people might do this but its lame
             // Also skip already-processed resources (i.e. bundled CSS)
-            if (originalUrl.startsWith('/') || (originalUrl.indexOf('://') > 0)) {
+            if (!URLUtils.isRelativeURL(originalUrl)) {
                 if (log.debugEnabled) {
                     log.debug "CSS Preprocessor leaving $originalUrl as is"
                 }

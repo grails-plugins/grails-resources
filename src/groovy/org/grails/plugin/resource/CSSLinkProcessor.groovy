@@ -11,8 +11,9 @@ import org.apache.commons.logging.LogFactory
 class CSSLinkProcessor {
     
     def log = LogFactory.getLog(CSSLinkProcessor)
-
-    static CSS_URL_PATTERN = ~/(url\s*\(['"]?\s*)(.+?)(\s*['"]?\s*\))/
+    
+    // We need to successfully match any kind of url(), mappers are responsible for checking type
+    static CSS_URL_PATTERN = ~/(url\s*\(['"]?\s*['"]?)(.+?)(\s*['"]?\s*['"]?\))/
     
     boolean isCSSRewriteCandidate(resource, resourceService) {
         def enabled = resourceService.config.rewrite.css instanceof Boolean ? resourceService.config.rewrite.css : true

@@ -1,0 +1,8 @@
+
+
+grails.resources.debug
+grails.resources.processing.enabled
+
+grails.resources.adhoc.patterns
+grails.resources.rewrite.css
+grails.resources.<mappername>.enabled
