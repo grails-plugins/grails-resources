@@ -29,7 +29,7 @@ DONE * Killswitch
 DONE * data: url bugfix
 * other critical bug fixes
 DONE * deprecate r:use & r:resourceLink ---> r:require
-* finalize noXXXX convention
+DONE * finalize noXXXX convention
 * final 1.0 release of resources
 * final releases of cached&zipped
 

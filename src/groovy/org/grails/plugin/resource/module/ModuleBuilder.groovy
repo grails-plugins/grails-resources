@@ -37,6 +37,10 @@ class ModuleBuilder {
         _data.defaultBundle = value
     }   
     
+    Object getResource() {
+        throw new IllegalArgumentException("You must supply arguments to 'resource' - check that you do not have a line break before your argument list, or add parentheses")
+    }
+
     void resource(args) {
         _data.resources << args
     }
