@@ -118,9 +118,9 @@ class ResourceMeta {
      */
     String declaringResource
     
-    final Integer contentLength
+    Integer contentLength
     
-    final Integer originalContentLength
+    Integer originalContentLength
 
     Set excludedMappers
     
