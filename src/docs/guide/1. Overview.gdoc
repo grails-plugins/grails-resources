@@ -13,3 +13,76 @@ The issues that the Resources framework tackles are:
 The Resources plugin achieves this end by introducing new artefacts and processing the resources using the server's local file system.
 
 It adds artefacts for declaring resources, for declaring "mappers" that can process resources, and a servlet filter to serve processed resources.
+
+h2. Quick Start
+
+To demonstrate the power of the framework, here's a quick demonstration of usage with the jQuery, jQuery-Ui and Blueprint plugins which exposes resource modules.
+
+h3. Make sure jQuery plugin is installed
+
+For Grails 1.4, it is installed by default. For older versions: *grails install-plugin jquery*
+
+h3. Install jQuery UI and Blueprint plugins
+
+Just run:
+{code}
+grails install-plugin jquery-ui
+grails install-plugin blueprint
+{code}
+
+h3. Edit your Sitemesh layout
+
+You need to add <r:layoutResources/> twice to your page, for the <head> resources and end-of-body resources.
+
+Your grails-app/views/layouts/main.gsp:
+
+{code:xml}
+<html>
+   <head>
+      <g:layoutTitle/>
+      <r:layoutResources/>
+   </head>
+   <body>
+      <g:layoutBody/>
+      <r:layoutResources/>
+   </body>
+</html>
+{code}
+
+h3. Edit your GSP page to include jQuery
+
+All you have to do here is add <r:require> to your GSP page. Anywhere will do, but in <head> makes sense, and add a bit of code:
+
+{code:xml}
+<html>
+   <head>
+      <meta name="layout" content="main"/>
+      <r:require module="jquery-ui, blueprint"/>
+      
+      <r:script>
+          $(function() {
+              $('#form').dialog('open');
+          });
+      </r:script>
+   </head>
+   <body>
+      <div id="form">
+           Hello World
+      </div>  
+   </body>
+</html>
+{code}
+
+h3. View the page source
+
+When you run this and request the GSP page, you should view the source and look at what is happening in the page. Use Safari or Chrome resource inspector to see what files were requested and when.
+
+You should have a page that is rendered with the Blueprint CSS framework, pulling in both jQuery and jQuery-UI, with jQuery-UI JS deferred to the end of the page, jQuery loaded in the head, and the "docuemnt ready" JS code fragment to set up the page is rendered right at the end of the body after jQuery UI has loaded.
+
+All with almost zero effort!
+
+h3. Now optimize your application
+
+Installing the "cached-resources" and "zipped-resources" plugins and running your app again, you will then find that your resources are cached in the browser "eternally" and transferred with zip encoding.
+
+No other code changes are necessary.

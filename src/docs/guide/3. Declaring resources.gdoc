@@ -1,3 +1,198 @@
+You can declare your resources in your Application's Config.groovy or in a Resources artefact in your application or plugins.
 
+This is done using a simple DSL in for both cases. You define the names of the modules you have and the resources within them, and dependencies between modules.
 
-....mention per-environment
+h2. The resource DSL
+
+There are few methods to call in the DSL. At the top level method calls taking a single Closure argument are translated into module names. The code in the nested closure represents the module definition.
+
+A module definition can call dependsOn, defaultBundle and resource methods:
+
+{code:java}
+modules = {
+    core {
+        dependsOn 'jquery, utils'
+        defaultBundle 'ui'
+
+        resource url:'/js/core.js', disposition: 'head'
+        resource url:'/js/ui.js'
+        resource url:'/css/main.css', 
+        resource url:'/css/branding.css'
+        resource url:'/css/print.css', attrs:[media:'print']
+    }
+    
+    utils {
+        dependsOn 'jquery'
+        
+        resource url:'/js/utils.js' 
+    }
+
+    forms {
+        dependsOn 'core,utils'
+        defaultBundle 'ui'
+        
+        resource url:'/css/forms.css'
+        resource url:'/js/forms.js'
+    }
+}
+{code}
+
+The above DSL defines three resource modules; 'core', 'utils' and 'forms'. The resources in these modules will be automatically bundled out of the box according to the module name, resulting in fewer files. You can override this with "bundle:'someOtherName'" on each resource, or call defaultBundle on the module
+
+h3. The dependsOn method
+
+To declare that a module depends on another, you use dependsOn. It accepts a string or list of names. The string can be comma-delimited to specify multiple dependencies. You can also call dependsOn as many times as you like:
+
+{code:java}
+modules = {
+    core {
+        dependsOn 'jquery, utils'
+        dependsOn 'other'
+        dependsOn(['heavy', 'metal'])
+    }
+}
+{code}
+
+h3. The resource method
+
+Declaring a resource requires the "resource" method. This takes a map of arguments that define the URL of the resource and any other specific options you require.
+
+The map arguments are:
+
+* url - Required. The app-relative URL of the resource as a String, or a g:resource-style map of dir, file and plugin attributes.
+* exclude - Optional. A comma-delimited String or a List of names of mappers/operations to exclude. The special "*" value excludes all mappers and operations - the resource will be passed-through as is. You can exclude specific operations such as "minify" if the resource has already been minified.
+* bundle - Optional. The name of the bundle to put the resource into. See "Bundling" for more details
+* disposition - Optional. The disposition of the resource. If not specified, it will default to a value appropriate for the type of the resource. For JavaScript this default is "defer". To force code into the <head>, set it to "head".
+* attrs - Optional. Map of attribute names and values to pass through to the linking tag when the resource is rendered. e.g. use to pass attrs:[media:'print'] for print-only CSS, or "type". Note that supplying "attrs" will prevent bundling of the resource.
+* id - Optional. Module-unique id of the resource to be used when overriding resource properties
+* linkOverride - Optional. The URL to use when rendering links for the resource, instead of the processed URL. Allows your external resources to participate in dependency management.
+* wrapper - Optional. A Closure that will be used to render the resource link. The correct markup for linking will be passed in. Used primarily for MSIE workarounds i.e: wrapper: \{ s -> "<!--[if lt IE 8]>$s<![endif]-->" \}. Note that supplying a wrapper will prevent bundling of that resource.
+
+Examples:
+
+{code:java}
+modules = {
+    core {
+        resource url:[dir:'css/blueprint',file:'screen.css'], attrs:[media:'screen, projection'], bundle:'core-ui'
+        resource url:[dir:'css/blueprint',file:'ie.css'], attrs:[media:'screen, projection'],  
+            wrapper: { s -> "<!--[if lt IE 8]>$s<![endif]-->" }
+
+        resource id:'main-js', url:'js/coreutils-min.js', disposition: 'head', exclude:'minify'
+
+        resource url:'js/lib.js', linkOverride:'http://mycdn.com/js/lib.js'
+    }
+    
+    ui {
+        resource url:'/css/forms.css', bundle:'core-ui'
+        resource url:'/js/forms.js'
+    }
+}
+{code}
+
+h3. The defaultBundle method
+
+By default, modules with more than one resource will be auto-bundled using the module name as a bundle name. You can override this by setting the default bundle name for the module by calling defaultBundle. This name can be the same as bundles used in other modules, to bundle resoures across module boundaries.
+
+The method takes a String or boolean as parameter. A string sets the default bundle name, and passing in a boolean false will turn off all default bundling for that module.
+
+{code:java}
+modules = {
+    core {
+        defaultBundle 'core-ui'
+        
+        resource url:[dir:'css/blueprint',file:'screen.css'], attrs:[media:'screen, projection']
+        resource url:[dir:'css/blueprint',file:'ie.css'], attrs:[media:'screen, projection'],  
+            wrapper: { s -> "<!--[if lt IE 8]>$s<![endif]-->" }
+
+        resource id:'main-js', url:'js/coreutils-min.js', disposition: 'head', exclude:'minify'
+
+        resource url:'js/lib.js', linkOverride:'http://mycdn.com/js/lib.js'
+    }
+    
+    ui {
+        defaultBundle 'core-ui'
+        
+        resource url:'/css/forms.css', bundle:'theme'
+        resource url:'/js/forms.js'
+    }
+}
+{code}
+
+Here you can see that the fallback bundle for both modules is set to "core-ui" and individual resources can still override this.
+
+h2. Resource artefacts
+
+The best place to put these declarations is in a resource artefact. These have a filename ending in Resources.groovy and live in grails-app/conf. These are Groovy ConfigSlurper scripts that are also environment-aware.
+
+Example grails-app/conf/MyAppResources.groovy:
+
+{code:java}
+modules = {
+    core {
+        dependsOn 'jquery, utils'
+        defaultBundle 'ui'
+
+        resource url:'/js/core.js', disposition: 'head'
+        resource url:'/js/ui.js'
+    }
+    
+    utils {
+        dependsOn 'jquery'
+        
+        resource url:'/js/utils.js' 
+    }
+
+    forms {
+        dependsOn 'core,utils'
+        defaultBundle 'ui'
+        
+        resource url:'/css/forms.css'
+        resource url:'/js/forms.js'
+    }
+}
+{code}
+
+h2. Config.groovy
+
+Applications can also define resources in Config.groovy if they wish. Simply assign the DSL to the *grails.resources.modules* property.
+
+Example in grails-app/conf/Config.groovy:
+
+{code:java}
+grails.resources.modules = {
+    core {
+        dependsOn 'jquery, utils'
+        defaultBundle 'ui'
+
+        resource url:'/js/core.js', disposition: 'head'
+        resource url:'/js/ui.js'
+    }
+    
+    utils {
+        dependsOn 'jquery'
+        
+        resource url:'/js/utils.js' 
+    }
+
+    forms {
+        dependsOn 'core,utils'
+        defaultBundle 'ui'
+        
+        resource url:'/css/forms.css'
+        resource url:'/js/forms.js'
+    }
+}
+{code}
+
+h2. Bundling
+
+As mentioned earlier, bundling can be controlled in a number of ways. The logic runs as follows:
+
+# If a resource has an explicit bundle property set, this is used.
+# If there is no explicit bundle property set on the resource, it will use the default for the module
+# The default for the module is "bundle_" plus the name of the module unless defaultBundle has been called
+# If defaultBundle has been called in the module with a string, that name is used for the resource's bundle
+# If defaultBundle has been called in the module with a boolean false, no bundling will occur on the resource, only resources with a bundle specified will be bundled.
+
+*NOTE* If a resource declares "attrs" or "wrapper" it will not be bundled at all. This is because bundling does not make sense in this situation unless all the attrs and wrapper logic match.
+

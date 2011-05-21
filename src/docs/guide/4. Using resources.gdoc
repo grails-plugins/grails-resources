@@ -1,0 +1,60 @@
+Now that you know how to declare resources, you need to use them in your page.
+
+There are several tags for this purpose, but the primary means is to use the <r:require> tag to indicate which modules you need, and the <r:layoutResources/> tag to perform the rendering of the resources.
+
+The <r:require> tag causes the framework to look up all the resources required to satisfy your module dependencies. However nothing is rendered at that point.
+
+The <r:layoutResources/> tag is called to render the resources themselves (and internally it calls into r:external for each resource). This tag has special behaviour, in that the first time you call it, it automatically renders only resources with disposition "head". The second time you call it, it automatically renders only resources with disposition "defer".
+
+h2. Linking to CSS, JavaScript and Favicons
+
+So you need to add two calls to <r:layoutResource/> to your GSP page or sitemesh layout. Normally you will place it in your sitemesh layout:
+
+Your grails-app/views/layouts/main.gsp:
+
+{code:xml}s
+<html>
+   <head>
+      <g:layoutTitle/>
+      <r:layoutResources/>
+   </head>
+   <body>
+      <g:layoutBody/>
+      <r:layoutResources/>
+   </body>
+</html>
+{code}
+
+You can of course include any common modules you require in your sitemesh layout using <r:require> but they must appear before the first <r:layoutResources/>.
+
+In your GSP pages you invoke <r:require> as many times as required, even inside GSP templates that you include with g:render, and you can include resources conditionally - something that can be really hard to do without resource dependency management.
+
+Example GSP page:
+
+{code:xml}
+<html>
+   <head>
+      <meta name="layout" content="main"/>
+      <r:require module="jquery-ui, blueprint"/>
+      <g:if test="${customerBranding}">
+          <r:require module="theme_${customer.theme}"/>
+      </g:if>
+   </head>
+   <body>
+      <div>
+           Hello World
+      </div>  
+   </body>
+</html>
+{code}
+
+h2. Other ways to link to resources
+
+There may be situations where you need to link to a specific resource without declaring them, and to link to images. 
+
+To link to images you use the <r:img> tag:
+
+
+To link to CSS or other resources that are not declared in a module you use <r:external>:
+
+h2. Including pieces of JavaScript code

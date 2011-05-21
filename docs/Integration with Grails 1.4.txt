@@ -27,14 +27,18 @@ Work
 =============
 DONE * Killswitch
 DONE * data: url bugfix
-* other critical bug fixes
+DONE * other critical bug fixes
 DONE * deprecate r:use & r:resourceLink ---> r:require
 DONE * finalize noXXXX convention
+* Test in 1.3.x app existing
+* Test in 1.4.x app new
+* Test in 1.4.x app existing
 * final 1.0 release of resources
 * final releases of cached&zipped
 
 * Document plugin with gdoc + expose on github
 * overhaul plugin portal docs
+
 
 Documentation
 =============
