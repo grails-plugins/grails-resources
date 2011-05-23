@@ -45,7 +45,7 @@ class CSSRewriterResourceMapper {
                 // This triggers the processing chain if necessary for any resource referenced by the CSS
                 def linkedToResource = resourceService.getResourceMetaForURI(uri, true, resURI) { res ->
                     // If there's no decl for the resource, create it with image disposition
-                    // otherwise we pop out as a favicon...
+                    // otherwise we may pop out as a favicon...
                     res.disposition = 'image'
                 }
 
@@ -54,8 +54,10 @@ class CSSRewriterResourceMapper {
                         log.debug "Calculating URL of ${linkedToResource?.dump()} relative to ${resource.dump()}"
                     }
 
-                    def fixedUrl = linkedToResource.relativeTo(resource)
+                    println "Getting relative URL of ${linkedToResource.sourceUrl}/${linkedToResource.actualUrl}"
+                    def fixedUrl = linkedToResource.relativeToWithQueryParams(resource)
                     def replacement = "${prefix}${fixedUrl}${suffix}"
+                    println " relative URL of ${linkedToResource.sourceUrl}/${linkedToResource.actualUrl} was ${fixedUrl}"
 
                     if (log.debugEnabled) {
                         log.debug "Rewriting CSS URL '${originalUrl}' to '$replacement'"

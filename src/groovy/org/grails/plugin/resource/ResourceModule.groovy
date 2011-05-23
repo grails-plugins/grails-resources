@@ -105,7 +105,7 @@ class ResourceModule {
         }
 
         // Default the resource id for overrides to the url if no id supplied
-        r.id = args.id ?: url
+        r.id = args.id ?: r.sourceUrl // minus the params etc
 
         r.disposition = args.remove('disposition') ?: ti.disposition
         r.linkOverride = args.remove('linkOverride')

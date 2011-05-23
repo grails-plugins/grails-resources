@@ -4,3 +4,4 @@ dependencies.groovy
 target
 /stacktrace.log
 /test-tmp/
+/src/docs/ref/Resources/

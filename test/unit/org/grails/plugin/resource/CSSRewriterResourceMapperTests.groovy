@@ -8,12 +8,16 @@ import grails.test.*
 
 class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
     
+    void setUp() {
+        super.setUp()
+        mockLogging(CSSRewriterResourceMapper)
+    }
+
     /**
      * This simulates a test where the image resources are moved to a new flat dir
      * but the CSS is *not* moved, to force recalculation of paths
      */
     void testCSSRewritingWithMovingFiles() {
-        mockLogging(CSSRewriterResourceMapper)
 
         def r = new ResourceMeta(sourceUrl:'/css/main.css')
 
@@ -68,7 +72,6 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
      * and the actualUrl is not mutated (i.e. like zipping)
      */
     void testCSSRewritingWithRenamedFilesBySameUrl() {
-        mockLogging(CSSRewriterResourceMapper)
 
         def svc = [
             getResourceMetaForURI : {  uri, adHoc, declRes, postProc = null ->
@@ -116,7 +119,6 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
      * as they are not valid URLs
      */
     void testCSSRewritingWithInvalidURI() {
-        mockLogging(CSSRewriterResourceMapper)
 
         def svc = [
             getResourceMetaForURI : {  uri, adHoc, declRes, postProc = null ->
@@ -154,5 +156,60 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
 
         assertEquals expected, outcome
     }
+
+    /**
+     * This simulates CSS that uses some MS IE css behaviour hacks that can cause problems
+     * as they are not valid URLs
+     */
+    void testCSSRewritingWithQueryParamsAndFragment() {
+
+        def svc = [
+            getResourceMetaForURI : {  uri, adHoc, declRes, postProc = null ->
+                def r = new ResourceMeta()
+                r.sourceUrl = uri
+                r.actualUrl = r.sourceUrl
+                r.actualUrl += '.gz' // frig it as if a mapper changed it
+                return r
+            },
+            config : [ rewrite: [css: true] ],
+            getResource: { uri -> 
+                new URL('file:./test/test-files'+uri) 
+            },
+            getMimeType: { uri -> "test/nothing" }
+        ]
+        
+
+        def base = new File('./test-tmp/')
+
+        def r = new ResourceMeta(sourceUrl:'/css/main.css')
+        r.workDir = base
+        r.actualUrl = r.sourceUrl
+        r.contentType = 'text/css'
+        r.processedFile = new File(base, 'css/main.css')
+        r.processedFile.parentFile.mkdirs()
+        r.processedFile.delete()
+
+        def css = """
+.bg1 { behaviour: url(resource:/image.png?arg1=value1) }
+.bg2 { background: url(resource:/image.png#bogus-but-what-the-hell) }
+"""
+        r.processedFile << new ByteArrayInputStream(css.bytes)
+
+        CSSRewriterResourceMapper.newInstance().with {
+            resourceService = svc
+            map(r, new ConfigObject())
+        }
+
+        def outcome = r.processedFile.text
+        
+        println "Output: $outcome"
+        def expected = """
+.bg1 { behaviour: url(../image.png.gz?arg1=value1) }
+.bg2 { background: url(../image.png.gz#bogus-but-what-the-hell) }
+"""
+
+        assertEquals expected, outcome
+    }
+
 
 }

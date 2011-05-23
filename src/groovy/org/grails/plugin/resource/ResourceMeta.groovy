@@ -312,6 +312,11 @@ class ResourceMeta {
         }
     }
     
+    String relativeToWithQueryParams(ResourceMeta base) {
+        def url = relativeTo(base)
+        return sourceUrlParamsAndFragment ? url + sourceUrlParamsAndFragment : url
+    }
+    
     String relativeTo(ResourceMeta base) {
         def baseDirStr = base.actualUrlParent
         def thisDirStr = this.actualUrlParent
