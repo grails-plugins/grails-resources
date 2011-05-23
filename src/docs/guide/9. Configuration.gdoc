@@ -2,6 +2,12 @@ There are various configuration options to control processing of your resources.
 
 All of these config variables can of course be set per-environment.
 
+h2. Change the /static/ URI prefix: grails.resources.uri.prefix
+
+By default the plugin serves the modified static resources from URIs beginning with <appcontext>/static/.
+
+You can change this by assigning a value to *grails.resources.uri.prefix*
+
 h2. Debug mode: grails.resources.debug
 
 Setting *grails.resources.debug=true* will force debug mode all the time, as if you added _debugResources=y to every request.
