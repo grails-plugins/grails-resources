@@ -60,4 +60,27 @@ class ResourceModuleTests extends GrailsUnitTestCase {
             assertEquals 'frank-and-beans_defer', r.bundle
         }
     }
+
+    void testExcludedMapperString() {
+        def resources = [
+            [url:'simile/simile.js', disposition:'head', exclude:'minify']
+        ]
+        
+        def m = new ResourceModule('testModule', resources, null, svc)
+        
+        assertEquals 1, m.resources.size()
+        assertTrue m.resources[0].excludedMappers.contains('minify')
+    }
+
+    void testExcludedMapperSet() {
+        def resources = [
+            [url:'simile/simile.js', disposition:'head', exclude:['minify']]
+        ]
+        
+        def m = new ResourceModule('testModule', resources, null, svc)
+        
+        assertEquals 1, m.resources.size()
+        assertTrue m.resources[0].excludedMappers.contains('minify')
+    }
+
 }

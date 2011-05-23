@@ -104,12 +104,12 @@ class ResourceModule {
         r.disposition = args.remove('disposition') ?: ti.disposition
         r.linkOverride = args.remove('linkOverride')
         r.bundle = args.remove('bundle')
-        r.excludedMappers = args.remove('exclude')
-        if (r.excludedMappers) {
-            if (r.excludedMappers instanceof List) {
-                r.excludedMappers = r.excludedMappers as Set
-            } else if (!(r.excludedMappers instanceof Set)) {
-                r.excludedMappers = r.excludedMappers.toString().split(',')*.trim() as Set
+        def excludedMappers = args.remove('exclude')
+        if (excludedMappers) {
+            if (excludedMappers instanceof List) {
+                r.excludedMappers = excludedMappers as Set
+            } else if (!(excludedMappers instanceof Set)) {
+                r.excludedMappers = excludedMappers.toString().split(',')*.trim() as Set
             }
         } 
         
