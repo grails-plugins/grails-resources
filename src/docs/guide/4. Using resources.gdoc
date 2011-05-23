@@ -12,7 +12,7 @@ So you need to add two calls to <r:layoutResource/> to your GSP page or sitemesh
 
 Your grails-app/views/layouts/main.gsp:
 
-{code:xml}s
+{code:xml}
 <html>
    <head>
       <g:layoutTitle/>
@@ -48,13 +48,75 @@ Example GSP page:
 </html>
 {code}
 
-h2. Other ways to link to resources
+h2. Linking to images
 
-There may be situations where you need to link to a specific resource without declaring them, and to link to images. 
+When you need to render an <img> tag that you wish to be subject to the Resources processing chain (e.g. to make it eternally cacheable) you should use the <r:img> tag:
 
-To link to images you use the <r:img> tag:
+{code:xml}
+<r:img uri="images/logo.png" width="100" height="50"/>
 
+<r:img dir="images" file="logo.png" width="100" height="50"/>
+{code}
+
+Usually this will produce a link to an undeclared resource. However you can declare images in modules and specify extra attributes in "attrs" to supply e.g. the width and height:
+
+{code:java}
+modules = {
+    images {
+        resource url:'images/logo.png', attrs:[width:100, height:50, alt:'Our logo'], disposition:'inline'
+        resource url:'images/icon/add.png', attrs:[width:32, height:32, alt:'Add'], disposition:'inline'
+    }
+}
+{code}
+
+The disposition "inline" is optional - as long as you don't have any other modules that "dependOn" the images module and link using r:resource or r:img, you won't need this.
+
+h2. Linking to resources explicitly, bypassing modules
+
+Sometimes you may need to link to a specific resource, or produce a URL pointing to the specific resource without rendering links to all the modules it depends on - or outside of a context where you can call <r:layoutResources/>. You may even wish to link to an undeclared resource, but still want it to be subject to processing on the fly.
 
 To link to CSS or other resources that are not declared in a module you use <r:external>:
 
-h2. Including pieces of JavaScript code
+{code:xml}
+<r:external uri="js/custom.js"/>
+<script type="text/javascript">
+    var urlOfCSSToLoadInJSCode = '${r.external(uri:"css/custom.css").encodeAsJavaScript()';
+</script>
+<r:external uri="icons/favicon.ico"/>
+{code}
+
+This would output the <script> and <link> tags required to include those resources, without rendering their dependencies first - whether the resource is declared in a module or not. The example shows how you might pass the URL of a resource to some JavaScript code for use later at runtime.
+
+h2. Including pieces of JavaScript code generated at runtime
+
+Often in an application, especially those using custom Grails tags and rich UIs, you will need to render fragments of JavaScript code while the page is being rendered. It is not always possible to know what JS code there will be in the page until the render process is finished.
+
+The <r:script> tag allows you to specify sections of JavaScript text during page rendering, but if using Sitemesh layouts, you will be able to have these fragments appear either in <head> or deferred to the end of the page, just like other JavaScript resources.
+
+This integrates with the disposition mechanism, allowing you to throw your JavaScript into a specific location:
+
+{code:xml}
+<r:script/>
+    window.alert('This is the end of the page!');
+</r:script>
+
+<r:script disposition='head'/>
+    window.alert('This is the head of the page!');
+</r:script>
+{code}
+
+What happens is the <r:script> tag stashes your fragment in the request attributes until <r:layoutResources/> is called - when it is pulled out of the attributes and rendered according to the current disposition being rendered.
+
+This is ideal for other custom Grails GSP taglibs to use to write out their JS code used to e.g. set up UI elements:
+
+{code:java}
+class MyCustomTagLib {
+    def datePicker = {
+        out << r.script(disposition:'head') {
+            out << '$("#'+attrs.id.encodeAsJavaScript()+').datePicker();'
+        }
+    }
+}
+{code}
+
+The order of code is preserved, and all such fragments are rendered *after* all the modules required by the page (in that disposition) have been included.
