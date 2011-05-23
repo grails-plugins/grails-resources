@@ -74,7 +74,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
             getResourceMetaForURI: { uri, adhoc, declRes,  postProc -> testMeta },
             staticUrlPrefix: '/static'
         ]
-        def output = tagLib.resourceLink(uri:'/css/test.less', rel:'stylesheet/less', type:'css').toString()
+        def output = tagLib.external(uri:'/css/test.less', rel:'stylesheet/less', type:'css').toString()
         println "Output was: $output"
         assertTrue output.contains('rel="stylesheet/less"')
         assertTrue output.contains('href="/static/css/test.less"')
@@ -93,10 +93,31 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
             getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
             staticUrlPrefix: '/static'
         ]
-        def output = tagLib.resourceLink(uri:'/css/test.less', type:'css').toString()
+        def output = tagLib.external(uri:'/css/test.less', type:'css').toString()
         println "Output was: $output"
         assertTrue output.contains('rel="stylesheet/less"')
         assertTrue output.contains('href="/static/css/test.less"')
+    }
+
+    void testResourceLinkWithWrapperAttribute() {
+        def testMeta = new ResourceMeta()
+        testMeta.sourceUrl = '/css/ie.css'
+        testMeta.actualUrl = '/css/ie.css'
+        testMeta.contentType = "text/css"
+        testMeta.disposition = 'head'
+        testMeta.tagAttributes = [rel:'stylesheet']
+
+        tagLib.resourceService = [
+            isDebugMode: { r -> false },
+            getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
+            staticUrlPrefix: '/static'
+        ]
+        def output = tagLib.external(uri:'/css/ie.less', type:'css', wrapper: { s -> "WRAPPED${s}WRAPPED" }).toString()
+        println "Output was: $output"
+        assertTrue output.contains('rel="stylesheet"')
+        assertFalse "Should not contain the wrapper= attribute in output", output.contains('wrapper=')
+        assertTrue output.contains('WRAPPED<link')
+        assertTrue output.contains('/>WRAPPED')
     }
 
     void testRenderModuleWithNonExistentResource() {
@@ -159,7 +180,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
             getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
             staticUrlPrefix: '/static'
         ]
-        def output = tagLib.resourceLink(uri:url, type:"js").toString()
+        def output = tagLib.external(uri:url, type:"js").toString()
         println "Output was: $output"
         assertTrue output.contains('src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js?_debugResources')
     }

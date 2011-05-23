@@ -216,9 +216,11 @@ class ResourceTagLib {
             if (!attrs.uri) {
                 attrs.uri = info.uri
             }
+
+            def wrapper = attrs.remove('wrapper') ?: info.resource?.prePostWrapper
+
             def output = doResourceLink(attrs).toString()
 
-            def wrapper = attrs.remove('wrapper')
             if (wrapper) {
                 out << wrapper(output)
             } else {
