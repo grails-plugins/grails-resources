@@ -72,7 +72,7 @@ class ResourceMapper {
 
     @Lazy excludes = {
         if (config?.excludes) {
-            toStringList(config.excludes) + defaultExcludes
+            toStringList(config.excludes)
         } else {
             defaultExcludes
         }
@@ -80,7 +80,7 @@ class ResourceMapper {
     
     @Lazy includes = {
         if (config?.includes) {
-            toStringList(config.includes) + defaultIncludes
+            toStringList(config.includes)
         } else {
             defaultIncludes
         }
