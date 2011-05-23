@@ -83,4 +83,15 @@ class ResourceModuleTests extends GrailsUnitTestCase {
         assertTrue m.resources[0].excludedMappers.contains('minify')
     }
 
+    void testStringOnlyResource() {
+        def resources = [
+            'js/test.js'
+        ]
+        
+        def m = new ResourceModule('testModule', resources, null, svc)
+        
+        assertEquals 1, m.resources.size()
+        assertEquals "/js/test.js", m.resources[0].sourceUrl
+    }
+
 }

@@ -29,13 +29,13 @@ environments {
         grails.resources.modules = {
             app {
                 dependsOn 'blueprint'
-                resource url:'css/main.css', bundle:'app'
+                resource 'css/main.css'
                 resource url:'js/application.js', exclude:["bundle"]
                 resource url:'images/grails_logo.png', attrs:[width:200, height:100], disposition:'inline'
             }
             jqueryGoogle { 
                 defaultBundle false 
-                resource url: 'https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js'
+                resource 'https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js'
             }
         } 
     }
