@@ -14,6 +14,8 @@ The Resources plugin achieves this end by introducing new artefacts and processi
 
 It adds artefacts for declaring resources, for declaring "mappers" that can process resources, and a servlet filter to serve processed resources.
 
+In tandem with Sitemesh layouts and the Grails plugin dependency system, you gain the ability to express dependencies on specific UI libraries, and the ability to specify the resources that a page needs anywhere in the page GSPs or even in rendered GSP templates.
+
 The Resource framework tags confer a whole new level of abstraction and power to application and plugin developers. It makes possible new patterns for managing resources and smart handling of JavaScript and CSS code.
 
 h2. Quick Start
@@ -59,7 +61,7 @@ All you have to do here is add <r:require> to your GSP page. Anywhere will do, b
 <html>
    <head>
       <meta name="layout" content="main"/>
-      <r:require module="jquery-ui, blueprint"/>
+      <r:require modules="jquery-ui, blueprint"/>
       
       <r:script>
           $(function() {

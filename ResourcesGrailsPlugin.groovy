@@ -35,8 +35,8 @@ class ResourcesGrailsPlugin {
         "file:./web-app/**/*.*" // Watch for resource changes, we need excludes here for WEB-INF+META-INF when grails impls this
     ]
 
-    def author = "Marc Palmer"
-    def authorEmail = "marc@grailsrocks.com"
+    def author = "Marc Palmer, Luke Daley"
+    def authorEmail = "marc@grailsrocks.com, ld@ldaley.com"
     def title = "Resources"
     def description = 'HTML resource management enhancements to replace g.resource etc.'
     def documentation = "http://grails.org/plugin/resources"

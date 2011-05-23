@@ -16,6 +16,10 @@ log4j = {
     
 }
 
+grails.doc.authors = 'Marc Palmer (marc@grailsrocks.com)'
+grails.doc.license = 'Apache License 2.0'
+grails.doc.title = 'Resources Plugin'
+
 //grails.resources.processing.enabled = false
 
 environments {

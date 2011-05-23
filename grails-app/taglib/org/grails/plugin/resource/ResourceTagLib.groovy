@@ -272,6 +272,8 @@ class ResourceTagLib {
      * Render the resources. First invocation renders head JS and CSS, second renders deferred JS only, and any more spews.
      */
     def layoutResources = { attrs ->
+        // @todo rewrite this to accept disposition attr and if not present
+        // do the auto toggle then.
         def trk = request.resourceDependencyTracker
         if (!request.resourceRenderedHeadResources) {
             if (log.debugEnabled) {
@@ -494,6 +496,9 @@ class ResourceTagLib {
     def img = { attrs ->
         def args = attrs.clone()
         args.disposition = "image"
+        if (!attrs.uri && !attrs.dir) {
+            attrs.dir = "images"
+        }
         def info = resolveResourceAndURI(args)
         def res = info.resource
 
