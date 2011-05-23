@@ -14,6 +14,8 @@ The Resources plugin achieves this end by introducing new artefacts and processi
 
 It adds artefacts for declaring resources, for declaring "mappers" that can process resources, and a servlet filter to serve processed resources.
 
+The Resource framework tags confer a whole new level of abstraction and power to application and plugin developers. It makes possible new patterns for managing resources and smart handling of JavaScript and CSS code.
+
 h2. Quick Start
 
 To demonstrate the power of the framework, here's a quick demonstration of usage with the jQuery, jQuery-Ui and Blueprint plugins which exposes resource modules.
