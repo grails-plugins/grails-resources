@@ -19,7 +19,13 @@ class ResourceModule {
     def defaultBundle
     
     def pluginManager
-    
+
+    /**
+     * Constructor for testing only
+     */
+    ResourceModule() {
+    }
+
     ResourceModule(name, svc) {
         this.name = name
         this.pluginManager = svc.pluginManager

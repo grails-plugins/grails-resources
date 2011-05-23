@@ -87,7 +87,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         testMeta.contentType = "stylesheet/less"
         testMeta.disposition = 'head'
         testMeta.tagAttributes = [rel:'stylesheet/less']
-        
+
         tagLib.resourceService = [
             isDebugMode: { r -> false },
             getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
@@ -97,6 +97,29 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         println "Output was: $output"
         assertTrue output.contains('rel="stylesheet/less"')
         assertTrue output.contains('href="/static/css/test.less"')
+    }
+
+    void testRenderModuleWithNonExistentResource() {
+        def testMeta = new ResourceMeta()
+        testMeta.sourceUrl = '/this/is/bull.css'
+        testMeta.contentType = "test/stylesheet"
+        testMeta.disposition = 'head'
+        testMeta._resourceExists = false
+        testMeta.tagAttributes = [rel:'stylesheet']
+        
+        def testMod = new ResourceModule() 
+        testMod.resources << testMeta
+        
+        tagLib.resourceService = [
+            isDebugMode: { r -> false },
+            getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
+            staticUrlPrefix: '/static',
+            getModule : { name -> testMod }
+        ]
+
+        shouldFail(IllegalArgumentException) {
+            def output = tagLib.renderModule(name:'test').toString()
+        }
     }
 
     void testImgTagWithAttributes() {

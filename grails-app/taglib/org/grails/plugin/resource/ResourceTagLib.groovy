@@ -367,7 +367,7 @@ class ResourceTagLib {
         def debugMode = resourceService.isDebugMode(request)
         
         module.resources.each { r ->
-            if (!r.actualUrl.contains('://') && !r.exists()) {
+            if (!r.exists() && !r.actualUrl?.contains('://')) {
                 throw new IllegalArgumentException("Module [$name] depends on resource [${r.sourceUrl}] but the file cannot be found")
             }
             if (log.debugEnabled) {
