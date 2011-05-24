@@ -1,0 +1,12 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>6.3 Operation</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    The optional "operation" property allows you to specify the name of the kind of work performed by the mapper. Users can then prevent any mappers of this operation from executing on their resources.<p class="paragraph"/>The common example is to specify <strong class="bold">exclude:"minify"</strong> in a resource declaration to prevent any kind of minifying mapper from being applied to a resource that is already minified.<p class="paragraph"/>A similar operation called e.g. "compress" could be used to prevent duplicate zipping of resources that may have been pre-compressed (such as images).<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.COMPRESS<p class="paragraph"/>    def operation = <span class="java&#45;quote">"compression"</span><p class="paragraph"/>    def map(resource, config) &#123;
+        // Zip the file here
+    &#125;<p class="paragraph"/>&#125;</pre></div><p class="paragraph"/>Note the operations and mapper names occupy the same namespace so that the "exclude" argument on resource declarations can apply to either.<p class="paragraph"/>Resources will fail fast at runtime if an operation is specified on any mapper, where there is also a mapper with a name the same as the operation.<p class="paragraph"/>
+    </body>
+</html>

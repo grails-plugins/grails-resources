@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>3.2 Resource artefacts</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    The best place to put these declarations is in a resource artefact. These have a filename ending in Resources.groovy and live in grails-app/conf.<p class="paragraph"/>Note that these are Groovy ConfigSlurper scripts that are therefore environment-aware, so you can declare different resources for e.g. dev, test and production.<p class="paragraph"/>Example grails-app/conf/MyAppResources.groovy:<p class="paragraph"/><div class="code"><pre>modules = &#123;
+    core &#123;
+        dependsOn 'jquery, utils'
+        defaultBundle 'ui'<p class="paragraph"/>        resource url:'/js/core.js', disposition: 'head'
+        resource url:'/js/ui.js'
+    &#125;<p class="paragraph"/>    utils &#123;
+        dependsOn 'jquery'<p class="paragraph"/>        resource url:'/js/utils.js' 
+    &#125;<p class="paragraph"/>    forms &#123;
+        dependsOn 'core,utils'
+        defaultBundle 'ui'<p class="paragraph"/>        resource url:'/css/forms.css'
+        resource url:'/js/forms.js'
+    &#125;
+&#125;</pre></div>
+
+    </body>
+</html>

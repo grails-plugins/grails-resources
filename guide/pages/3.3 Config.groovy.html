@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>3.3 Config.groovy</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    Applications can also define resources in Config.groovy if they wish. Simply assign the DSL to the <strong class="bold">grails.resources.modules</strong> property.<p class="paragraph"/>Example in grails-app/conf/Config.groovy:<p class="paragraph"/><div class="code"><pre>grails.resources.modules = &#123;
+    core &#123;
+        dependsOn 'jquery, utils'
+        defaultBundle 'ui'<p class="paragraph"/>        resource url:'/js/core.js', disposition: 'head'
+        resource url:'/js/ui.js'
+    &#125;<p class="paragraph"/>    utils &#123;
+        dependsOn 'jquery'<p class="paragraph"/>        resource url:'/js/utils.js' 
+    &#125;<p class="paragraph"/>    forms &#123;
+        dependsOn 'core,utils'
+        defaultBundle 'ui'<p class="paragraph"/>        resource url:'/css/forms.css'
+        resource url:'/js/forms.js'
+    &#125;
+&#125;</pre></div><p class="paragraph"/>
+    </body>
+</html>

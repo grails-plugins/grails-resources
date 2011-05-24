@@ -1,0 +1,16 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>4.2 Linking to images</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    When you need to render an &#60;img&#62; tag that you wish to be subject to the Resources processing chain (e.g. to make it eternally cacheable) you should use the &#60;r:img&#62; tag:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;r:img uri=<span class="xml&#45;quote">"images/logo.png"</span> width=<span class="xml&#45;quote">"100"</span> height=<span class="xml&#45;quote">"50"</span>/&#62;</span><p class="paragraph"/><span class="xml&#45;tag">&#60;r:img dir=<span class="xml&#45;quote">"images"</span> file=<span class="xml&#45;quote">"logo.png"</span> width=<span class="xml&#45;quote">"100"</span> height=<span class="xml&#45;quote">"50"</span>/&#62;</span></pre></div><p class="paragraph"/>Usually this will produce a link to an undeclared resource. However you can declare images in modules and specify extra attributes in "attrs" to supply e.g. the width and height:<p class="paragraph"/><div class="code"><pre>modules = &#123;
+    images &#123;
+        resource url:'images/logo.png', attrs:&#91;width:100, height:50, alt:'Our logo'&#93;, disposition:'inline'
+        resource url:'images/icon/add.png', attrs:&#91;width:32, height:32, alt:'Add'&#93;, disposition:'inline'
+    &#125;
+&#125;</pre></div><p class="paragraph"/>Once you have done this, using &#60;r:img&#62; to reference them would automatically set the width, height and other attributes.<p class="paragraph"/>The disposition "inline" is optional - as long as you don't have any other modules that "dependOn" the images module and link using r:resource or r:img, you won't need this.
+
+    </body>
+</html>

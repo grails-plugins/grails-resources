@@ -1,0 +1,26 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>3.1 The resource DSL</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    There are few methods to call in the DSL. At the top level method calls taking a single Closure argument are translated into module names. The code in the nested closure represents the module definition.<p class="paragraph"/>A module definition can call dependsOn, defaultBundle and resource methods:<p class="paragraph"/><div class="code"><pre>modules = &#123;
+    core &#123;
+        dependsOn 'jquery, utils'
+        defaultBundle 'ui'<p class="paragraph"/>        resource url:'/js/core.js', disposition: 'head'
+        resource url:'/js/ui.js'
+        resource url:'/css/main.css', 
+        resource url:'/css/branding.css'
+        resource url:'/css/print.css', attrs:&#91;media:'print'&#93;
+    &#125;<p class="paragraph"/>    utils &#123;
+        dependsOn 'jquery'<p class="paragraph"/>        resource url:'/js/utils.js' 
+    &#125;<p class="paragraph"/>    forms &#123;
+        dependsOn 'core,utils'
+        defaultBundle 'ui'<p class="paragraph"/>        resource url:'/css/forms.css'
+        resource url:'/js/forms.js'
+    &#125;
+&#125;</pre></div><p class="paragraph"/>The above DSL defines three resource modules; 'core', 'utils' and 'forms'. The resources in these modules will be automatically bundled out of the box according to the module name, resulting in fewer files. You can override this with <strong class="bold">bundle:'someOtherName'</strong> on each resource, or call defaultBundle on the module
+
+    </body>
+</html>

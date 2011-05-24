@@ -1,0 +1,20 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>4.4 Including pieces of JavaScript code generated at runtime</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    Often in an application, especially those using custom Grails tags and rich UIs, you will need to render fragments of JavaScript code while the page is being rendered. It is not always possible to know what JS code there will be in the page until the render process is finished.<p class="paragraph"/>The <a href="../ref/Tags/script.html" class="Tags">script</a> tag allows you to specify sections of JavaScript text during page rendering, but if using Sitemesh layouts, you will be able to have these fragments appear either in &#60;head&#62; or deferred to the end of the page, just like other JavaScript resources.<p class="paragraph"/>This integrates with the disposition mechanism, allowing you to throw your JavaScript into a specific location:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;r:script/&#62;</span>
+    window.alert('This is the end of the page!');
+<span class="xml&#45;tag">&#60;/r:script&#62;</span><p class="paragraph"/><span class="xml&#45;tag">&#60;r:script disposition='head'/&#62;</span>
+    window.alert('This is the head of the page!');
+<span class="xml&#45;tag">&#60;/r:script&#62;</span></pre></div><p class="paragraph"/>What happens is the &#60;r:script&#62; tag stashes your fragment in the request attributes until &#60;r:layoutResources/&#62; is called - when it is pulled out of the attributes and rendered according to the current disposition being rendered.<p class="paragraph"/>This is ideal for other custom Grails GSP taglibs to use to write out their JS code used to e.g. set up UI elements:<p class="paragraph"/><div class="code"><pre>class MyCustomTagLib &#123;
+    def datePicker = &#123;
+        out &#60;&#60; r.script(disposition:'head') &#123;
+            out &#60;&#60; '$("&#35;'+attrs.id.encodeAsJavaScript()+').datePicker();'
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/>The order of code is preserved, and all such fragments are rendered <strong class="bold">after</strong> all the modules required by the page (in that disposition) have been included.
+    </body>
+</html>

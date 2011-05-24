@@ -1,0 +1,17 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>3.1.1 The dependsOn method</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    To declare that a module depends on another, you use dependsOn. It accepts a string or list of names. The string can be comma-delimited to specify multiple dependencies. You can also call dependsOn as many times as you like:<p class="paragraph"/><div class="code"><pre>modules = &#123;
+    core &#123;
+        dependsOn 'jquery, utils'
+        dependsOn 'other'
+        dependsOn(&#91;'heavy', 'metal'&#93;)
+    &#125;
+&#125;</pre></div>
+
+    </body>
+</html>

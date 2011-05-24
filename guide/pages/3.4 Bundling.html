@@ -1,0 +1,18 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>3.4 Bundling</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    As mentioned earlier, bundling can be controlled in a number of ways. The logic runs as follows:
+<ol>
+<li>If a resource has an explicit bundle property set, this is used.</li>
+<li>If there is no explicit bundle property set on the resource, it will use the default for the module</li>
+<li>The default for the module is "bundle_" plus the name of the module unless defaultBundle has been called</li>
+<li>If defaultBundle has been called in the module with a string, that name is used for the resource's bundle</li>
+<li>If defaultBundle has been called in the module with a boolean false, no bundling will occur on the resource, only resources with a bundle specified will be bundled.</li>
+</ol><p class="paragraph"/><strong class="bold">NOTE</strong> If a resource declares "attrs" or "wrapper" it will not be bundled at all. This is because bundling does not make sense in this situation unless all the attrs and wrapper logic match.
+
+    </body>
+</html>

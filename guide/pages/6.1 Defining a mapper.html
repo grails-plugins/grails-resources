@@ -1,0 +1,15 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>6.1 Defining a mapper</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    Defining a resource mapper is easy. You create a file with ResourceMapper.groovy as the file suffix, in the grails-app/conf/resourceMappers folder.<p class="paragraph"/>The name of the mapper is extracted from the filename like any other Grails artefact, for example "TestResourceMapper" yields a mapper with name "test".<p class="paragraph"/>Example grails-app/conf/resourceMappers/TestResourceMapper.groovy:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.MUTATION<p class="paragraph"/>    def map(resource, config) &#123;
+        def file = <span class="java&#45;keyword">new</span> File(resource.processedFile.parentFile, <span class="java&#45;quote">"_$&#123;resource.processedFile.name&#125;"</span>)
+        assert resource.processedFile.renameTo(file)
+        resource.processedFile = file
+        resource.updateActualUrlFromProcessedFile()
+    &#125;<p class="paragraph"/>&#125;</pre></div><p class="paragraph"/>The only method a mapper must implement is <strong class="bold">map(resource, config)</strong> which is passed the <a href="http://github.com/grails-plugins/grails-resources/blob/master/src/groovy/org/grails/plugin/resource/ResourceMeta.groovy" target="blank">ResourceMeta</a> object that represents the resource and the mapper-specific config variables pulled out of grails.resources.&#60;mappername&#62;.<p class="paragraph"/>This method can do whatever it needs to the resource's file, provided it calls the updateActualUrlFromProcessedFile() method if the resource moves, unless you patch ResourceMeta.actualUrl manually.<p class="paragraph"/>You can change other properties of the resource, such as change the content type of the resource, add or modify tagAttributes (which are passed through when rendering the link for the resource).<p class="paragraph"/>That's all you need to do to create a mapper. The best way to learn how they work is to study the source of <a href="http://grails.org/plugin/cached-resources" target="blank">Cached-Resources</a> and <a href="http://grails.org/plugin/zipped-resources" target="blank">Zipped-Resources</a> plugins.<p class="paragraph"/>
+    </body>
+</html>

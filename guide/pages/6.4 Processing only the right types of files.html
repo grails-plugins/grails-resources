@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>6.4 Processing only the right types of files</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    Often a mapper is only meant to target certain file types or file patterns. Make it easier for your users by operating correctly out of the box by specifying defaultExcludes and/or defaultIncludes for your mapper, which will filter the resources passed to your mapper:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.MUTATION<p class="paragraph"/>    <span class="java&#45;keyword">static</span> defaultExcludes = &#91;
+        '/&#42;&#42;/&#42;.png',
+        '/&#42;&#42;/&#42;.gif',
+        '/&#42;&#42;/&#42;.jpg',
+        '/&#42;&#42;/&#42;.jpeg',
+        '/&#42;&#42;/&#42;.gz',
+        '/&#42;&#42;/&#42;.zip'
+    &#93;
+    <span class="java&#45;keyword">static</span> defaultIncludes = &#91; '/images/&#42;&#42;' &#93;<p class="paragraph"/>    def map(resource, config) &#123;
+        &#8230;
+    &#125;</pre></div><p class="paragraph"/>These defaults can be overidden by the user with the <strong class="bold">grails.resources.&#60;mappername&#62;.includes</strong> and <strong class="bold">grails.resources.&#60;mappername&#62;.excludes</strong> Config variables.
+
+    </body>
+</html>
