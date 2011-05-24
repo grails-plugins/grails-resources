@@ -1,5 +1,7 @@
 package org.grails.plugin.resource
 
+import org.apache.commons.io.FileUtils
+
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.springframework.mock.web.MockServletContext
 import groovy.util.ConfigObject
@@ -11,6 +13,7 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
     void setUp() {
         super.setUp()
         mockLogging(CSSRewriterResourceMapper)
+        FileUtils.cleanDirectory(new File('./test-tmp/'));
     }
 
     /**

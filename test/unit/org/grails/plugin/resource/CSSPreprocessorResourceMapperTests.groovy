@@ -1,5 +1,7 @@
 package org.grails.plugin.resource
 
+import org.apache.commons.io.FileUtils
+
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.springframework.mock.web.MockServletContext
 import groovy.util.ConfigObject
@@ -12,6 +14,7 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
     void setUp() {
         super.setUp()
         mockLogging(CSSPreprocessorResourceMapper)
+        FileUtils.cleanDirectory(new File('./test-tmp/'));
         
     }
     /**

@@ -760,6 +760,7 @@ class ResourceService implements InitializingBean {
                 s1 << "             -- id: ${resource.id}\n"
                 s1 << "             -- original Url: ${resource.originalUrl}\n"
                 s1 << "             -- local file: ${resource.processedFile}\n"
+                s1 << "             -- exists: ${resource.exists()}\n"
                 s1 << "             -- mime type: ${resource.contentType}\n"
                 s1 << "             -- actual Url: ${resource.actualUrl}\n"
                 s1 << "             -- source Extension: ${resource.sourceUrlExtension}\n"

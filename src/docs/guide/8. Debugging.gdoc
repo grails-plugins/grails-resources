@@ -35,5 +35,14 @@ h2. Inspecting your dependency data
 
 A utility function in ResourceService can be used to output the current resource metadata that the plugin has - all the modules and resources and their dependencies.
 
-Simple add resourceService.dumpInfo() somewhere in your application and it will come out to console.
+Simple add resourceService.dumpResources() somewhere in your application and it will come out to console.
 
+h2. Turning on debug logging
+
+There are copious amounts of debug logging output by the plugin that should make it relatively easy to track down problems. This information includes the order of mapper execution that will be used, the dependency order of your resource module definitions, and all the steps of processing each resource.
+
+To enable debug logging add this to your Config logging section:
+
+{code:java}
+debug "org.grails.plugin.resource"
+{code}

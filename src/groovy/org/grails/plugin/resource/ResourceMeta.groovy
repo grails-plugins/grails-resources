@@ -120,7 +120,7 @@ class ResourceMeta {
     
     Integer contentLength
     
-    Integer originalContentLength
+    Integer originalContentLength = 0
 
     Set excludedMappers
     
@@ -141,17 +141,24 @@ class ResourceMeta {
     void setOriginalResource(Resource res) {
         this.originalResource = res
         this.originalLastMod = res.lastModified()
-        _resourceExists = res.exists()
-        this.@originalContentLength = originalResource?.URL.openConnection().contentLength        
+        updateExists()
+        this.originalContentLength = originalResource?.URL.openConnection().contentLength        
         updateContentLength()
     }
     
     void setProcessedFile(File f) {
         this.processedFile = f
-        _resourceExists = f.exists()
+        updateExists()
         updateContentLength()
     }
 
+    void updateExists() {
+        if (processedFile) {
+            _resourceExists = processedFile.exists()
+        } else if (originalResource) {
+            _resourceExists = originalResource.exists()            
+        }
+    }
     private void copyOriginalResourceToWorkArea() {
         def inputStream = this.originalResource.inputStream
         try {
@@ -226,8 +233,9 @@ class ResourceMeta {
             if (processedFile) {
                 processedFile.setLastModified(originalLastMod ?: System.currentTimeMillis() )
             }
-            updateContentLength()
         }
+        updateContentLength()
+        updateExists()
     }
     
     boolean isDelegating() {

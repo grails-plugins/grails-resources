@@ -36,7 +36,8 @@ class AggregatedResourceMeta extends ResourceMeta {
         if (contentType == 'text/css') {
             writer << '@charset "UTF-8";\n'
         }
-        
+
+        // @todo I'm not sure we really want this here?
         resourceService.updateDependencyOrder()
         def moduleOrder = resourceService.modulesInDependencyOrder
     
