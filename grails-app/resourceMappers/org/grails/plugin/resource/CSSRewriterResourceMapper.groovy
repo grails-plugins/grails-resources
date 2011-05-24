@@ -54,10 +54,8 @@ class CSSRewriterResourceMapper {
                         log.debug "Calculating URL of ${linkedToResource?.dump()} relative to ${resource.dump()}"
                     }
 
-                    println "Getting relative URL of ${linkedToResource.sourceUrl}/${linkedToResource.actualUrl}"
                     def fixedUrl = linkedToResource.relativeToWithQueryParams(resource)
                     def replacement = "${prefix}${fixedUrl}${suffix}"
-                    println " relative URL of ${linkedToResource.sourceUrl}/${linkedToResource.actualUrl} was ${fixedUrl}"
 
                     if (log.debugEnabled) {
                         log.debug "Rewriting CSS URL '${originalUrl}' to '$replacement'"
