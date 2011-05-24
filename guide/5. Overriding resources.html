@@ -1,0 +1,20 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>5. Overriding resources</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    <h1><a name="5. Overriding resources">5. Overriding resources</a></h1>When plugins provide resource module declarations, they may not choose the same resource attributes that you would like to use - in particular plugins will often auto-bundle resources by module name, or have dependencies that you'd like to tweak.<p class="paragraph"/>This is easy to achieve with the Resources framework, as your application can override the defaultBundle, dependsOn and resources of any module using the "overrides" clause:<p class="paragraph"/><div class="code"><pre>modules = &#123;
+    overrides &#123;
+        jquery &#123;
+            // We want jquery bundled in with our other code
+            defaultBundle 'monolith'
+        &#125;<p class="paragraph"/>        otherModuleToTweak &#123;
+            dependsOn 'something&#45;<span class="java&#45;keyword">else</span>&#45;we&#45;added'<p class="paragraph"/>            resource id:'main&#45;css', bundle: 'my&#45;bundle'
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/>All you do is re-define the module inside your "overrides" clause (yes this mean no module can be called "overrides"), and provide new values for defaultBundle, dependsOn and individual resource attributes.<p class="paragraph"/>To override the attributes of resources, the original resource needs to have an id declared on it, or you can use the URI of the original resource if you no id was provided.<p class="paragraph"/>Arguments passed to the resource call in "overrides" are merged into those for the original resource, before being processed. There fore you can change or clear any values previously declared.
+
+    </body>
+</html>

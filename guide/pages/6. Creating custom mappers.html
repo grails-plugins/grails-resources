@@ -1,0 +1,55 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>6. Creating custom mappers</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    The resource processing chain uses ResourceMapper artefacts to do the work.<p class="paragraph"/>You can create your own ResourceMapper artefacts inside your application or plugins to perform tasks such as;
+<ul class="star">
+<li>Moving and renaming resources</li>
+<li>Changing the contents of resource files (compress, minify, compile etc)</li>
+<li>Set HTTP response headers when requests are processed</li>
+</ul><p class="paragraph"/>Resource mappers only get the chance to map (process) each resource once - the final resource is then stored on disk to serve future requests.<p class="paragraph"/>
+<h2>Defining a mapper</h2><p class="paragraph"/>Defining a resource mapper is easy. You create a file with ResourceMapper.groovy as the file suffix, in the grails-app/conf/resourceMappers folder.<p class="paragraph"/>The name of the mapper is extracted from the filename like any other Grails artefact, for example "TestResourceMapper" yields a mapper with name "test".<p class="paragraph"/>Example grails-app/conf/resourceMappers/TestResourceMapper.groovy:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.MUTATION<p class="paragraph"/>    def map(resource, config) &#123;
+        def file = <span class="java&#45;keyword">new</span> File(resource.processedFile.parentFile, <span class="java&#45;quote">"_$&#123;resource.processedFile.name&#125;"</span>)
+        assert resource.processedFile.renameTo(file)
+        resource.processedFile = file
+        resource.updateActualUrlFromProcessedFile()
+    &#125;<p class="paragraph"/>&#125;</pre></div><p class="paragraph"/>The only method a mapper must implement is <strong class="bold">map(resource, config)</strong> which is passed the <a href="http://github.com/grails-plugins/grails-resources/blob/master/src/groovy/org/grails/plugin/resource/ResourceMeta.groovy" target="blank">ResourceMeta</a> object that represents the resource and the mapper-specific config variables pulled out of grails.resources.&#60;mappername&#62;.<p class="paragraph"/>This method can do whatever it needs to the resource's file, provided it calls the updateActualUrlFromProcessedFile() method if the resource moves, unless you patch ResourceMeta.actualUrl manually.<p class="paragraph"/>You can change other properties of the resource, such as change the content type of the resource, add or modify tagAttributes (which are passed through when rendering the link for the resource).<p class="paragraph"/>That's all you need to do to create a mapper. The best way to learn how they work is to study the source of <a href="http://grails.org/plugin/cached-resources" target="blank">Cached-Resources</a> and <a href="http://grails.org/plugin/zipped-resources" target="blank">Zipped-Resources</a> plugins.<p class="paragraph"/><h2>Mapper phases and priority</h2><p class="paragraph"/>The example mapper shows the "phase" property being set to MapperPhase.MUTATION. The <a href="http://github.com/grails-plugins/grails-resources/blob/master/src/groovy/org/grails/plugin/resource/mapper/MapperPhase.groovy" target="blank">MapperPhase</a> enumeration provides the possible mapping phases in the order in which they occur during processing of resources:<p class="paragraph"/><div class="code"><pre>enum MapperPhase &#123;
+    GENERATION, // create <span class="java&#45;keyword">new</span> assets = compile less files
+    MUTATION, // alter/improve assets (may mean creating <span class="java&#45;keyword">new</span>/deleting aggregated resources) = spriting
+    COMPRESSION, // reducing the file size but maintaining semantics = minify
+    LINKNORMALISATION, // convert all inter asset references into a normal form = css links
+    AGGREGATION, // combining mutiple assets into one = bundling
+    RENAMING, // moving of physical assets = hashing
+    LINKREALISATION, // convert normalised inter asset references into real form = css links
+    ALTERNATEREPRESENTATION, // attach different representations of the asset = gzipping
+    DISTRIBUTION, // moving assets to their hosting environment = s3, cdn
+    ABSOLUTISATION, // update inter asset references to their distributed equivalent = css links
+    NOTIFICATION // let the world know about the <span class="java&#45;keyword">new</span> resources = cache invalidation
+&#125;</pre></div><p class="paragraph"/>In most cases it will be enough to specify your phase and operation (see next section). However in some cases there may be issues where multiple mappers in the same phase must operate in a specific order. In those cases a "priority" property can be set to specify the priority integer.<p class="paragraph"/>Mappers will be executed in phase order, in order of ascending priority within each phase. The default priority if not specified is equivalent to zero.<p class="paragraph"/><h2>Mapper operation</h2><p class="paragraph"/>The optional "operation" property allows you to specify the name of the kind of work performed by the mapper. Users can then prevent any mappers of this operation from executing on their resources.<p class="paragraph"/>The common example is to specify <strong class="bold">exclude:"minify"</strong> in a resource declaration to prevent any kind of minifying mapper from being applied to a resource that is already minified.<p class="paragraph"/>A similar operation called e.g. "compress" could be used to prevent duplicate zipping of resources that may have been pre-compressed (such as images).<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.COMPRESS<p class="paragraph"/>    def operation = <span class="java&#45;quote">"compression"</span><p class="paragraph"/>    def map(resource, config) &#123;
+        // Zip the file here
+    &#125;<p class="paragraph"/>&#125;</pre></div><p class="paragraph"/>Note the operations and mapper names occupy the same namespace so that the "exclude" argument on resource declarations can apply to either.<p class="paragraph"/>Resources will fail fast at runtime if an operation is specified on any mapper, where there is also a mapper with a name the same as the operation.<p class="paragraph"/><h2>Processing only the right types of files</h2><p class="paragraph"/>Often a mapper is only meant to target certain file types or file patterns. Make it easier for your users by operating correctly out of the box, but specifying defaultExcludes and/or defaultIncludes for your mapper, which will filter the resources passed to your mapper:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.MUTATION<p class="paragraph"/>    <span class="java&#45;keyword">static</span> defaultExcludes = &#91;
+        '/&#42;&#42;/&#42;.png',
+        '/&#42;&#42;/&#42;.gif',
+        '/&#42;&#42;/&#42;.jpg',
+        '/&#42;&#42;/&#42;.jpeg',
+        '/&#42;&#42;/&#42;.gz',
+        '/&#42;&#42;/&#42;.zip'
+    &#93;
+    <span class="java&#45;keyword">static</span> defaultIncludes = &#91; '/images/&#42;&#42;' &#93;<p class="paragraph"/>    def map(resource, config) &#123;
+        &#8230;
+    &#125;</pre></div><p class="paragraph"/>The use defaults can be overidden by the user with the <strong class="bold">grails.resources.&#60;mappername&#62;.includes</strong> and <strong class="bold">grails.resources.&#60;mappername&#62;.excludes</strong> Config variables.<p class="paragraph"/><h2>Adding request headers / intercepting requests</h2><p class="paragraph"/>Resource mappers also have the opportunity to take part in response handling so that they can adjust the response headers if necessary. You may need to adapt the handling of the current request to the request headers supplied.<p class="paragraph"/>Note that this cannot be used to change how the resource is mapped - the mapping is performed once only, but the response headers can be customized  every time the file is requested.<p class="paragraph"/>As an example, the Zipped-Resources plugin uses this mechanism to set the Content-Encoding header:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class ZipResourceMapper &#123;<p class="paragraph"/>    <span class="java&#45;keyword">static</span> phase = MapperPhase.ALTERNATEREPRESENTATION<p class="paragraph"/>    /&#42;&#42;
+     &#42; Rename the file to a hash of it's contents, and set caching headers 
+     &#42;/
+    def map(resource, config) &#123;
+        // Do the zipping
+        ...<p class="paragraph"/>        // Set up response headers
+        resource.requestProcessors &#60;&#60; &#123; req, resp &#45;&#62;
+            resp.setHeader('Content&#45;Encoding', 'gzip')
+        &#125;    
+    &#125;
+&#125;</pre></div><p class="paragraph"/>Here the mapper adds a Closure that takes the request and response objects to the resource's requestProcessors list. These will be called in the order they are defined on the resource.<p class="paragraph"/>
+    </body>
+</html>

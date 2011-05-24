@@ -1,0 +1,17 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>Resources Plugin 1.0 - Reference Documentation</title>
+        <link rel="stylesheet" href="../../css/ref.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    <h1>r:img Tag</h1><p class="paragraph"/>This tag renders an HTML &#60;img&#62; tag that points to a declared or undeclared resource.<p class="paragraph"/><h2>Attributes</h2>
+<ul class="star">
+<li>uri - Optional. The app-relative URI of the resource, i.e. "/images/icon.png". Used as an alternative to dir/file combination</li>
+<li>file - Optional. The file attribute as used by g:resource</li>
+<li>dir - Optional. The dir attribute as used by g:resource. Defaults to "images"</li>
+<li>plugin - Optional. The plugin attribute as used by g:resource</li>
+</ul><p class="paragraph"/>All other attributes such as width and height are passed-through. Note that if the resource is declared and has 'attrs' specified, these will be passed through. Therefore you can declare images in modules and use that as a central location for their common attributes such as width and height.
+
+    </body>
+</html>

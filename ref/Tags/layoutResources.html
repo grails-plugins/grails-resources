@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>Resources Plugin 1.0 - Reference Documentation</title>
+        <link rel="stylesheet" href="../../css/ref.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    <h1>r:layoutResources Tag</h1><p class="paragraph"/>Renders the resource links required to satisfy the dependencies described by calls to &#60;r:require&#62; in the current request - for the current disposition.<p class="paragraph"/>This tag has special behaviour, in that the first time it is called it renders the resources with disposition "head" (intended to be included within the &#60;head&#62; section of your page) and the second time it is called it renders the disposition "defer" resources.<p class="paragraph"/>For best use, this should be called in the head and at the end of the body in your Sitemesh layout. It can work without Sitemesh layouts, but you will need to ensure that all &#60;r:require&#62; and &#60;r:script&#62; invocations are called before the &#60;r:layoutResources/&#62; that would render them. Herein lies the power of using Sitemesh - using it you no longer have to worry about when you call resource tags, which opens up many new possibilities.<p class="paragraph"/>Example grails-app/views/layouts/main.gsp:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
+   <span class="xml&#45;tag">&#60;head&#62;</span>
+      <span class="xml&#45;tag">&#60;g:layoutTitle/&#62;</span>
+      <span class="xml&#45;tag">&#60;r:layoutResources/&#62;</span>
+   <span class="xml&#45;tag">&#60;/head&#62;</span>
+   <span class="xml&#45;tag">&#60;body&#62;</span>
+      <span class="xml&#45;tag">&#60;g:layoutBody/&#62;</span>
+      <span class="xml&#45;tag">&#60;r:layoutResources/&#62;</span>
+   <span class="xml&#45;tag">&#60;/body&#62;</span>
+<span class="xml&#45;tag">&#60;/html&#62;</span></pre></div><p class="paragraph"/><h2>Attributes</h2><p class="paragraph"/>None.<p class="paragraph"/>
+    </body>
+</html>

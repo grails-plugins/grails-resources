@@ -1,0 +1,45 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>1. Overview</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    
+This plugin provides the Resources framework for Grails.<p class="paragraph"/>The issues that the Resources framework tackles are:
+<ul class="star">
+<li>Web application performance tuning is difficult</li>
+<li>Correct ordering of resources, and deferred inclusion of JavaScript</li>
+<li>Resources that depend on others that must be loaded first</li>
+<li>The need for a standard way to expose static resources in plugins and applications</li>
+<li>The need for an extensible processing chain to optimize resources</li>
+<li>Preventing inclusion of the same resource multiple times</li>
+</ul><p class="paragraph"/>The Resources plugin achieves this end by introducing new artefacts and processing the resources using the server's local file system.<p class="paragraph"/>It adds artefacts for declaring resources, for declaring "mappers" that can process resources, and a servlet filter to serve processed resources.<p class="paragraph"/>In tandem with Sitemesh layouts and the Grails plugin dependency system, you gain the ability to express dependencies on specific UI libraries, and the ability to specify the resources that a page needs anywhere in the page GSPs or even in rendered GSP templates.<p class="paragraph"/>The Resource framework tags confer a whole new level of abstraction and power to application and plugin developers. It makes possible new patterns for managing resources and smart handling of JavaScript and CSS code.<p class="paragraph"/><h2>Quick Start</h2><p class="paragraph"/>To demonstrate the power of the framework, here's a quick demonstration of usage with the jQuery, jQuery-Ui and Blueprint plugins which exposes resource modules.<p class="paragraph"/><h3>Make sure jQuery plugin is installed</h3><p class="paragraph"/>For Grails 1.4, it is installed by default. For older versions: <strong class="bold">grails install-plugin jquery</strong><p class="paragraph"/><h3>Install jQuery UI and Blueprint plugins</h3><p class="paragraph"/>Just run:
+<div class="code"><pre>grails install&#45;plugin jquery&#45;ui
+grails install&#45;plugin blueprint</pre></div><p class="paragraph"/><h3>Edit your Sitemesh layout</h3><p class="paragraph"/>You need to add &#60;r:layoutResources/&#62; twice to your page, for the &#60;head&#62; resources and end-of-body resources.<p class="paragraph"/>Your grails-app/views/layouts/main.gsp:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
+   <span class="xml&#45;tag">&#60;head&#62;</span>
+      <span class="xml&#45;tag">&#60;g:layoutTitle/&#62;</span>
+      <span class="xml&#45;tag">&#60;r:layoutResources/&#62;</span>
+   <span class="xml&#45;tag">&#60;/head&#62;</span>
+   <span class="xml&#45;tag">&#60;body&#62;</span>
+      <span class="xml&#45;tag">&#60;g:layoutBody/&#62;</span>
+      <span class="xml&#45;tag">&#60;r:layoutResources/&#62;</span>
+   <span class="xml&#45;tag">&#60;/body&#62;</span>
+<span class="xml&#45;tag">&#60;/html&#62;</span></pre></div><p class="paragraph"/><h3>Edit your GSP page to include jQuery</h3><p class="paragraph"/>All you have to do here is add &#60;r:require&#62; to your GSP page. Anywhere will do, but in &#60;head&#62; makes sense, and add a bit of code:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
+   <span class="xml&#45;tag">&#60;head&#62;</span>
+      <span class="xml&#45;tag">&#60;meta name=<span class="xml&#45;quote">"layout"</span> content=<span class="xml&#45;quote">"main"</span>/&#62;</span>
+      <span class="xml&#45;tag">&#60;r:require modules=<span class="xml&#45;quote">"jquery&#45;ui, blueprint"</span>/&#62;</span><p class="paragraph"/>      <span class="xml&#45;tag">&#60;r:script&#62;</span>
+          $(function() &#123;
+              $('&#35;form').dialog('open');
+          &#125;);
+      <span class="xml&#45;tag">&#60;/r:script&#62;</span>
+   <span class="xml&#45;tag">&#60;/head&#62;</span>
+   <span class="xml&#45;tag">&#60;body&#62;</span>
+      <span class="xml&#45;tag">&#60;div id=<span class="xml&#45;quote">"form"</span>&#62;</span>
+           Hello World
+      <span class="xml&#45;tag">&#60;/div&#62;</span>  
+   <span class="xml&#45;tag">&#60;/body&#62;</span>
+<span class="xml&#45;tag">&#60;/html&#62;</span></pre></div><p class="paragraph"/><h3>View the page source</h3><p class="paragraph"/>When you run this and request the GSP page, you should view the source and look at what is happening in the page. Use Safari or Chrome resource inspector to see what files were requested and when.<p class="paragraph"/>You should have a page that is rendered with the Blueprint CSS framework, pulling in both jQuery and jQuery-UI, with jQuery-UI JS deferred to the end of the page, jQuery loaded in the head, and the "docuemnt ready" JS code fragment to set up the page is rendered right at the end of the body after jQuery UI has loaded.<p class="paragraph"/>All with almost zero effort!<p class="paragraph"/><h3>Now optimize your application</h3><p class="paragraph"/>Installing the "cached-resources" and "zipped-resources" plugins and running your app again, you will then find that your resources are cached in the browser "eternally" and transferred with zip encoding.<p class="paragraph"/>No other code changes are necessary.
+
+    </body>
+</html>

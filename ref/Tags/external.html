@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>Resources Plugin 1.0 - Reference Documentation</title>
+        <link rel="stylesheet" href="../../css/ref.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    <h1>r:external Tag</h1><p class="paragraph"/>This tag renders the right kind of links to external resources, based on their type, never including the same resource multiple times.<p class="paragraph"/>For example CSS files are rendered with:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;link rel=<span class="xml&#45;quote">"stylesheet"</span> .../&#62;</span></pre></div><p class="paragraph"/>or JS files are rendered with &#60;script&#62; tags. Images are rendered as favicons.<p class="paragraph"/>This is used internally by &#60;r:layoutResources/&#62;, and is rarely used on its own unless you must render links to resources without using the dependency mechanism and <a href="../../ref/Tags/require.html" class="Tags">require</a>.<p class="paragraph"/><h2>Attributes</h2>
+<ul class="star">
+<li>uri - Optional. The app-relative URI of the resource, i.e. "/css/main.css". Used as an alternative to dir/file combination</li>
+<li>file - Optional. The file attribute as used by g:resource</li>
+<li>dir - Optional. The dir attribute as used by g:resource. Defaults to "images"</li>
+<li>plugin - Optional. The plugin attribute as used by g:resource</li>
+<li>type - Optional. The type of link to render, from the supported list Default is chosen based on file extension but you can override with this, e.g. to treat a ".less" file as a "CSS" file when rendering the link.</li>
+<li>wrapper - Optional. A Closure taking a single parameter, the result of which will be used to render the link. The link markup is passed in as the parameter, so this can be used to wrap the link in something like MS IE specific markup.</li>
+</ul><p class="paragraph"/>Note that all other attributes are passed through to the target tag, overriding any defaults.<p class="paragraph"/>The types supported are:
+<ul class="star">
+<li>css - Sets type="text/css", rel="stylesheet", media="screen, projector"</li>
+<li>js - Sets type="text/javascript", writer="js"</li>
+<li>gif - Sets rel="shortcut icon"</li>
+<li>jpg - Sets rel="shortcut icon"</li>
+<li>ico - Sets rel="shortcut icon"</li>
+<li>png - Sets rel="shortcut icon"</li>
+<li>appleicon - Sets rel="apple-touch-icon"</li>
+</ul><p class="paragraph"/>
+    </body>
+</html>
