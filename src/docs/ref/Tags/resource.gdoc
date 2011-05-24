@@ -13,3 +13,4 @@ h2. Attributes
 * dir - Optional. The dir attribute as used by g:resource
 * plugin - Optional. The plugin attribute as used by g:resource
 
+

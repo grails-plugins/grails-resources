@@ -4,4 +4,4 @@ The "csspreprocessor" mapper iterates over the lines in your CSS files and updat
 
 This is a precursor phase that makes it safe for the CSS to be moved in the filesystem, without breaking the links to the resources.
 
-The inverse is performed by the [cssrewriter] mapper.
+The inverse is performed by the [cssrewriter|Mappers] mapper.

@@ -22,8 +22,8 @@ It is recommended that developers establish sound naming conventions in the comm
 
 For example there may be YUI and a Google CSS minifier plugins. These should be clearly named e.g:
 
-yui-css-minified-resources
-google-css-minified-resources
+* yui-css-minified-resources
+* google-css-minified-resources
 
 In addition the mappers must be clearly named, i.e. YuiCssMinifyMapper and GoogleCssMinifyMapper. Such that the user can exclude them selectively with code such as *exclude:'yuicssminify'*.
 

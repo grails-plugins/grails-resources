@@ -1,6 +1,6 @@
-There are several concepts introduced in the Resources framework which which you may not be familiar.
+There are several concepts introduced in the Resources framework with which you may not be familiar.
 
-It may help yout to understand the rest of the documentation if you familiarize yourself with these first.
+It may help you to understand the rest of the documentation if you familiarize yourself with these first.
 
 h2. Resources
 
@@ -10,7 +10,7 @@ This includes CSS, JavaScript and usually some icons and images.
 
 h2. Modules
 
-In the resources framework, you define resource modules that have a name and contain one or more resources. You use tags to indicate which modules your pages need.
+In the resources framework, you define resource modules that have a name and contain one or more resources. You use GSP tags to indicate which modules your pages need.
 
 h2. Module dependencies
 
@@ -24,13 +24,19 @@ Resource mappers are Grails artefacts that participate in the processing of reso
 
 Mappers can modify and/or move and rename the file.
 
+The person who declares resources can choose to exclude specific mappers per-resource, to prevent double-processing of resources that have been supplied pre-processed, such as pre-minified JS libraries.
+
 h2. Mapper phases
 
 Resource mappers are applied in a specific order, denoted by a series of well-defined phases. This ensures that the right processing happens at the right times.
 
+h2. Mapper operation
+
+Resource mappers often have an "operation" grouping, for example Yahoo UI and Google CSS minifier mappers might both have the operation name "minify", but unique mapper names. This allows the user to exclude a whole family of mappers on a per-resource basis.
+
 h2. Undeclared Resources
 
-Undeclared resources are those that you link to using the Resources framework tags (or Grails 1.4 and higher g:resource/g:img and other linking tags that are resources-aware) but you did not explicitly declare in any modules.
+Undeclared resources are those that you link to using the Resources framework tags such as [require|Tags], [img|Tags] and [external|Tags] (or Grails 1.4 and higher g:resource/g:img and other linking tags that are resources-aware) but you *did not explicitly declare in any modules*.
 
 h2. Ad-hoc/Legacy Resources
 
@@ -43,6 +49,8 @@ Bundling is the act of aggregating two or more resources of the same type into o
 h2. CSS Rewriting
 
 Rewriting CSS is the act of changing any URLs in your CSS files so that they continue to point to the correct resource even if the CSS is bundled into a new file and/or moved to a new location in the filesystem.
+
+When you bundle files, or move them to reduce link URL size (as the Cached-Resources plugin does), without URL rewriting this would break the links from your bundled file to other resources.
 
 h2. Disposition
 

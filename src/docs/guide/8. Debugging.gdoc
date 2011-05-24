@@ -1,6 +1,6 @@
 Due to the processing of resources, it can be tricky to diagnose problems when something is not working - your styling may not be coming through correctly, or you are getting weird JS errors. 
 
-Usually these are due to incorrect dependencies with your modules, but you may also have actual bugs in your JS or CSS. 
+Usually these are due to incorrect dependencies in your modules, but you may also have actual bugs in your JS or CSS. 
 
 When you're using mappers that completely rename or aggregate files, it can be hard to tell where the problem lies.
 
@@ -35,7 +35,7 @@ h2. Inspecting your dependency data
 
 A utility function in ResourceService can be used to output the current resource metadata that the plugin has - all the modules and resources and their dependencies.
 
-Simple add resourceService.dumpResources() somewhere in your application and it will come out to console.
+Simply add a "println resourceService.dumpResources()" somewhere in your application or GSP and it will come out.
 
 h2. Turning on debug logging
 

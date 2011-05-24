@@ -4,89 +4,19 @@ This plugin provides the Resources framework for Grails.
 The issues that the Resources framework tackles are:
 
 * Web application performance tuning is difficult
-* Correct ordering of resources, and deferred inclusion of JavaScript
-* Resources that depend on others that must be loaded first
-* The need for a standard way to expose static resources in plugins and applications
+* Correct load order for resources that depend on others
+* Deferring inclusion of JavaScript to the end of the document
+* The need for a standard way to for Grails plugins to expose static resources
 * The need for an extensible processing chain to optimize resources
 * Preventing inclusion of the same resource multiple times
+* The need for identical behaviour in development and production
 
-The Resources plugin achieves this end by introducing new artefacts and processing the resources using the server's local file system.
-
-It adds artefacts for declaring resources, for declaring "mappers" that can process resources, and a servlet filter to serve processed resources.
+The Resources plugin achieves these goals by introducing new artefacts and processing the resources using the server's local file system.
 
 In tandem with Sitemesh layouts and the Grails plugin dependency system, you gain the ability to express dependencies on specific UI libraries, and the ability to specify the resources that a page needs anywhere in the page GSPs or even in rendered GSP templates.
 
 The Resource framework tags confer a whole new level of abstraction and power to application and plugin developers. It makes possible new patterns for managing resources and smart handling of JavaScript and CSS code.
 
-h2. Quick Start
+It adds artefacts for declaring resources, for declaring "mappers" that can process resources, and a servlet filter to serve processed resources.
 
-To demonstrate the power of the framework, here's a quick demonstration of usage with the jQuery, jQuery-Ui and Blueprint plugins which exposes resource modules.
 
-h3. Make sure jQuery plugin is installed
-
-For Grails 1.4, it is installed by default. For older versions: *grails install-plugin jquery*
-
-h3. Install jQuery UI and Blueprint plugins
-
-Just run:
-{code}
-grails install-plugin jquery-ui
-grails install-plugin blueprint
-{code}
-
-h3. Edit your Sitemesh layout
-
-You need to add <r:layoutResources/> twice to your page, for the <head> resources and end-of-body resources.
-
-Your grails-app/views/layouts/main.gsp:
-
-{code:xml}
-<html>
-   <head>
-      <g:layoutTitle/>
-      <r:layoutResources/>
-   </head>
-   <body>
-      <g:layoutBody/>
-      <r:layoutResources/>
-   </body>
-</html>
-{code}
-
-h3. Edit your GSP page to include jQuery
-
-All you have to do here is add <r:require> to your GSP page. Anywhere will do, but in <head> makes sense, and add a bit of code:
-
-{code:xml}
-<html>
-   <head>
-      <meta name="layout" content="main"/>
-      <r:require modules="jquery-ui, blueprint"/>
-      
-      <r:script>
-          $(function() {
-              $('#form').dialog('open');
-          });
-      </r:script>
-   </head>
-   <body>
-      <div id="form">
-           Hello World
-      </div>  
-   </body>
-</html>
-{code}
-
-h3. View the page source
-
-When you run this and request the GSP page, you should view the source and look at what is happening in the page. Use Safari or Chrome resource inspector to see what files were requested and when.
-
-You should have a page that is rendered with the Blueprint CSS framework, pulling in both jQuery and jQuery-UI, with jQuery-UI JS deferred to the end of the page, jQuery loaded in the head, and the "docuemnt ready" JS code fragment to set up the page is rendered right at the end of the body after jQuery UI has loaded.
-
-All with almost zero effort!
-
-h3. Now optimize your application
-
-Installing the "cached-resources" and "zipped-resources" plugins and running your app again, you will then find that your resources are cached in the browser "eternally" and transferred with zip encoding.
-
-No other code changes are necessary.

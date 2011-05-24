@@ -28,7 +28,7 @@ h2. Controlling the scope of the adhoc filter: grails.resources.adhoc.patterns
 
 The ad-hoc resource filter is mapped using Servlet SDK filter mappings, which are more restricted that Ant patterns. You can specify folder (xxx/*) or file type (*.xxx) mappings only. 
 
-You may not want the adhoc filter, which is used for legacy resources (which are not linked to using resource tags) only and as such you do not want it to intercept everything in your application.
+You may not want the adhoc filter, which is only used for legacy resources (which are not linked to using resource tags), to intercept everything in your application.
 
 The default value is:
 
