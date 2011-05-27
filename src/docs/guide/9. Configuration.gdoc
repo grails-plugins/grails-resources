@@ -17,7 +17,7 @@ h2. Dependency-only mode: grails.resources.processing.enabled
 You can turn off resource processing completely with the trivial Config variable:
 
 {code:java}
-grails.resource.processing.enabled = false
+grails.resources.processing.enabled = false
 {code}
 
 Like the _debugResources option, this will perform no processing at all. It will also not require a writable file system on the server, but obviously precludes any processing of resources.
