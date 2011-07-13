@@ -11,7 +11,7 @@ import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
  */
 class ResourcesGrailsPlugin {
 
-    def version = "1.0"
+    def version = "1.0.1.BUILD-SNAPSHOT"
     def grailsVersion = "1.2 > *"
     def dependsOn = [logging:'1.0 > *']
     def loadAfter = ['logging']
@@ -44,17 +44,17 @@ class ResourcesGrailsPlugin {
     static DEFAULT_URI_PREFIX = 'static'
     static DEFAULT_ADHOC_PATTERNS = ["/images/*", "*.css", "*.js"].asImmutable()
     
-    def getResourcesConfig() {
-        ConfigurationHolder.config.grails.resources
+    def getResourcesConfig(application) {
+        application.config.grails.resources
     }
     
-    def getUriPrefix() {
-        def prf = resourcesConfig.uri.prefix
+    def getUriPrefix(application) {
+        def prf = getResourcesConfig(application).uri.prefix
         prf instanceof String ? prf : DEFAULT_URI_PREFIX
     }
     
-    def getAdHocPatterns() {
-        def patterns = resourcesConfig.adhoc.patterns
+    def getAdHocPatterns(application) {
+        def patterns = getResourcesConfig(application).adhoc.patterns
         patterns instanceof List ? patterns : DEFAULT_ADHOC_PATTERNS
     }
     
@@ -67,7 +67,7 @@ class ResourcesGrailsPlugin {
     }
     
     def doWithWebDescriptor = { webXml ->
-        def adHocPatterns = getAdHocPatterns()
+        def adHocPatterns = getAdHocPatterns(application)
         
         log.info("Adding servlet filter")
         def filters = webXml.filter[0]
@@ -91,7 +91,7 @@ class ResourcesGrailsPlugin {
         mappings + {
             'filter-mapping' {
                 'filter-name'("DeclaredResourcesPluginFilter")
-                'url-pattern'("/${uriPrefix}/*")
+                'url-pattern'("/${getUriPrefix(application)}/*")
             }
             // To be pre-Servlets 2.5 safe, we have 1 extension mapping per filter-mapping entry
             // Lame, but Tomcat 5.5 is not SSDK 2.5
@@ -105,7 +105,7 @@ class ResourcesGrailsPlugin {
     }
 
     def doWithDynamicMethods = { applicationContext ->
-        applicationContext.resourceService.staticUrlPrefix = "/${uriPrefix}"
+        applicationContext.resourceService.staticUrlPrefix = "/${getUriPrefix(application)}"
         applicationContext.resourceService.reload()
     }
 
