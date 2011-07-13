@@ -50,6 +50,7 @@ class ResourceService implements InitializingBean {
     ]
 
     def grailsLinkGenerator
+    def grailsResourceLocator
     
     def staticUrlPrefix
     
@@ -452,7 +453,15 @@ class ResourceService implements InitializingBean {
      *
      */
     URL getOriginalResourceURLForURI(uri) {
-        servletContext.getResource(uri)
+        if(grailsResourceLocator != null) {
+            def res = grailsResourceLocator.findResourceForURI(uri)
+            if(res != null) {
+                return res.URL
+            }
+        }
+        else {
+            servletContext.getResource(uri)            
+        }
     }
     
     /**
