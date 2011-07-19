@@ -25,7 +25,7 @@ Note that all other attributes are passed through to the target tag, overriding 
 
 The types supported are:
 
-* css - Sets type="text/css", rel="stylesheet", media="screen, projector"
+* css - Sets type="text/css", rel="stylesheet", media="screen, projection"
 * js - Sets type="text/javascript", writer="js"
 * gif - Sets rel="shortcut icon"
 * jpg - Sets rel="shortcut icon"
