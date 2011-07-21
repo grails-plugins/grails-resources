@@ -863,7 +863,7 @@ class ResourceService implements InitializingBean {
     
     def reload() {
         log.info("Performing a full reload")
-        resourceMappers = ResourceMappersFactory.createResourceMappers(grailsApplication, config.mappers)
+        resourceMappers = ResourceMappersFactory.createResourceMappers(grailsApplication, getConfig())
         loadResources()
     }
 }
