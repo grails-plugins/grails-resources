@@ -506,7 +506,7 @@ class ResourceTagLib {
         def o = new StringBuilder()
         o << "<img src=\"${info.uri.encodeAsHTML()}\" "
         if (res) {
-            def attribs = res.tagAttributes.clone()
+            def attribs = res.tagAttributes ? res.tagAttributes.clone() : [:]
     		def excludes = ['dir', 'uri', 'file', 'plugin']
             attribs += attrs.findAll { !(it.key in excludes) }
             attrs = attribs
