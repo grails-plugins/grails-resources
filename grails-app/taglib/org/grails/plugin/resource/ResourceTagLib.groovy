@@ -484,7 +484,7 @@ class ResourceTagLib {
         } else {
             // We don't know about this, back out and use grails URI but warn
             if (!info.debug && log.warnEnabled) {
-                log.warn "Invocation of <r:resource> for a resource that apparently doesn't exist: $uri"
+                log.warn "Invocation of <r:resource> for a resource that apparently doesn't exist: ${info.uri}"
             }
             out << info.uri
         }
