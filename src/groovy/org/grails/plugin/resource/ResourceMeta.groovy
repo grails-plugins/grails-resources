@@ -155,7 +155,7 @@ class ResourceMeta {
         if (processedFile) {
             _resourceExists = processedFile.exists()
             if (!this.originalLastMod && _resourceExists) {
-                this.originalLastMod = res.lastModified()
+                this.originalLastMod = processedFile.lastModified()
             }
         } else if (originalResource) {
             _resourceExists = originalResource.exists()            

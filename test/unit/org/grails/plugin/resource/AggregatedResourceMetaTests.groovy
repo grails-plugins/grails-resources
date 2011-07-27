@@ -17,7 +17,9 @@ class AggregatedResourceMetaTests extends GrailsUnitTestCase {
     void setUp() {
         super.setUp()
 
-        FileUtils.cleanDirectory(new File('./test-tmp/'));
+        def f = new File('./test-tmp/')
+        f.mkdirs()
+        FileUtils.cleanDirectory(f);
         
         module = new ResourceModule()
         module.name = 'aggmodule'
