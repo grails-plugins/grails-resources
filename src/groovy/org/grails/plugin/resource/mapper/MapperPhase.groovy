@@ -14,7 +14,7 @@ enum MapperPhase {
     LINKREALISATION, // convert normalised inter asset references into real form = css links
     ALTERNATEREPRESENTATION, // attach different representations of the asset = gzipping
     DISTRIBUTION, // moving assets to their hosting environment = s3, cdn
-    ABSOLUTISATION, // update inter asset references to their distributed equivalent = css links
+    ABSOLUTISATION, // update inter asset references to their distributed equivalent
     NOTIFICATION // let the world know about the new resources = cache invalidation
 }
 

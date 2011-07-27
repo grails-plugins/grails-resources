@@ -140,7 +140,6 @@ class ResourceMeta {
 
     void setOriginalResource(Resource res) {
         this.originalResource = res
-        this.originalLastMod = res.lastModified()
         updateExists()
         this.originalContentLength = originalResource?.URL.openConnection().contentLength        
         updateContentLength()
@@ -155,8 +154,14 @@ class ResourceMeta {
     void updateExists() {
         if (processedFile) {
             _resourceExists = processedFile.exists()
+            if (!this.originalLastMod && _resourceExists) {
+                this.originalLastMod = res.lastModified()
+            }
         } else if (originalResource) {
             _resourceExists = originalResource.exists()            
+            if (!this.originalLastMod && _resourceExists) {
+                this.originalLastMod = originalResource.lastModified()
+            }
         }
     }
     private void copyOriginalResourceToWorkArea() {
