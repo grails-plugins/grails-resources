@@ -1,8 +1,8 @@
-Defining a resource mapper is easy. You create a file with ResourceMapper.groovy as the file suffix, in the grails-app/conf/resourceMappers folder.
+Defining a resource mapper is easy. You create a file with ResourceMapper.groovy as the file suffix, in the grails-app/resourceMappers folder.
 
 The name of the mapper is extracted from the filename like any other Grails artefact, for example "TestResourceMapper" yields a mapper with name "test".
  
-Example grails-app/conf/resourceMappers/TestResourceMapper.groovy:
+Example grails-app/resourceMappers/TestResourceMapper.groovy:
 
 {code:java}
 import org.grails.plugin.resource.mapper.MapperPhase
