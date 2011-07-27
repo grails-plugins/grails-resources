@@ -30,14 +30,16 @@ class ProcessingFilter implements Filter {
 
         def debugging = resourceService.isDebugMode(request)
         request['resources.debug'] = debugging
+        def committed = false
         if (!debugging) {
             if (adhoc) {
-                resourceService.processAdHocResource(request, response)
+                committed = resourceService.processAdHocResource(request, response)
             } else {
                 resourceService.processDeclaredResource(request, response)
             }
-            // we've done it, don't call any other filters
-        } else {
+        }
+
+        if (!committed) {
             chain.doFilter(request, response)
         }
     }

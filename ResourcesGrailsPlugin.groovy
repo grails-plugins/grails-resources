@@ -87,7 +87,7 @@ class ResourcesGrailsPlugin {
                 }
             }
         }
-        def mappings = webXml.'filter-mapping' // this does only yield 2 filter mappings
+        def mappings = webXml.'filter-mapping'[0] 
         mappings + {
             'filter-mapping' {
                 'filter-name'("DeclaredResourcesPluginFilter")

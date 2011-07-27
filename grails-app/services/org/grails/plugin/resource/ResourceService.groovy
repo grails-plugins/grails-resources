@@ -164,7 +164,7 @@ class ResourceService implements InitializingBean {
      * This involves looking it up by source uri. Therefore the same resource may have multiple mappings in the 
      * processedResourcesByURI map but they should not be conflicting.
      */
-    void processAdHocResource(request, response) {
+    boolean processAdHocResource(request, response) {
         if (log.debugEnabled) {
             log.debug "Handling ad-hoc resource ${request.requestURI}"
         }
@@ -194,6 +194,9 @@ class ResourceService implements InitializingBean {
             } else {
                 response.sendError(404)
             }
+            return true
+        } else {
+            return false // we didn't handle this
         }
     }
     
