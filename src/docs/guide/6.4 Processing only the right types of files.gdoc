@@ -8,12 +8,12 @@ class TestResourceMapper {
     def phase = MapperPhase.MUTATION
 
     static defaultExcludes = [
-        '/**/*.png',
-        '/**/*.gif',
-        '/**/*.jpg',
-        '/**/*.jpeg',
-        '/**/*.gz',
-        '/**/*.zip'
+        '**/*.png',
+        '**/*.gif',
+        '**/*.jpg',
+        '**/*.jpeg',
+        '**/*.gz',
+        '**/*.zip'
     ]
     static defaultIncludes = [ '/images/**' ]
     
