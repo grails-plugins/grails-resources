@@ -11,7 +11,7 @@
 <li>Changing the contents of resource files (compress, minify, compile etc)</li>
 <li>Set HTTP response headers when requests are processed</li>
 </ul><p class="paragraph"/>Resource mappers only get the chance to map (process) each resource once - the final resource is then stored on disk to serve future requests.
-<h2><a name="6.1 Defining a mapper">6.1 Defining a mapper</a></h2>Defining a resource mapper is easy. You create a file with ResourceMapper.groovy as the file suffix, in the grails-app/conf/resourceMappers folder.<p class="paragraph"/>The name of the mapper is extracted from the filename like any other Grails artefact, for example "TestResourceMapper" yields a mapper with name "test".<p class="paragraph"/>Example grails-app/conf/resourceMappers/TestResourceMapper.groovy:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.MUTATION<p class="paragraph"/>    def map(resource, config) &#123;
+<h2><a name="6.1 Defining a mapper">6.1 Defining a mapper</a></h2>Defining a resource mapper is easy. You create a file with ResourceMapper.groovy as the file suffix, in the grails-app/resourceMappers folder.<p class="paragraph"/>The name of the mapper is extracted from the filename like any other Grails artefact, for example "TestResourceMapper" yields a mapper with name "test".<p class="paragraph"/>Example grails-app/resourceMappers/TestResourceMapper.groovy:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.MUTATION<p class="paragraph"/>    def map(resource, config) &#123;
         def file = <span class="java&#45;keyword">new</span> File(resource.processedFile.parentFile, <span class="java&#45;quote">"_$&#123;resource.processedFile.name&#125;"</span>)
         assert resource.processedFile.renameTo(file)
         resource.processedFile = file
@@ -32,12 +32,12 @@
 <h2><a name="6.3 Operation">6.3 Operation</a></h2>The optional "operation" property allows you to specify the name of the kind of work performed by the mapper. Users can then prevent any mappers of this operation from executing on their resources.<p class="paragraph"/>The common example is to specify <strong class="bold">exclude:"minify"</strong> in a resource declaration to prevent any kind of minifying mapper from being applied to a resource that is already minified.<p class="paragraph"/>A similar operation called e.g. "compress" could be used to prevent duplicate zipping of resources that may have been pre-compressed (such as images).<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.COMPRESS<p class="paragraph"/>    def operation = <span class="java&#45;quote">"compression"</span><p class="paragraph"/>    def map(resource, config) &#123;
         // Zip the file here
     &#125;<p class="paragraph"/>&#125;</pre></div><p class="paragraph"/>Note the operations and mapper names occupy the same namespace so that the "exclude" argument on resource declarations can apply to either.<p class="paragraph"/>Resources will fail fast at runtime if an operation is specified on any mapper, where there is also a mapper with a name the same as the operation.<p class="paragraph"/><h2><a name="6.4 Processing only the right types of files">6.4 Processing only the right types of files</a></h2>Often a mapper is only meant to target certain file types or file patterns. Make it easier for your users by operating correctly out of the box by specifying defaultExcludes and/or defaultIncludes for your mapper, which will filter the resources passed to your mapper:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.MUTATION<p class="paragraph"/>    <span class="java&#45;keyword">static</span> defaultExcludes = &#91;
-        '/&#42;&#42;/&#42;.png',
-        '/&#42;&#42;/&#42;.gif',
-        '/&#42;&#42;/&#42;.jpg',
-        '/&#42;&#42;/&#42;.jpeg',
-        '/&#42;&#42;/&#42;.gz',
-        '/&#42;&#42;/&#42;.zip'
+        '&#42;&#42;/&#42;.png',
+        '&#42;&#42;/&#42;.gif',
+        '&#42;&#42;/&#42;.jpg',
+        '&#42;&#42;/&#42;.jpeg',
+        '&#42;&#42;/&#42;.gz',
+        '&#42;&#42;/&#42;.zip'
     &#93;
     <span class="java&#45;keyword">static</span> defaultIncludes = &#91; '/images/&#42;&#42;' &#93;<p class="paragraph"/>    def map(resource, config) &#123;
         &#8230;
