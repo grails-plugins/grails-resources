@@ -29,17 +29,16 @@ class ProcessingFilter implements Filter {
         FilterChain chain) throws IOException, ServletException {
 
         def debugging = resourceService.isDebugMode(request)
-        request['resources.debug'] = debugging
-        def committed = false
+        request.setAttribute('resources.debug', debugging)
         if (!debugging) {
             if (adhoc) {
-                committed = resourceService.processAdHocResource(request, response)
+                resourceService.processAdHocResource(request, response)
             } else {
                 resourceService.processDeclaredResource(request, response)
             }
         }
 
-        if (!committed) {
+        if (!response.committed) {
             chain.doFilter(request, response)
         }
     }
