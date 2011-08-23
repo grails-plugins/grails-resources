@@ -164,7 +164,37 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         assertTrue output.contains('src="/static/images/test.png"')
         assertFalse output.contains('uri=')
     }
-    
+
+    void testImgTagWithAttributesDefaultDir() {
+        def testMeta = new ResourceMeta()
+        testMeta.sourceUrl = '/images/test.png'
+        testMeta.actualUrl = '/images/test.png'
+        testMeta.contentType = "image/png"
+        testMeta.disposition = 'head'
+        testMeta.tagAttributes = [width:'100', height:'50', alt:'mugshot']
+
+        tagLib.resourceService = [
+            isDebugMode: { r -> false },
+            getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
+            staticUrlPrefix: '/static'
+        ]
+        tagLib.grailsLinkGenerator = [
+            resource: {attrs ->
+                assertEquals 'test.png', attrs.file
+                assertEquals 'images', attrs.dir
+
+                return '/images/test.png'
+            }
+        ]
+        def output = tagLib.img(file:'test.png').toString()
+        println "Output was: $output"
+        assertTrue output.contains('width="100"')
+        assertTrue output.contains('height="50"')
+        assertTrue output.contains('src="/static/images/test.png"')
+        assertFalse output.contains('file=')
+        assertFalse output.contains('dir=')
+    }
+
     def testDebugModeResourceLinkWithAbsoluteCDNURL() {
 
         def url = 'https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js'

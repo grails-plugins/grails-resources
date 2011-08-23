@@ -494,11 +494,12 @@ class ResourceTagLib {
      * Write out an HTML <img> tag using resource processing for the image
      */
     def img = { attrs ->
-        def args = attrs.clone()
-        args.disposition = "image"
         if (!attrs.uri && !attrs.dir) {
             attrs.dir = "images"
         }
+        def args = attrs.clone()
+        args.disposition = "image"
+        
         def info = resolveResourceAndURI(args)
         def res = info.resource
 
