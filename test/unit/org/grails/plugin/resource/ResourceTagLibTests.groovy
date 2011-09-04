@@ -184,4 +184,28 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         println "Output was: $output"
         assertTrue output.contains('src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js?_debugResources')
     }
+    
+    def testRequireUpdatesRequestAttributes() {
+        def output = tagLib.require(modules:['thingOne', 'thingTwo']).toString()
+        
+        def tracker = tagLib.request.resourceModuleTracker
+        assertNotNull tracker
+        assertEquals 2, tracker?.size()
+        assertTrue tracker.containsKey('thingOne')
+        assertEquals true, tracker.thingOne
+        assertTrue tracker.containsKey('thingTwo')
+        assertEquals true, tracker.thingOne
+    }
+    
+    def testRequireIndicatesModuleNotMandatory() {
+        def output = tagLib.require(modules:['thingOne', 'thingTwo'], strict:false).toString()
+        
+        def tracker = tagLib.request.resourceModuleTracker
+        assertNotNull tracker
+        assertEquals 2, tracker?.size()
+        assertTrue tracker.containsKey('thingOne')
+        assertEquals false, tracker.thingOne
+        assertTrue tracker.containsKey('thingTwo')
+        assertEquals false, tracker.thingTwo
+    }
 }

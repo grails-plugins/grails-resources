@@ -96,15 +96,16 @@ class ResourceTagLib {
         }
     }
     
-    boolean notAlreadyDeclared(name) {
+    boolean declareModuleRequiredByPage(name, boolean mandatory = true) {
         def trk = request.resourceModuleTracker
         if (!trk) {
-            trk = new HashSet()
+            trk = new HashMap()
             request.resourceModuleTracker = trk
         }
         
-        if (!trk.contains(name)) {
-            trk.add(name)
+        // If not already added, or is there but not mandatory and setting mandatory...
+        if (!trk.containsKey(name) || (!trk[name] && mandatory)) {
+            trk[name] = mandatory
             return true
         } else {
             return false
@@ -245,6 +246,7 @@ class ResourceTagLib {
             request.resourceDependencyTracker = trk
         }
         
+        def mandatory = attrs.strict == null ? true : attrs.strict.toString() != 'false'
         def moduleNames
         if (attrs.module) {
             moduleNames = [attrs.module]
@@ -259,7 +261,7 @@ class ResourceTagLib {
             if (log.debugEnabled) {
                 log.debug "Checking if module [${name}] is already declared for this page..."
             }
-            if (notAlreadyDeclared(name)) {
+            if (declareModuleRequiredByPage(name, mandatory)) {
                 if (log.debugEnabled) {
                     log.debug "Adding module [${name}] declaration for this page..."
                 }
@@ -273,13 +275,18 @@ class ResourceTagLib {
      */
     def layoutResources = { attrs ->
         // @todo rewrite this to accept disposition attr and if not present
-        // do the auto toggle then.
+        // do the auto toggle then, this code is wet.
+        
         def trk = request.resourceDependencyTracker
         if (!request.resourceRenderedHeadResources) {
             if (log.debugEnabled) {
                 log.debug "Rendering non-deferred resources..."
             }
-            trk.each { module ->
+            
+            def modulesNeeded = trk ? resourceService.getAllModuleNamesRequired(trk) : []
+            def modulesInOrder = resourceService.getModulesInDependencyOrder(modulesNeeded)
+            
+            for (module in modulesInOrder) {
                 out << r.renderModule(name:module, disposition:"head")
             }
             
@@ -293,9 +300,14 @@ class ResourceTagLib {
             if (log.debugEnabled) {
                 log.debug "Rendering deferred resources..."
             }
-            trk.each { module ->
+
+            def modulesNeeded = resourceService.getAllModuleNamesRequired(trk)
+            def modulesInOrder = resourceService.getModulesInDependencyOrder(modulesNeeded)
+            
+            for (module in modulesInOrder) {
                 out << r.renderModule(name:module, disposition:"defer")
             }
+
             def pageScripts = request['resourceRequestScripts:defer']
             if (pageScripts) {
                 out << "<script type=\"text/javascript\">${pageScripts}</script>"
@@ -325,45 +337,39 @@ class ResourceTagLib {
         def dispos = attrs.remove('disposition') ?: 'defer'
         storeRequestScript(body(), dispos)
     }
-    
+
+    protected getModuleByName(name) {
+        def module = resourceService.getModule(name)
+        if (!module) {
+            if (name != ResourceService.IMPLICIT_MODULE) {
+                throw new IllegalArgumentException("No module found with name [$name]")
+            }
+        }
+        return module
+    }
+
     /**
      * Render the resources of the given module, and all its dependencies
      * Boolean attribute "deferred" determines whether or not the JS with "defer:true" gets rendered or not
      */
     def renderModule = { attrs ->
-        def name = attrs.name
         if (log.debugEnabled) {
             log.debug "renderModule ${attrs}"
         }
 
-        if (log.debugEnabled) {
-            log.debug "Getting info for module [${name}]"
-        }
-
-        def module = resourceService.getModule(name)
+        def name = attrs.name
+        def module = attrs.module
         if (!module) {
-            if (name != ResourceService.IMPLICIT_MODULE) {
-                throw new IllegalArgumentException("No module found with name [$name]")
-            } else {
-                // No implicit module, fine
-                return
-            }
+            module = getModuleByName(name)
+        }
+        if (!module) {
+            return
         }
         
         def s = new StringBuilder()
         
         def renderingDisposition = attrs.remove('disposition')
 
-        // Write out any dependent modules first
-        if (module.dependsOn) {
-            if (log.debugEnabled) {
-                log.debug "Rendering the dependencies of module [${name}]"
-            }
-            module.dependsOn.each { modName ->
-                s << r.renderModule(name:modName, disposition:renderingDisposition)
-            }
-        }
-        
         if (log.debugEnabled) {
             log.debug "Rendering the resources of module [${name}]"
         }

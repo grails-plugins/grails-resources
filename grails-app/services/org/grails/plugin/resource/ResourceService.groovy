@@ -869,4 +869,70 @@ class ResourceService implements InitializingBean {
         resourceMappers = ResourceMappersFactory.createResourceMappers(grailsApplication, config.mappers)
         loadResources()
     }
+    
+
+    /**
+     * Return a list of all the names of all modules required (included the input modules) to 
+     * satisfy the dependencies of the input list of module names.
+     */
+    def getAllModuleNamesRequired(moduleNameList) {
+        def result = []
+
+        for (m in moduleNameList) {
+            def module = getModule(m)
+            if (module) {
+                if (module.dependsOn) {
+                    result.addAll(getAllModuleNamesRequired(module.dependsOn))
+                }
+                result << m
+            } else {
+                throw new IllegalArgumentException("No module found with name [${m}]")
+            }
+        }
+        
+        return result
+    }
+    
+    /**
+     * Return a list of all the names of all modules required (included the input modules) to 
+     * satisfy the dependencies of the input list of module names.
+     */
+    def getAllModuleNamesRequired(Map <String, Boolean> moduleNamesAndMandatory) {
+        def result = []
+
+        for (m in moduleNamesAndMandatory) {
+            def module = getModule(m.key)
+            if (module) {
+                if (module.dependsOn) {
+                    def depModules = getAllModuleNamesRequired(module.dependsOn)
+                    for (dep in depModules) {
+                        if (result.indexOf(dep) == -1) {
+                            result << dep
+                        }
+                    }
+                }
+                result << m.key
+            } else if (m.value && m.key != ResourceService.IMPLICIT_MODULE) {
+                throw new IllegalArgumentException("No module found with name [${m.key}]")
+            }
+        }
+        
+        return result
+    }
+
+    /**
+     * Return a the module names sorted in first to last dependency order, based on the required name list
+     */
+    def getModulesInDependencyOrder(moduleNameList) {
+        def result = []
+
+        def modules = moduleNameList as HashSet
+        for (m in modulesInDependencyOrder) {
+            if (modules.contains(m)) {
+                result << m
+            }
+        }
+        
+        return result        
+    }
 }
