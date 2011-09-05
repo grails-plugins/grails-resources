@@ -29,6 +29,8 @@ h2. Attributes
 
 * module - Optional. The name of the resource module required.
 * modules - Optional. A comma-delimited list of resource modules required.
+* strict - Optional. Set to true by default, the page will throw an exception if one of them modules in the module/modules attributes cannot be found. If you wish to include an optional module, set this attribute to false.
+
 
 
 
