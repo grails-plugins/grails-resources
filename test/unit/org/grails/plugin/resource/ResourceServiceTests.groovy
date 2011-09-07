@@ -97,6 +97,7 @@ class ResourceServiceTests extends GrailsUnitTestCase {
 
     void testProcessAdHocResourceIncludesExcludesSpecificFile() {
         
+        svc.adHocIncludes = ['/**/*.js']
         svc.adHocExcludes = ['/**/js/something.js']
 
         def testData = [
