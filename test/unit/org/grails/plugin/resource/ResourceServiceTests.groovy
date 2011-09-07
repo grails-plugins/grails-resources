@@ -94,4 +94,32 @@ class ResourceServiceTests extends GrailsUnitTestCase {
             assertEquals "Failed on ${d.requestURI}", d.expected, didHandle
         }
     }
+
+    void testProcessAdHocResourceIncludesExcludesSpecificFile() {
+        
+        svc.adHocExcludes = ['/**/js/something.js']
+
+        def testData = [
+            [requestURI: '/js/other.js', expected:true],
+            [requestURI: '/js/something.js', expected:false],
+            [requestURI: 'js/something.js', expected:false],
+            [requestURI: '/xxx/js/something.js', expected:false],
+            [requestURI: 'xxx/js/something.js', expected:false]
+        ]
+        
+        testData.each { d ->
+            def request = [contextPath:'resources', requestURI: 'resources'+d.requestURI]
+            
+            // We know if it tried to handle it if it 404s, we can't be bothered to create resourcemeta for all those
+            def didHandle = false
+            def response = [
+                sendError: { code, msg = null -> didHandle = true },
+                sendRedirect: { uri -> }
+            ]
+            
+            svc.processAdHocResource(request, response)
+            
+            assertEquals "Failed on ${d.requestURI}", d.expected, didHandle
+        }
+    }
 }

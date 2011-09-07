@@ -97,6 +97,7 @@ class ResourceService implements InitializingBean {
     }
     
     void afterPropertiesSet() {
+        println "aPS"
         if (!servletContext) {
             servletContext = grailsApplication.mainContext.servletContext
         }
@@ -106,7 +107,9 @@ class ResourceService implements InitializingBean {
         adHocIncludes = adHocIncludes.collect { it.startsWith('/') ? it : '/'+it }
 
         adHocExcludes = getConfigParamOrDefault('adhoc.excludes', [])
+        println "aPS ahE raw: ${adHocExcludes}"
         adHocExcludes = adHocExcludes.collect { it.startsWith('/') ? it : '/'+it }
+        println "aPS ahE cooked: ${adHocExcludes}"
     }
     
     File getWorkDir() {
@@ -137,10 +140,11 @@ class ResourceService implements InitializingBean {
             PATH_MATCHER.match(p, uri) 
         }
         if (log.debugEnabled) {
-            log.debug "Ad-hoc resource ${uri} passed includes? ${included}"
+            log.debug "Ad-hoc resource ${uri} matched includes? ${included}"
         }
 
         if (included) {
+            println "EXCLUDES: ${adHocExcludes}"
             included = !(adHocExcludes.find { PATH_MATCHER.match(it, uri) })
             if (log.debugEnabled) {
                 log.debug "Ad-hoc resource ${uri} passed excludes? ${included}"
@@ -346,14 +350,18 @@ class ResourceService implements InitializingBean {
         // Declared resources will already exist, but ad-hoc or synthetic may need to be created
         def res = processedResourcesByURI.getOrCreateAdHocResource(uri) { -> 
 
+            println "C"
             if (!createAdHocResourceIfNeeded) {
+                println "D"
                 if (log.warnEnabled) {
                     log.warn("We can't create resources on the fly unless they are 'ad-hoc', we're going to 404. Resource URI: $uri")
                 }
                 return null
             }
             
+            println "A"
             if (!canProcessAdHocResource(uri)) {
+                println "B"
                 if (log.debugEnabled) {
                     log.debug("Skipping ad-hoc resource $uri as it is excluded")
                 }

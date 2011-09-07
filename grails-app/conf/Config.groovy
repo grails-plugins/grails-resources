@@ -26,9 +26,7 @@ environments {
     development {
         grails.serverURL = "http://localhost:8080/resources"
         
-        grails.resources.test.excludes = ['/images/**']
-        
-        grails.resources.adhoc.excludes = ['**/js/core.js']
+        grails.resources.adhoc.excludes = ['/**/js/core.js']
         
         grails.resources.modules = {
             app {
@@ -42,6 +40,10 @@ environments {
                 resource 'https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js'
             }
         } 
+    }
+    
+    test {
+        grails.resources.adhoc.excludes = ['/**/js/core.js']
     }
 }
 

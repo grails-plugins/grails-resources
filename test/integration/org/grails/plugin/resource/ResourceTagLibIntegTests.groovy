@@ -14,19 +14,33 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
         ]
     }
 
-    def testExternalWithAdhocResourceURI() {
-        def result = applyTemplate('<r:external uri="/js/core.js"/>', [:])
+    def testExternalWithAdhocResourceURIThatIsExcluded() {
+        def result = applyTemplate('<r:external uri="js/core.js"/>', [:])
         println "Result: ${result}"
-        assertTrue result.indexOf('/static/js/_core.js') != -1
+        assertTrue result.indexOf('/js/core.js') != -1
+    }
 
-        result = applyTemplate('<r:external uri="js/core.js"/>', [:])
+    def testExternalWithAdhocResourceDirAndFileThatIsExcluded() {
+        def result = applyTemplate('<r:external dir="js" file="core.js"/>', [:])
         println "Result: ${result}"
-        assertTrue result.indexOf('/static/js/_core.js') != -1
+        assertTrue result.indexOf('/js/core.js') != -1
+    }
+
+    def testExternalWithAdhocResourceURI() {
+        def result = applyTemplate('<r:external uri="js/adhoc.js"/>', [:])
+        println "Result: ${result}"
+        assertTrue result.indexOf('/static/js/_adhoc.js') != -1
+    }
+
+    def testExternalWithAdhocResourceURIWithSlash() {
+        def result = applyTemplate('<r:external uri="/js/adhoc.js"/>', [:])
+        println "Result: ${result}"
+        assertTrue result.indexOf('/static/js/_adhoc.js') != -1
     }
 
     def testExternalWithAdhocResourceDirAndFile() {
-        def result = applyTemplate('<r:external dir="js" file="core.js"/>', [:])
+        def result = applyTemplate('<r:external dir="js" file="adhoc.js"/>', [:])
         println "Result: ${result}"
-        assertTrue result.indexOf('/static/js/_core.js') != -1
+        assertTrue result.indexOf('/static/js/_adhoc.js') != -1
     }
 }
