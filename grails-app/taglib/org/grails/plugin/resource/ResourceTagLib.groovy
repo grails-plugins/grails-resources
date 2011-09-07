@@ -468,7 +468,6 @@ class ResourceTagLib {
             }
         })
         
-        println "Back from gRMfU, URI is: ${res?.linkUrl} / ${uri}"
         // We need to handle a) absolute links here for CDN, and b) base url
         def linkUrl = res ? res.linkUrl : uri
         def baseUrl = '' // @todo get from config
@@ -476,7 +475,6 @@ class ResourceTagLib {
             // @todo do we need to toggle http/https here based on current request protocol?
             return [uri:baseUrl ? baseUrl+linkUrl : forcePrefixedWithSlash(linkUrl), resource:res]
         } else {
-            println "build URI: ${ctxPath} + ${resourceService.staticUrlPrefix} + ${linkUrl} "
             // Only apply static prefix if the resource actually has ResourceMeta created for it
             uri = res ? ctxPath+resourceService.staticUrlPrefix+linkUrl : ctxPath+linkUrl
             return [uri:uri, resource:res]
