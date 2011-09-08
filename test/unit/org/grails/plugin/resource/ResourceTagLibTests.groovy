@@ -15,7 +15,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         super.tearDown()
     }
 
-    void testLinkResolutionForGrails1_4() {
+    void testLinkResolutionForGrails2() {
         tagLib.grailsLinkGenerator = [
             resource: { attrs ->
                 "${attrs.contextPath}/${attrs.dir}/${attrs.file}"
@@ -39,6 +39,27 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         
         def res = tagLib.resolveResourceAndURI(dir:'images', file:'favicon.ico')
         assertEquals "/CTX/static/images/favicon.ico", res.uri
+    }
+    
+    void testLinkResolutionForGrails2ResourceExcluded() {
+        tagLib.grailsLinkGenerator = [
+            resource: { attrs ->
+                "${attrs.contextPath}/${attrs.dir}/${attrs.file}"
+            }
+        ]
+        tagLib.resourceService = [
+            isDebugMode: { r -> false },
+            getResourceMetaForURI: { uri, adhoc, declRes,  postProc -> 
+                assertEquals "/images/favicon.ico", uri
+                return null // Excluded
+            },
+            staticUrlPrefix: '/static'
+        ]
+
+        tagLib.request.contextPath = "/CTX"
+        
+        def res = tagLib.resolveResourceAndURI(dir:'images', file:'favicon.ico')
+        assertEquals "/CTX/images/favicon.ico", res.uri
     }
     
     void testLinkResolutionForGrails1_3AndEarlier() {

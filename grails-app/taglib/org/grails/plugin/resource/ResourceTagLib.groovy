@@ -406,6 +406,9 @@ class ResourceTagLib {
 
     /**
      * Get the uri to use for linking, and - if relevant - the resource instance
+     * NOTE: The URI handling mechanics in here are pretty evil and nuanced (i.e. 
+     * ad-hoc vs declared, ad-hoc and not found, ad-hoc and excluded etc).
+     * There is reasonable test coverage, but be careful.
      * @return Map with uri/url property and *maybe* a resource property
      */
     def resolveResourceAndURI(attrs) {
@@ -471,7 +474,8 @@ class ResourceTagLib {
         })
         
         // We need to handle a) absolute links here for CDN, and b) base url
-        def linkUrl = res ? res.linkUrl : uri
+        def linkUrl = res ? res.linkUrl : reluri
+
         def baseUrl = '' // @todo get from config
         if (linkUrl.contains('://') || baseUrl) {
             // @todo do we need to toggle http/https here based on current request protocol?
