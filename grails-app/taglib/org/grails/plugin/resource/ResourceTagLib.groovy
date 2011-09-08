@@ -422,7 +422,7 @@ class ResourceTagLib {
             } else {
                 // use the link generator to avoid stack overflow calling back into us
                 // via g.resource
-                attrs.contextPath = ctxPath
+                //attrs.contextPath = ctxPath
                 uri = grailsLinkGenerator.resource(attrs)
             }
         }
@@ -457,7 +457,9 @@ class ResourceTagLib {
         def disposition = attrs.remove('disposition')
 
         // Chop off context path
-        uri = forcePrefixedWithSlash(uri)
+        if (!abs) {
+            uri = forcePrefixedWithSlash(uri)
+        }
         def reluri = ResourceService.removeQueryParams(abs ? uri : uri[ctxPath.size()..-1])
         
         // Get or create ResourceMeta
@@ -473,7 +475,7 @@ class ResourceTagLib {
         def baseUrl = '' // @todo get from config
         if (linkUrl.contains('://') || baseUrl) {
             // @todo do we need to toggle http/https here based on current request protocol?
-            return [uri:baseUrl ? baseUrl+linkUrl : forcePrefixedWithSlash(linkUrl), resource:res]
+            return [uri:baseUrl ? baseUrl+linkUrl : linkUrl, resource:res]
         } else {
             // Only apply static prefix if the resource actually has ResourceMeta created for it
             uri = res ? ctxPath+resourceService.staticUrlPrefix+linkUrl : ctxPath+linkUrl
