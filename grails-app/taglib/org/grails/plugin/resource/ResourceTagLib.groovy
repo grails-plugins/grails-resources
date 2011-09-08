@@ -422,7 +422,7 @@ class ResourceTagLib {
             } else {
                 // use the link generator to avoid stack overflow calling back into us
                 // via g.resource
-                //attrs.contextPath = ctxPath
+                attrs.contextPath = ctxPath
                 uri = grailsLinkGenerator.resource(attrs)
             }
         }
@@ -456,10 +456,10 @@ class ResourceTagLib {
         
         def disposition = attrs.remove('disposition')
 
-        // Chop off context path
         if (!abs) {
             uri = forcePrefixedWithSlash(uri)
         }
+        // Chop off context path
         def reluri = ResourceService.removeQueryParams(abs ? uri : uri[ctxPath.size()..-1])
         
         // Get or create ResourceMeta
