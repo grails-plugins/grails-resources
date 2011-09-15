@@ -98,16 +98,25 @@ class ResourceTagLib {
     
     boolean declareModuleRequiredByPage(name, boolean mandatory = true) {
         def trk = request.resourceModuleTracker
-        if (!trk) {
+        if (trk == null) {
+            if (log.debugEnabled) {
+                log.debug "createing new resource module tracker for request ${request}"
+            }
             trk = new HashMap()
             request.resourceModuleTracker = trk
         }
         
         // If not already added, or is there but not mandatory and setting mandatory...
         if (!trk.containsKey(name) || (!trk[name] && mandatory)) {
+            if (log.debugEnabled) {
+                log.debug "adding module [$name] (mandatory:${mandatory}) to resource module tracker for request ${request}"
+            }
             trk[name] = mandatory
             return true
         } else {
+            if (log.debugEnabled) {
+                log.debug "skipping adding module [$name] to resource module tracker for request ${request} - already included"
+            }
             return false
         }
     }
@@ -240,10 +249,13 @@ class ResourceTagLib {
      * This is stored in the request until layoutResources is called, we then sort out what needs rendering or not later
      */
     def require = { attrs ->
-        def trk = request.resourceDependencyTracker
+        if (log.debugEnabled) {
+            log.debug "require (request ${request}): ${attrs}"
+        }
+        
+        def trk = request.resourceModuleTracker
         if (!trk) {
-            trk = [ResourceService.IMPLICIT_MODULE] // Always include this
-            request.resourceDependencyTracker = trk
+            declareModuleRequiredByPage(ResourceService.IMPLICIT_MODULE)
         }
         
         def mandatory = attrs.strict == null ? true : attrs.strict.toString() != 'false'
@@ -257,16 +269,16 @@ class ResourceTagLib {
                 moduleNames = attrs.modules.split(',')*.trim()
             }
         }
+
+        if (log.debugEnabled) {
+            log.debug "requiring modules: ${moduleNames} (mandatory: ${mandatory})"
+        }
+
         moduleNames?.each { name ->
             if (log.debugEnabled) {
                 log.debug "Checking if module [${name}] is already declared for this page..."
             }
-            if (declareModuleRequiredByPage(name, mandatory)) {
-                if (log.debugEnabled) {
-                    log.debug "Adding module [${name}] declaration for this page..."
-                }
-                trk << name  
-            }
+            declareModuleRequiredByPage(name, mandatory)
         }
     }
     
@@ -274,18 +286,33 @@ class ResourceTagLib {
      * Render the resources. First invocation renders head JS and CSS, second renders deferred JS only, and any more spews.
      */
     def layoutResources = { attrs ->
+        if (log.debugEnabled) {
+            log.debug "laying out resources for request ${request}: ${attrs}"
+        }
+
         // @todo rewrite this to accept disposition attr and if not present
         // do the auto toggle then, this code is wet.
         
-        def trk = request.resourceDependencyTracker
+        def trk = request.resourceModuleTracker
+        if (log.debugEnabled) {
+            log.debug "Rendering resources, modules in tracker: ${trk}"
+        }
+
         if (!request.resourceRenderedHeadResources) {
             if (log.debugEnabled) {
                 log.debug "Rendering non-deferred resources..."
             }
             
             def modulesNeeded = trk ? resourceService.getAllModuleNamesRequired(trk) : []
+            if (log.debugEnabled) {
+                log.debug "Rendering resources, modules needed: ${modulesNeeded}"
+            }
+
             def modulesInOrder = resourceService.getModulesInDependencyOrder(modulesNeeded)
-            
+            if (log.debugEnabled) {
+                log.debug "Rendering non-deferred resources, modules: ${modulesInOrder}..."
+            }
+
             for (module in modulesInOrder) {
                 out << r.renderModule(name:module, disposition:"head")
             }
@@ -304,6 +331,9 @@ class ResourceTagLib {
             def modulesNeeded = resourceService.getAllModuleNamesRequired(trk)
             def modulesInOrder = resourceService.getModulesInDependencyOrder(modulesNeeded)
             
+            if (log.debugEnabled) {
+                log.debug "Rendering non-deferred resources, modules: ${modulesInOrder}..."
+            }
             for (module in modulesInOrder) {
                 out << r.renderModule(name:module, disposition:"defer")
             }
@@ -320,6 +350,9 @@ class ResourceTagLib {
     }
     
     void storeRequestScript(text, disposition) {
+        if (log.debugEnabled) {
+            log.debug "stashing request script for disposition [${disposition}]: ${text}"
+        }
         def trkName = 'resourceRequestScripts:'+disposition
         def trk = request[trkName]
         if (!trk) {
@@ -371,7 +404,7 @@ class ResourceTagLib {
         def renderingDisposition = attrs.remove('disposition')
 
         if (log.debugEnabled) {
-            log.debug "Rendering the resources of module [${name}]"
+            log.debug "Rendering the resources of module [${name}]: ${module.dump()}"
         }
         
         def debugMode = resourceService.isDebugMode(request)

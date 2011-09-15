@@ -33,6 +33,10 @@ class ModulesBuilder implements GroovyInterceptable {
 
             if (name != METHODNAME_OVERRIDES) {
                 
+                if (modules.find { m -> m.name == name}) {
+                    throw new IllegalArgumentException("A module called [$name] has already been defined")
+                }
+                
                 // build it
                 def moduleDefinition = args[0]
                 moduleDefinition.delegate = _moduleBuilder
