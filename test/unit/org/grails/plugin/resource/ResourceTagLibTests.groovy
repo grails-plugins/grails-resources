@@ -241,11 +241,13 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         
         def tracker = tagLib.request.resourceModuleTracker
         assertNotNull tracker
-        assertEquals 2, tracker?.size()
+        assertEquals 3, tracker?.size()
         assertTrue tracker.containsKey('thingOne')
         assertEquals true, tracker.thingOne
         assertTrue tracker.containsKey('thingTwo')
         assertEquals true, tracker.thingOne
+        assertTrue tracker.containsKey(ResourceService.IMPLICIT_MODULE)
+        assertEquals false, tracker[ResourceService.IMPLICIT_MODULE]
     }
     
     def testRequireIndicatesModuleNotMandatory() {
@@ -253,10 +255,12 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         
         def tracker = tagLib.request.resourceModuleTracker
         assertNotNull tracker
-        assertEquals 2, tracker?.size()
+        assertEquals 3, tracker?.size()
         assertTrue tracker.containsKey('thingOne')
         assertEquals false, tracker.thingOne
         assertTrue tracker.containsKey('thingTwo')
         assertEquals false, tracker.thingTwo
+        assertTrue tracker.containsKey(ResourceService.IMPLICIT_MODULE)
+        assertEquals false, tracker[ResourceService.IMPLICIT_MODULE]
     }
 }

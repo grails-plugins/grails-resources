@@ -17,13 +17,15 @@ class ModulesBuilder implements GroovyInterceptable {
     private _moduleOverrides
     private _collatedData
     private _moduleBuilder
+    private boolean _strict
     
     static METHODNAME_OVERRIDES = 'overrides'
     
     private final log = LoggerFactory.getLogger(this.class.name)
     
-    ModulesBuilder(List modules) {
+    ModulesBuilder(List modules, strict = false) {
         _modules = modules
+        _strict = strict
         _collatedData = [resources:[], dependencies:[]]
         _moduleBuilder = new ModuleBuilder(_collatedData)
     }
@@ -33,7 +35,7 @@ class ModulesBuilder implements GroovyInterceptable {
 
             if (name != METHODNAME_OVERRIDES) {
                 
-                if (modules.find { m -> m.name == name}) {
+                if (_strict && _modules.find { m -> m.name == name}) {
                     throw new IllegalArgumentException("A module called [$name] has already been defined")
                 }
                 
@@ -65,7 +67,7 @@ class ModulesBuilder implements GroovyInterceptable {
                 if (log.debugEnabled) {
                     log.debug("Processing module overrides")
                 }
-                def nestedBuilder = new ModulesBuilder(_moduleOverrides == null ? [] : _moduleOverrides)
+                def nestedBuilder = new ModulesBuilder(_moduleOverrides == null ? [] : _moduleOverrides, false)
                 def moduleDefinition = args[0]
                 moduleDefinition.delegate = nestedBuilder
                 moduleDefinition.resolveStrategy = Closure.DELEGATE_FIRST

@@ -255,7 +255,7 @@ class ResourceTagLib {
         
         def trk = request.resourceModuleTracker
         if (!trk) {
-            declareModuleRequiredByPage(ResourceService.IMPLICIT_MODULE)
+            declareModuleRequiredByPage(ResourceService.IMPLICIT_MODULE, false)
         }
         
         def mandatory = attrs.strict == null ? true : attrs.strict.toString() != 'false'
