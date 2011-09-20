@@ -13,8 +13,9 @@ class ResourcesGrailsPlugin {
 
     def version = "1.0.3.BUILD-SNAPSHOT"
     def grailsVersion = "1.2 > *"
-    def dependsOn = [logging:'1.0 > *']
-    def loadAfter = ['logging']
+
+    def loadAfter = ['logging'] // retained to ensure correct loading under Grails < 2.0
+
     def pluginExcludes = [
             "grails-app/views/error.gsp",
             "grails-app/views/index.gsp",
