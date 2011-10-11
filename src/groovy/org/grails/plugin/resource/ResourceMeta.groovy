@@ -18,7 +18,7 @@ import org.grails.plugin.resource.mapper.ResourceMapper
  */
 class ResourceMeta {
 
-    final log = LoggerFactory.getLogger(ResourceMeta)
+    def log = LoggerFactory.getLogger(ResourceMeta)
 
     /**
      * The optional module-unique id
