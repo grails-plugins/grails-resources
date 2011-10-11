@@ -19,14 +19,14 @@ class ResourceServiceTests extends GrailsUnitTestCase {
         svc = new ResourceService()
         
         svc.grailsApplication = [
-            config : [grails:[resources:[work:[dir:'./test-tmp']]]]
-        ]
-        svc.servletContext = [
-            getResource: { uri -> 
-                assertTrue uri.indexOf('#') < 0
-                new URL('file:./test/test-files'+uri) 
-            },
-            getMimeType: { uri -> "test/nothing" }
+            config : [grails:[resources:[work:[dir:'./test-tmp']]]],
+            mainContext : [servletContext:[
+                getResource: { uri -> 
+                    assertTrue uri.indexOf('#') < 0
+                    new URL('file:./test/test-files'+uri) 
+                },
+                getMimeType: { uri -> "test/nothing" }
+            ]]
         ]
     }
 

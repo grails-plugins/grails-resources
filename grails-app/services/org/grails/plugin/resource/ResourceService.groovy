@@ -32,12 +32,16 @@ import org.grails.plugin.resource.util.ResourceMetaStore
 class ResourceService implements InitializingBean {
     
     static transactional = false
-
     
     static final PATH_MATCHER = new AntPathMatcher()
     static IMPLICIT_MODULE = "__@adhoc-files@__"
     static SYNTHETIC_MODULE = "__@synthetic-files@__"
     static REQ_ATTR_DEBUGGING = 'resources.debug'
+    static REQ_ATTR_DISPOSITIONS_REMAINING = 'resources.dispositions.remaining'
+
+    static DISPOSITION_HEAD = 'head'
+    static DISPOSITION_DEFER = 'defer'
+    static DEFAULT_DISPOSITION_LIST = [DISPOSITION_HEAD, DISPOSITION_DEFER]
     
     static DEFAULT_MODULE_SETTINGS = [
         css:[disposition: 'head'],
@@ -67,7 +71,7 @@ class ResourceService implements InitializingBean {
     def resourceMappers
     
     def grailsApplication
-    def servletContext
+    @Lazy servletContext = { grailsApplication.mainContext.servletContext }()
     
     boolean processingEnabled
     
@@ -97,10 +101,6 @@ class ResourceService implements InitializingBean {
     }
     
     void afterPropertiesSet() {
-        if (!servletContext) {
-            servletContext = grailsApplication.mainContext.servletContext
-        }
-        
         processingEnabled = getConfigParamOrDefault('processing.enabled', true)
         adHocIncludes = getConfigParamOrDefault('adhoc.includes', ['**/*.*'])
         adHocIncludes = adHocIncludes.collect { it.startsWith('/') ? it : '/'+it }
@@ -934,5 +934,40 @@ class ResourceService implements InitializingBean {
         }
         
         return result        
+    }
+    
+    /**
+     * Get the set of dispositions required by resources in the current request, which have not yet been rendered
+     */
+    Set getRequestDispositionsRemaining(request) {
+        def dispositions = request[REQ_ATTR_DISPOSITIONS_REMAINING] 
+        // Return a new set of HEAD + DEFER if there is nothing in the request currently, this is our baseline
+        if (dispositions == null) {
+            dispositions = new HashSet(DEFAULT_DISPOSITION_LIST)
+            request[REQ_ATTR_DISPOSITIONS_REMAINING] = dispositions
+        }
+        return dispositions 
+    }
+
+    /**
+     * Add a disposition to the current request's set of them
+     */
+    void addDispositionToRequest(request, String disposition) {
+        def dispositions = request[REQ_ATTR_DISPOSITIONS_REMAINING] 
+        if (dispositions != null) {
+            dispositions << disposition
+        } else {
+            request[REQ_ATTR_DISPOSITIONS_REMAINING] = [disposition] as Set
+        }
+    }
+
+    /**
+     * Add a disposition to the current request's set of them
+     */
+    void removeDispositionFromRequest(request, String disposition) {
+        def dispositions = request[REQ_ATTR_DISPOSITIONS_REMAINING] 
+        if (dispositions != null) {
+            dispositions.remove(disposition)
+        }
     }
 }

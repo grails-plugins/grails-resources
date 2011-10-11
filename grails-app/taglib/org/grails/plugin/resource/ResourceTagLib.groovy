@@ -18,6 +18,8 @@ import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
 class ResourceTagLib {
     static namespace = "r"
     
+    static REQ_ATTR_PREFIX_PAGE_FRAGMENTS = 'resources.plugin.page.fragments'
+    
     static writeAttrs( attrs, output) {
         // Output any remaining user-specified attributes
         attrs.each { k, v ->
@@ -282,6 +284,28 @@ class ResourceTagLib {
         }
     }
     
+    private storePageFragment(String type, String disposition, def fragment) {
+        if (log.debugEnabled) {
+            log.debug "stashing request script for disposition [${disposition}]: ${ fragment}"
+        }
+        def trkName = makePageFragmentKey(type, disposition)
+        def trk = request[trkName]
+        if (!trk) {
+            trk = []
+            request[trkName] = trk
+        }
+        trk << fragment
+    }
+    
+    private String makePageFragmentKey(String type, String disposition) {
+        "${REQ_ATTR_PREFIX_PAGE_FRAGMENTS}:${type}:${disposition}"
+    }
+    
+    private consumePageFragments(String type, String disposition) {
+        def fraggles = request[makePageFragmentKey(type, disposition)] ?: Collection.EMPTY_LIST
+        return fraggles
+    }
+    
     /**
      * Render the resources. First invocation renders head JS and CSS, second renders deferred JS only, and any more spews.
      */
@@ -290,85 +314,79 @@ class ResourceTagLib {
             log.debug "laying out resources for request ${request}: ${attrs}"
         }
 
-        // @todo rewrite this to accept disposition attr and if not present
-        // do the auto toggle then, this code is wet.
+        def remainingDispositions = resourceService.getRequestDispositionsRemaining(request)
+        def dispositionToRender = attrs.disposition
+        if (!dispositionToRender) {
+            if (remainingDispositions.contains(ResourceService.DISPOSITION_HEAD)) {
+                dispositionToRender = ResourceService.DISPOSITION_HEAD
+            } else if (remainingDispositions.contains(ResourceService.DISPOSITION_DEFER)) {
+                dispositionToRender = ResourceService.DISPOSITION_DEFER
+            } else {
+                if (log.warnEnabled) {
+                    log.warn "You seem to have too many r:layoutResources invocations with no disposition specified. It has already been called twice."
+                }
+                return
+            }
+        } else if (!remainingDispositions.contains(disposition)) {
+            if (log.warnEnabled) {
+                log.warn "A request was made to render resources for disposition [${dispositionToRender}] but there are no resources scheduled for that disposition, or it has already been rendered"
+            }
+            return
+        }
+
+        if (log.debugEnabled) {
+            log.debug "Rendering resources for disposition [${dispositionToRender}]"
+        }
         
         def trk = request.resourceModuleTracker
         if (log.debugEnabled) {
             log.debug "Rendering resources, modules in tracker: ${trk}"
         }
-
-        if (!request.resourceRenderedHeadResources) {
-            if (log.debugEnabled) {
-                log.debug "Rendering non-deferred resources..."
-            }
-            
-            def modulesNeeded = trk ? resourceService.getAllModuleNamesRequired(trk) : []
-            if (log.debugEnabled) {
-                log.debug "Rendering resources, modules needed: ${modulesNeeded}"
-            }
-
-            def modulesInOrder = resourceService.getModulesInDependencyOrder(modulesNeeded)
-            if (log.debugEnabled) {
-                log.debug "Rendering non-deferred resources, modules: ${modulesInOrder}..."
-            }
-
-            for (module in modulesInOrder) {
-                out << r.renderModule(name:module, disposition:"head")
-            }
-            
-            def pageScripts = request['resourceRequestScripts:head']
-            if (pageScripts) {
-                out << "<script type=\"text/javascript\">${pageScripts}</script>"
-                request['resourceRequestScripts:head'] = null // help out the GC
-            }
-            request.resourceRenderedHeadResources = true
-        } else if (!request.resourceRenderedFooterResources) {
-            if (log.debugEnabled) {
-                log.debug "Rendering deferred resources..."
-            }
-
-            def modulesNeeded = resourceService.getAllModuleNamesRequired(trk)
-            def modulesInOrder = resourceService.getModulesInDependencyOrder(modulesNeeded)
-            
-            if (log.debugEnabled) {
-                log.debug "Rendering non-deferred resources, modules: ${modulesInOrder}..."
-            }
-            for (module in modulesInOrder) {
-                out << r.renderModule(name:module, disposition:"defer")
-            }
-
-            def pageScripts = request['resourceRequestScripts:defer']
-            if (pageScripts) {
-                out << "<script type=\"text/javascript\">${pageScripts}</script>"
-                request['resourceRequestScripts:defer'] = null // help out the GC
-            }
-            request.resourceRenderedFooterResources = true
-        } else {
-            throw new RuntimeException('You have invoked [layoutResources] more than twice. Invoke once in head and once in footer only.')
-        }
-    }
-    
-    void storeRequestScript(text, disposition) {
+        def modulesNeeded = trk ? resourceService.getAllModuleNamesRequired(trk) : []
         if (log.debugEnabled) {
-            log.debug "stashing request script for disposition [${disposition}]: ${text}"
+            log.debug "Rendering resources, modules needed: ${modulesNeeded}"
         }
-        def trkName = 'resourceRequestScripts:'+disposition
-        def trk = request[trkName]
-        if (!trk) {
-            trk = new StringBuilder() // Always include this
-            request[trkName] = trk
+
+        def modulesInOrder = resourceService.getModulesInDependencyOrder(modulesNeeded)
+        if (log.debugEnabled) {
+            log.debug "Rendering non-deferred resources, modules: ${modulesInOrder}..."
         }
-        trk << text
+
+        for (module in modulesInOrder) {
+            // @todo where a module resource is bundled, need to satisfy deps of all resources in the bundle first!
+            out << r.renderModule(name:module, disposition:dispositionToRender)
+        }
+        
+        if (log.debugEnabled) {
+            log.debug "Rendering page fragments for disposition: ${dispositionToRender}"
+        }
+
+        layoutPageScripts(dispositionToRender)
+
+        if (log.debugEnabled) {
+            log.debug "Removing outstanding request disposition: ${dispositionToRender}"
+        }
+        resourceService.removeDispositionFromRequest(request, dispositionToRender)
     }
-    
+
+    private layoutPageScripts(String disposition) {
+        def pageScripts = consumePageFragments('script', disposition)
+        if (pageScripts) {
+            out << "<script type=\"text/javascript\">"
+            for (s in pageScripts) {
+                out << s
+            }
+            out << "</script>"
+        }
+    }
+
     /**
      * For inline javascript that needs to be executed in the <head> section after all dependencies
      * @todo Later, we implement ESP hooks here and add scope="user" or scope="shared"
      */
     def script = { attrs, body ->
         def dispos = attrs.remove('disposition') ?: 'defer'
-        storeRequestScript(body(), dispos)
+        storePageFragment('script', dispos, body())
     }
 
     protected getModuleByName(name) {
