@@ -1,3 +1,5 @@
+import grails.util.Environment
+
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean
@@ -69,37 +71,58 @@ class ResourcesGrailsPlugin {
     
     def doWithWebDescriptor = { webXml ->
         def adHocPatterns = getAdHocPatterns(application)
+
+        def declaredResFilter = [   
+                name:'DeclaredResourcesPluginFilter', 
+                filterClass:"org.grails.plugin.resource.ProcessingFilter",
+                urlPatterns:["/${getUriPrefix(application)}/*"]
+        ]
+        def adHocFilter = [   
+            name:'AdHocResourcesPluginFilter', 
+            filterClass:"org.grails.plugin.resource.ProcessingFilter",
+            params: [adhoc:true],
+            urlPatterns: adHocPatterns
+        ]
+
+        def filtersToAdd = [declaredResFilter]
+        if (adHocPatterns) {
+            filtersToAdd << adHocFilter
+        }
+
+        if ( Environment.current == Environment.DEVELOPMENT) {
+            filtersToAdd << [   
+                name:'ResourcesDevModeFilter', 
+                filterClass:"org.grails.plugin.resource.DevModeSanityFilter",
+                urlPatterns:['/*']
+            ]
+        }
         
-        log.info("Adding servlet filter")
+        log.info("Adding servlet filters")
         def filters = webXml.filter[0]
         filters + {
-            'filter' {
-                'filter-name'("DeclaredResourcesPluginFilter")
-                'filter-class'("org.grails.plugin.resource.ProcessingFilter")
-            }
-            if (adHocPatterns) {
+            filtersToAdd.each { f ->
+                log.info "Adding filter: ${f.name} with class ${f.filterClass} and init-params: ${f.params}"
                 'filter' {
-                    'filter-name'("AdHocResourcesPluginFilter")
-                    'filter-class'("org.grails.plugin.resource.ProcessingFilter")
-                    'init-param' {
-                        'param-name'("adhoc")
-                        'param-value'("true")
+                    'filter-name'(f.name)
+                    'filter-class'(f.filterClass)
+                    f.params?.each { k, v ->
+                        'init-param' {
+                            'param-name'(k)
+                            'param-value'(v.toString())
+                        }
                     }
                 }
             }
         }
         def mappings = webXml.'filter-mapping'[0] 
         mappings + {
-            'filter-mapping' {
-                'filter-name'("DeclaredResourcesPluginFilter")
-                'url-pattern'("/${getUriPrefix(application)}/*")
-            }
-            // To be pre-Servlets 2.5 safe, we have 1 extension mapping per filter-mapping entry
-            // Lame, but Tomcat 5.5 is not SSDK 2.5
-            adHocPatterns.each { pattern ->
-                'filter-mapping' {
-                    'filter-name'("AdHocResourcesPluginFilter")
-                    'url-pattern'(pattern.toString())
+            filtersToAdd.each { f ->
+                f.urlPatterns?.each { p ->
+                    log.info "Adding url pattern ${p} for filter ${f.name}"
+                    'filter-mapping' {
+                        'filter-name'(f.name)
+                        'url-pattern'(p)
+                    }
                 }
             }
         }

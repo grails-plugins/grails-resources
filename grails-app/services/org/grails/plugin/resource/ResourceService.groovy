@@ -715,6 +715,17 @@ class ResourceService implements InitializingBean {
         
         // Now pre-prepare the bundles
         prepareSyntheticResources()
+        
+        resolveResourceDependencies()
+    }
+
+    void resolveResourceDependencies() {
+        // @todo:
+        // 1. Go through all SYNTHETIC resources 
+        // 2. Add all resources before it in the current module as deps to the resources
+        // 3. Iterate over module deps of resource's owning module, in module dep order
+        // 4. Add all their resources as deps, before existing deps
+        // 5. Repeat 2-4 for all resources on all declared modules, in module dep order (bottom up)
     }
     
     /**

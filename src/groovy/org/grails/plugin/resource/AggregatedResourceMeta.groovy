@@ -15,11 +15,11 @@ class AggregatedResourceMeta extends ResourceMeta {
     def log = LogFactory.getLog(this.class)
 
     def resources = []
+    def inheritedModuleDependencies = new HashSet()
 
-    static DISPOSITION_PRIORITIES = [ 'head', 'defer']
-    
     void add(ResourceMeta r, Closure postProcessor = null) {
         resources << r
+        inheritedModuleDependencies << r.module
         
         // Update our aggregated sourceUrl
         sourceUrl = "${sourceUrl}, ${r.sourceUrl}"
@@ -30,22 +30,22 @@ class AggregatedResourceMeta extends ResourceMeta {
         }
     }
 
+    Writer getWriter() {
+        processedFile.newWriter('UTF-8', true)
+    }
+
     @Override
     void beginPrepare(resourceService) {
-        def writer = processedFile.newWriter('UTF-8')
-        if (contentType == 'text/css') {
-            writer << '@charset "UTF-8";\n'
-        }
+        buildAggregateResource(resourceService)
+    }
 
+    void buildAggregateResource(resourceService) {
+        def out = getWriter()
+        
         // @todo I'm not sure we really want this here?
         resourceService.updateDependencyOrder()
         def moduleOrder = resourceService.modulesInDependencyOrder
-    
-        def disposIdx = DISPOSITION_PRIORITIES.indexOf(disposition)
-        if (disposIdx == -1) {
-            disposIdx = Integer.MAX_VALUE
-        }
-        
+
         def newestLastMod = 0
         
         // Add the resources to the file in the order determined by module dependencies!
@@ -56,25 +56,18 @@ class AggregatedResourceMeta extends ResourceMeta {
                     if (log.debugEnabled) {
                         log.debug "Appending contents of ${r.processedFile} to ${processedFile}"
                     }
-                    writer << r.processedFile.getText("UTF-8")
-                    writer << "\r\n"
+                    out << r.processedFile.getText("UTF-8")
+                    out << "\r\n"
                     
                     if (r.originalLastMod > newestLastMod) {
                         newestLastMod = r.originalLastMod
-                    }
-                    
-                    // Copy the most appropriate disposition i.e. head trumps defer
-                    def idx = DISPOSITION_PRIORITIES.indexOf(r.disposition)
-                    if (idx < disposIdx) {
-                        disposition = r.disposition
-                        disposIdx = idx
                     }
                 }
             }
         }
         
-        writer << "\r\n"
-        writer.close()
+        out << "\r\n"
+        out.close()
         
         this.originalLastMod = newestLastMod
     }

@@ -170,11 +170,16 @@ class ResourceTagLib {
         out << external(attrs)
     }
 
+    private void needsResourceLayout() {
+        println "Setting attrib"
+        request.setAttribute('resources.need.layout', true)
+    }
+
     def external = { attrs ->
         if (log.debugEnabled) {
             log.debug "external with $attrs"
         }
-
+        
         def url = attrs.remove('url')
         def disposition = attrs.remove('disposition')
 
@@ -255,6 +260,8 @@ class ResourceTagLib {
             log.debug "require (request ${request}): ${attrs}"
         }
         
+        needsResourceLayout()
+        
         def trk = request.resourceModuleTracker
         if (!trk) {
             declareModuleRequiredByPage(ResourceService.IMPLICIT_MODULE, false)
@@ -288,6 +295,8 @@ class ResourceTagLib {
         if (log.debugEnabled) {
             log.debug "stashing request script for disposition [${disposition}]: ${ fragment}"
         }
+        needsResourceLayout()
+        
         def trkName = makePageFragmentKey(type, disposition)
         def trk = request[trkName]
         if (!trk) {
@@ -302,7 +311,7 @@ class ResourceTagLib {
     }
     
     private consumePageFragments(String type, String disposition) {
-        def fraggles = request[makePageFragmentKey(type, disposition)] ?: Collection.EMPTY_LIST
+        def fraggles = request[makePageFragmentKey(type, disposition)] ?: Collections.EMPTY_LIST
         return fraggles
     }
     
@@ -427,7 +436,7 @@ class ResourceTagLib {
         
         def debugMode = resourceService.isDebugMode(request)
         
-        module.resources.each { r ->
+        for (r in module.resources) { 
             if (!r.exists() && !r.actualUrl?.contains('://')) {
                 throw new IllegalArgumentException("Module [$name] depends on resource [${r.sourceUrl}] but the file cannot be found")
             }

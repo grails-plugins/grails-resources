@@ -14,11 +14,15 @@ import org.grails.plugin.resource.mapper.MapperPhase
  */
 class BundleResourceMapper {
     
-//    def priority = 500
-    
     def phase = MapperPhase.AGGREGATION
     
     def resourceService
+    
+    static MIMETYPE_TO_RESOURCE_META_CLASS = [
+        'text/css': CSSBundleResourceMeta,
+        'text/javascript': JavaScriptBundleResourceMeta,
+        'application/javascript': JavaScriptBundleResourceMeta
+    ]
     
     /**
      * Find resources that belong in bundles, and create the bundles, and make the resource delegate to the bundle
@@ -33,14 +37,22 @@ class BundleResourceMapper {
     def map(resource, config) {
         def bundleId = resource.bundle
         if (bundleId) {
+            def resType = MIMETYPE_TO_RESOURCE_META_CLASS[resource.contentType]
+            if (!resType) {
+                log.warn "Cannot create a bundle from resource [${resource.sourceUrl}], "+
+                    "the content type [${resource.contentType}] is not supported. Set the resource to exclude bundle mapper."
+                return
+            }
+
             // Find/create bundle for this extension type
             def bundle = "/bundle-$bundleId.${resource.sourceUrlExtension}"
             
             def bundleResource = resourceService.findSyntheticResourceForURI(bundle)
             if (!bundleResource) {
                 // Creates a new resource and empty file
-                bundleResource = resourceService.newSyntheticResource(bundle, AggregatedResourceMeta)
+                bundleResource = resourceService.newSyntheticResource(bundle, resType)
                 bundleResource.contentType = resource.contentType
+                bundleResource.disposition = resource.disposition
                 bundleResource.processedFile.createNewFile()
             }
 

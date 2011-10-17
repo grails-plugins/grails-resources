@@ -18,9 +18,8 @@
 <r:external dir="css" file="legacy.css"/>
 <!-- This tests ad hoc resource deferral -->
 <r:external dir="js" file="core.js"/>
-<r:layoutResources/>
+<r:layoutResources/> 
 </g:set>
-
     ${output}
 </head>
 <body>
