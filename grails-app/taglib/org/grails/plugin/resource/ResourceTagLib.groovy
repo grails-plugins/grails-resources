@@ -171,7 +171,6 @@ class ResourceTagLib {
     }
 
     private void needsResourceLayout() {
-        println "Setting attrib"
         request.setAttribute('resources.need.layout', true)
     }
 
