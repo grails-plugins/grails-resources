@@ -5,11 +5,11 @@ The [script|Tags] tag allows you to specify sections of JavaScript text during p
 This integrates with the disposition mechanism, allowing you to throw your JavaScript into a specific location:
 
 {code:xml}
-<r:script/>
+<r:script>
     window.alert('This is the end of the page!');
 </r:script>
 
-<r:script disposition='head'/>
+<r:script disposition='head'>
     window.alert('This is the head of the page!');
 </r:script>
 {code}
