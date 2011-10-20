@@ -13,7 +13,7 @@ import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
  */
 class ResourcesGrailsPlugin {
 
-    def version = "1.1.BUILD-SNAPSHOT"
+    def version = "1.1"
     def grailsVersion = "1.2 > *"
 
     def loadAfter = ['logging'] // retained to ensure correct loading under Grails < 2.0
