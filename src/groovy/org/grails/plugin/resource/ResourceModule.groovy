@@ -164,7 +164,9 @@ class ResourceModule {
     
     Set<String> getRequiredDispositions() {
         if (!dispositions) {
-            dispositions = resources*.disposition as Set
+            dispositions = (resources.findAll { r -> 
+                r.disposition
+            }).disposition as Set
         }
         return dispositions
     }
