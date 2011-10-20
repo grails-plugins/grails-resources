@@ -17,7 +17,6 @@ void sortFilterMappingNodes(dom, filterOrder) {
                     def filterName = n.'filter-name'.text()
                     if (!(filterName in doneFilters)) {
                         if ((filterName == f) || ((f == '*') && !filterOrder.contains(filterName))) {
-                            println "Filter order adding mapping for: ${filterName}"
                             sortedMappingNodes << n
                             doneFilters << n
                         }

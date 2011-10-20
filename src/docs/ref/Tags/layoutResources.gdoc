@@ -23,5 +23,6 @@ Example grails-app/views/layouts/main.gsp:
 
 h2. Attributes
 
-None.
+* disposition - Optional. The resource disposition to render. If not specified, the first call in a request renders "head", and then the second renders "defer". However you can pass in any disposition that you use in resource declarations e.g. "image-preload".
+
 

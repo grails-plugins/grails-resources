@@ -123,4 +123,34 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
             assertEquals "Failed on ${d.requestURI}", d.expected, didHandle
         }
     }
+    
+    void testAddingDispositionToRequest() {
+        def request = [:]
+        assertTrue svc.getRequestDispositionsRemaining(request).empty
+
+        svc.addDispositionToRequest(request, 'head')
+        assertTrue((['head'] as Set) == svc.getRequestDispositionsRemaining(request))
+
+        // Let's just make sure its a set
+        svc.addDispositionToRequest(request, 'head')
+        assertTrue((['head'] as Set) == svc.getRequestDispositionsRemaining(request))
+
+        svc.addDispositionToRequest(request, 'defer')
+        assertTrue((['head', 'defer'] as Set) == svc.getRequestDispositionsRemaining(request))
+
+        svc.addDispositionToRequest(request, 'image')
+        assertTrue((['head', 'image', 'defer'] as Set) == svc.getRequestDispositionsRemaining(request))
+    }
+
+    void testRemovingDispositionFromRequest() {
+        def request = [(ResourceProcessor.REQ_ATTR_DISPOSITIONS_REMAINING):(['head', 'image', 'defer'] as Set)]
+
+        assertTrue((['head', 'image', 'defer'] as Set) == svc.getRequestDispositionsRemaining(request))
+
+        svc.removeDispositionFromRequest(request, 'head')
+        assertTrue((['defer', 'image'] as Set) == svc.getRequestDispositionsRemaining(request))
+
+        svc.removeDispositionFromRequest(request, 'defer')
+        assertTrue((['image'] as Set) == svc.getRequestDispositionsRemaining(request))
+    }
 }

@@ -42,7 +42,8 @@ class ResourceProcessor implements InitializingBean {
     static SYNTHETIC_MODULE = "__@synthetic-files@__"
     static REQ_ATTR_DEBUGGING = 'resources.debug'
     static REQ_ATTR_DISPOSITIONS_REMAINING = 'resources.dispositions.remaining'
-
+    static REQ_ATTR_DISPOSITIONS_DONE = "resources.dispositions.done"
+    
     static DISPOSITION_HEAD = 'head'
     static DISPOSITION_DEFER = 'defer'
     static DEFAULT_DISPOSITION_LIST = [DISPOSITION_HEAD, DISPOSITION_DEFER]
@@ -971,6 +972,11 @@ class ResourceProcessor implements InitializingBean {
      * Add a disposition to the current request's set of them
      */
     void addDispositionToRequest(request, String disposition) {
+        if (haveAlreadyDoneDispositionResources(request, disposition)) {
+            throw new IllegalArgumentException("""Cannot add resource with disposition [$disposition] to this request - 
+that disposition has already been rendered. Check that your r:layoutResources tag comes after all
+other Resource tags that add content to that disposition.""")
+        }
         def dispositions = request[REQ_ATTR_DISPOSITIONS_REMAINING] 
         if (dispositions != null) {
             dispositions << disposition
@@ -1003,4 +1009,20 @@ class ResourceProcessor implements InitializingBean {
             dispositions.remove(disposition)
         }
     }
+    
+    void doneDispositionResources(request, String disposition) {
+        removeDispositionFromRequest(request, disposition)
+        def s = request[REQ_ATTR_DISPOSITIONS_DONE]
+        if (s == null) {
+            s = new HashSet()
+            request[REQ_ATTR_DISPOSITIONS_DONE] = s
+        }
+        s << disposition
+    }
+    
+    boolean haveAlreadyDoneDispositionResources(request,String disposition) {
+        def s = request[REQ_ATTR_DISPOSITIONS_DONE]
+        s == null ? false : s.contains(disposition)
+    }
+    
 }

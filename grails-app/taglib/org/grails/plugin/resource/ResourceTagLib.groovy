@@ -298,11 +298,12 @@ class ResourceTagLib {
         if (log.debugEnabled) {
             log.debug "stashing request script for disposition [${disposition}]: ${ fragment}"
         }
+
         needsResourceLayout()
         
         def trkName = ResourceTagLib.makePageFragmentKey(type, disposition)
         grailsResourceProcessor.addDispositionToRequest(request, disposition)
-        
+
         def trk = request[trkName]
         if (!trk) {
             trk = []
@@ -336,6 +337,7 @@ class ResourceTagLib {
      * Render the resources. First invocation renders head JS and CSS, second renders deferred JS only, and any more spews.
      */
     def layoutResources = { attrs ->
+
         if (log.debugEnabled) {
             log.debug "laying out resources for request ${request}: ${attrs}"
         }
@@ -394,7 +396,8 @@ class ResourceTagLib {
         if (log.debugEnabled) {
             log.debug "Removing outstanding request disposition: ${dispositionToRender}"
         }
-        grailsResourceProcessor.removeDispositionFromRequest(request, dispositionToRender)
+        
+        grailsResourceProcessor.doneDispositionResources(request, dispositionToRender)
     }
 
     private layoutPageScripts(String disposition) {
