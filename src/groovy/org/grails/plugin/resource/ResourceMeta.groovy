@@ -33,7 +33,7 @@ class ResourceMeta {
     /**
      * Set on instantiation to be the dir that content is served from
      * 
-     * @see ResourceService#workDir
+     * @see ResourceProcessor#workDir
      */
     File workDir
 
@@ -184,7 +184,7 @@ class ResourceMeta {
     }
     
     // Hook for when preparation is starting
-    void beginPrepare(resourceService) {
+    void beginPrepare(grailsResourceProcessor) {
         def uri = this.sourceUrl
         if (!uri.contains('://')) {
 
@@ -194,7 +194,7 @@ class ResourceMeta {
         			uriWithoutFragment = uri.substring(0, uri.indexOf('#'))
         		}
 
-                def origResourceURL = resourceService.getOriginalResourceURLForURI(uriWithoutFragment)
+                def origResourceURL = grailsResourceProcessor.getOriginalResourceURLForURI(uriWithoutFragment)
                 if (!origResourceURL) {
                     if (log.errorEnabled) {
                         if (this.declaringResource) {
@@ -206,17 +206,17 @@ class ResourceMeta {
                     throw new FileNotFoundException("Cannot locate resource [$uri]")
                 }
 
-                this.contentType = resourceService.getMimeType(uriWithoutFragment)
+                this.contentType = grailsResourceProcessor.getMimeType(uriWithoutFragment)
                 if (log.debugEnabled) {
                     log.debug "Resource [$uriWithoutFragment] ($origResourceURL) has content type [${this.contentType}]"
                 }
 
                 setOriginalResource(new UrlResource(origResourceURL))
 
-                if (resourceService.processingEnabled) {
+                if (grailsResourceProcessor.processingEnabled) {
                     setActualUrl(uriWithoutFragment)
 
-                    setProcessedFile(resourceService.makeFileForURI(uriWithoutFragment))
+                    setProcessedFile(grailsResourceProcessor.makeFileForURI(uriWithoutFragment))
                     // copy the file ready for mutation
                     this.copyOriginalResourceToWorkArea()
                 } else {
@@ -233,7 +233,7 @@ class ResourceMeta {
     }
     
     // Hook for when preparation is done
-    void endPrepare(resourceService) {
+    void endPrepare(grailsResourceProcessor) {
         if (!delegating) {
             if (processedFile) {
                 processedFile.setLastModified(originalLastMod ?: System.currentTimeMillis() )

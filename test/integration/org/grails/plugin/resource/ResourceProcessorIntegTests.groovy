@@ -1,8 +1,8 @@
 package org.grails.plugin.resource
 
-class ResourceServiceIntegTests extends GroovyTestCase {
+class ResourceProcessorIntegTests extends GroovyTestCase {
     
-    def resourceService
+    def grailsResourceProcessor
     
     protected makeMockResource(uri) {
         [
@@ -26,12 +26,12 @@ class ResourceServiceIntegTests extends GroovyTestCase {
             c: true
         ]
 
-        resourceService.modulesByName.putAll(testModules)
-        resourceService.updateDependencyOrder()
+        grailsResourceProcessor.modulesByName.putAll(testModules)
+        grailsResourceProcessor.updateDependencyOrder()
         
-        def moduleNames = resourceService.getAllModuleNamesRequired(modsNeeded)
+        def moduleNames = grailsResourceProcessor.getAllModuleNamesRequired(modsNeeded)
         println "Module names: ${moduleNames}"
-        def moduleNameResults = resourceService.getModulesInDependencyOrder(moduleNames)
+        def moduleNameResults = grailsResourceProcessor.getModulesInDependencyOrder(moduleNames)
         println "Modules: ${moduleNameResults}"
 
         assertTrue moduleNameResults.indexOf('a') < moduleNameResults.indexOf('b')

@@ -19,7 +19,7 @@ class CSSRewriterResourceMapper {
     
     def phase = MapperPhase.LINKREALISATION
     
-    def resourceService
+    def grailsResourceProcessor
     
     static defaultIncludes = ['**/*.css']
     
@@ -33,7 +33,7 @@ class CSSRewriterResourceMapper {
         def resURI = resource.sourceUrl
 
         def processor = new CSSLinkProcessor()
-        processor.process(resource, resourceService) { prefix, originalUrl, suffix ->
+        processor.process(resource, grailsResourceProcessor) { prefix, originalUrl, suffix ->
             
             if (originalUrl.startsWith('resource:')) {
                 def uri = originalUrl - 'resource:'
@@ -43,7 +43,7 @@ class CSSRewriterResourceMapper {
                 }
 
                 // This triggers the processing chain if necessary for any resource referenced by the CSS
-                def linkedToResource = resourceService.getResourceMetaForURI(uri, true, resURI) { res ->
+                def linkedToResource = grailsResourceProcessor.getResourceMetaForURI(uri, true, resURI) { res ->
                     // If there's no decl for the resource, create it with image disposition
                     // otherwise we may pop out as a favicon...
                     res.disposition = 'image'

@@ -1,6 +1,6 @@
 class InitialisationSmokeTests {
 
-    def resourceService
+    def grailsResourceProcessor
     
     /**
      * We are testing that the resources plugin operates correctly in an integration testing environment. 
@@ -10,7 +10,7 @@ class InitialisationSmokeTests {
      */
     void testInitialisedOk() {
         //@todo this temporarily removed until Grails fixes the problems with servletContext resource loading/another workaround found
-        //assert resourceService.getModule("jquery") != null
+        //assert grailsResourceProcessor.getModule("jquery") != null
     }
 
 }

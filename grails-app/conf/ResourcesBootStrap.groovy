@@ -10,12 +10,12 @@ import org.grails.plugin.resource.*
  */
 class ResourcesBootStrap {
  
-    def resourceService
+    def grailsResourceProcessor
     
     def init = { servletContext ->
-        /*resourceService.reload()*/
+        /*grailsResourceProcessor.reload()*/
         if (Environment.current == Environment.DEVELOPMENT) {
-            resourceService.dumpResources()
+            grailsResourceProcessor.dumpResources()
         }
     }
     

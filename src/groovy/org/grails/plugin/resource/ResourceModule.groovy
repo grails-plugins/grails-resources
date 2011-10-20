@@ -19,6 +19,8 @@ class ResourceModule {
     def defaultBundle
     
     def pluginManager
+    
+    private HashSet<String> dispositions
 
     /**
      * Constructor for testing only
@@ -160,5 +162,10 @@ class ResourceModule {
         this.resources = this.resources.asImmutable()
     }
     
-   
+    Set<String> getRequiredDispositions() {
+        if (!dispositions) {
+            dispositions = resources*.disposition as Set
+        }
+        return dispositions
+    }
 }

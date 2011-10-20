@@ -10,12 +10,11 @@ import grails.util.Environment
  * @author Marc Palmer (marc@grailsrocks.com)
  */
 class DevModeSanityFilter implements Filter {
-    def resourceService
+    def grailsResourceProcessor
     
     void init(FilterConfig config) throws ServletException {
         def applicationContext = WebApplicationContextUtils.getWebApplicationContext(config.servletContext)
-        resourceService = applicationContext.resourceService
-        println "In dev filter init"
+        grailsResourceProcessor = applicationContext.grailsResourceProcessor
     }
 
     void destroy() {
@@ -24,14 +23,26 @@ class DevModeSanityFilter implements Filter {
     void doFilter(ServletRequest request, ServletResponse response,
         FilterChain chain) throws IOException, ServletException {
 
+        println "In dev filter, chaining: ${request.requestURI}"
         chain.doFilter(request, response)
+        println "In dev filter, back from chaining: ${request.requestURI}"
 
+
+        println "In dev filter, checking: ${request.requestURI}"
         if (request.getAttribute('resources.need.layout')) {
-            def dispositionsLeftOver = resourceService.getRequestDispositionsRemaining(request)
+            println "In dev filter: needed layout"
+            def dispositionsLeftOver = grailsResourceProcessor.getRequestDispositionsRemaining(request)
+            println "In dev filter remaining disp: ${dispositionsLeftOver}"
             if (dispositionsLeftOver) {
-                throw new RuntimeException("It looks like you are missing some calls to tag r:layoutResources. "+
-                    "After rendering your view dispositions ${dispositionsLeftOver} are still pending.")
+                def optionals = grailsResourceProcessor.optionalDispositions
+                dispositionsLeftOver -= optionals
+                println "In dev filter remaining disp minus optionals: ${dispositionsLeftOver}"
+                if (dispositionsLeftOver) {
+                    throw new RuntimeException("It looks like you are missing some calls to tag r:layoutResources. "+
+                        "After rendering your view dispositions ${dispositionsLeftOver} are still pending.")
+                }
             }
         }
+
     }
 }

@@ -33,9 +33,9 @@ You can specify this value per-environment in your Config.
 
 h2. Inspecting your dependency data
 
-A utility function in ResourceService can be used to output the current resource metadata that the plugin has - all the modules and resources and their dependencies.
+A utility function in ResourceProcessor can be used to output the current resource metadata that the plugin has - all the modules and resources and their dependencies.
 
-Simply add a "println resourceService.dumpResources()" somewhere in your application or GSP and it will come out.
+Simply add a "println grailsResourceProcessor.dumpResources()" somewhere in your application or GSP and it will come out.
 
 h2. Turning on debug logging
 

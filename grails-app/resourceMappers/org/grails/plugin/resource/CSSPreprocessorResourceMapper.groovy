@@ -21,7 +21,7 @@ class CSSPreprocessorResourceMapper {
 
     static defaultIncludes = ['**/*.css']
 
-    def resourceService
+    def grailsResourceProcessor
     
     /**
      * Find all url() and fix up the url if it is not absolute
@@ -42,7 +42,7 @@ class CSSPreprocessorResourceMapper {
             log.debug "CSS Preprocessor munging ${resource}"
         }
 
-        processor.process(resource, resourceService) { prefix, originalUrl, suffix ->
+        processor.process(resource, grailsResourceProcessor) { prefix, originalUrl, suffix ->
             
             if (log.debugEnabled) {
                 log.debug "CSS Preprocessor munging url $originalUrl"

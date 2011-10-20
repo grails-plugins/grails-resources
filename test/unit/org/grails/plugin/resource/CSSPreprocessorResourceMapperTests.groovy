@@ -45,7 +45,7 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
         r.processedFile << new ByteArrayInputStream(css.bytes)
         
         new CSSPreprocessorResourceMapper().with {
-            resourceService = svc
+            grailsResourceProcessor = svc
             map(r, new ConfigObject())
         }
 
@@ -90,7 +90,7 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
         r.processedFile << new ByteArrayInputStream(css.bytes)
 
         new CSSPreprocessorResourceMapper().with {
-            resourceService = svc
+            grailsResourceProcessor = svc
             map(r, new ConfigObject())
         }
 
@@ -134,7 +134,7 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
         r.processedFile << new ByteArrayInputStream(css.bytes)
 
         new CSSPreprocessorResourceMapper().with {
-            resourceService = svc
+            grailsResourceProcessor = svc
             map(r, new ConfigObject())
         }
 

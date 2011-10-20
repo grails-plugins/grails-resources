@@ -35,16 +35,16 @@ class AggregatedResourceMeta extends ResourceMeta {
     }
 
     @Override
-    void beginPrepare(resourceService) {
-        buildAggregateResource(resourceService)
+    void beginPrepare(grailsResourceProcessor) {
+        buildAggregateResource(grailsResourceProcessor)
     }
 
-    void buildAggregateResource(resourceService) {
+    void buildAggregateResource(grailsResourceProcessor) {
         def out = getWriter()
         
         // @todo I'm not sure we really want this here?
-        resourceService.updateDependencyOrder()
-        def moduleOrder = resourceService.modulesInDependencyOrder
+        grailsResourceProcessor.updateDependencyOrder()
+        def moduleOrder = grailsResourceProcessor.modulesInDependencyOrder
 
         def newestLastMod = 0
         

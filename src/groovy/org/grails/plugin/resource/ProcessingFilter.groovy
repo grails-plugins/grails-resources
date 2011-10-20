@@ -11,7 +11,7 @@ import grails.util.Environment
  * @author Marc Palmer (marc@grailsrocks.com)
  */
 class ProcessingFilter implements Filter {
-    def resourceService
+    def grailsResourceProcessor
     
     boolean adhoc
     
@@ -19,7 +19,7 @@ class ProcessingFilter implements Filter {
         adhoc = config.getInitParameter('adhoc') == 'true'
         
         def applicationContext = WebApplicationContextUtils.getWebApplicationContext(config.servletContext)
-        resourceService = applicationContext.resourceService
+        grailsResourceProcessor = applicationContext.grailsResourceProcessor
     }
 
     void destroy() {
@@ -28,15 +28,15 @@ class ProcessingFilter implements Filter {
     void doFilter(ServletRequest request, ServletResponse response,
         FilterChain chain) throws IOException, ServletException {
 
-        def debugging = resourceService.isDebugMode(request)
+        def debugging = grailsResourceProcessor.isDebugMode(request)
         if (debugging) {
             request.setAttribute('resources.debug', debugging)
         }
         if (!debugging) {
             if (adhoc) {
-                resourceService.processAdHocResource(request, response)
+                grailsResourceProcessor.processAdHocResource(request, response)
             } else {
-                resourceService.processDeclaredResource(request, response)
+                grailsResourceProcessor.processDeclaredResource(request, response)
             }
         }
 

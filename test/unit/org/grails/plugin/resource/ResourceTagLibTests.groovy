@@ -21,7 +21,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
                 "${attrs.contextPath}/${attrs.dir}/${attrs.file}"
             }
         ]
-        tagLib.resourceService = [
+        tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
             getResourceMetaForURI: { uri, adhoc, declRes,  postProc -> 
                 assertEquals "/images/favicon.ico", uri
@@ -47,7 +47,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
                 "${attrs.contextPath}/${attrs.dir}/${attrs.file}"
             }
         ]
-        tagLib.resourceService = [
+        tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
             getResourceMetaForURI: { uri, adhoc, declRes,  postProc -> 
                 assertEquals "/images/favicon.ico", uri
@@ -64,7 +64,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
     
     void testLinkResolutionForGrails1_3AndEarlier() {
         tagLib.grailsLinkGenerator = new HalfBakedLegacyLinkGenerator()
-        tagLib.resourceService = [
+        tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
             getResourceMetaForURI: { uri, adhoc, declRes,  postProc -> 
                 assertEquals "/images/favicon.ico", uri
@@ -90,7 +90,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         testMeta.actualUrl = '/css/test.less'
         testMeta.disposition = 'head'
         
-        tagLib.resourceService = [
+        tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
             getResourceMetaForURI: { uri, adhoc, declRes,  postProc -> testMeta },
             staticUrlPrefix: '/static'
@@ -109,7 +109,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         testMeta.disposition = 'head'
         testMeta.tagAttributes = [rel:'stylesheet/less']
 
-        tagLib.resourceService = [
+        tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
             getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
             staticUrlPrefix: '/static'
@@ -128,7 +128,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         testMeta.disposition = 'head'
         testMeta.tagAttributes = [rel:'stylesheet']
 
-        tagLib.resourceService = [
+        tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
             getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
             staticUrlPrefix: '/static'
@@ -152,7 +152,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         def testMod = new ResourceModule() 
         testMod.resources << testMeta
         
-        tagLib.resourceService = [
+        tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
             getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
             staticUrlPrefix: '/static',
@@ -172,7 +172,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         testMeta.disposition = 'head'
         testMeta.tagAttributes = [width:'100', height:'50', alt:'mugshot']
         
-        tagLib.resourceService = [
+        tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
             getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
             staticUrlPrefix: '/static'
@@ -194,7 +194,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         testMeta.disposition = 'head'
         testMeta.tagAttributes = [width:'100', height:'50', alt:'mugshot']
 
-        tagLib.resourceService = [
+        tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
             getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
             staticUrlPrefix: '/static'
@@ -226,7 +226,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         
         tagLib.request.contextPath = "/resourcestests"
         
-        tagLib.resourceService = [
+        tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> true },
             getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
             staticUrlPrefix: '/static'
@@ -237,6 +237,10 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
     }
     
     def testRequireUpdatesRequestAttributes() {
+        tagLib.grailsResourceProcessor = [
+            addModuleDispositionsToRequest: { req, module -> }
+        ]
+
         def output = tagLib.require(modules:['thingOne', 'thingTwo']).toString()
         
         def tracker = tagLib.request.resourceModuleTracker
@@ -246,11 +250,15 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         assertEquals true, tracker.thingOne
         assertTrue tracker.containsKey('thingTwo')
         assertEquals true, tracker.thingOne
-        assertTrue tracker.containsKey(ResourceService.IMPLICIT_MODULE)
-        assertEquals false, tracker[ResourceService.IMPLICIT_MODULE]
+        assertTrue tracker.containsKey(ResourceProcessor.IMPLICIT_MODULE)
+        assertEquals false, tracker[ResourceProcessor.IMPLICIT_MODULE]
     }
     
     def testRequireIndicatesModuleNotMandatory() {
+        tagLib.grailsResourceProcessor = [
+            addModuleDispositionsToRequest: { req, module -> }
+        ]
+
         def output = tagLib.require(modules:['thingOne', 'thingTwo'], strict:false).toString()
         
         def tracker = tagLib.request.resourceModuleTracker
@@ -260,7 +268,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         assertEquals false, tracker.thingOne
         assertTrue tracker.containsKey('thingTwo')
         assertEquals false, tracker.thingTwo
-        assertTrue tracker.containsKey(ResourceService.IMPLICIT_MODULE)
-        assertEquals false, tracker[ResourceService.IMPLICIT_MODULE]
+        assertTrue tracker.containsKey(ResourceProcessor.IMPLICIT_MODULE)
+        assertEquals false, tracker[ResourceProcessor.IMPLICIT_MODULE]
     }
 }

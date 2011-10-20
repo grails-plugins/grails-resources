@@ -67,6 +67,17 @@ class ResourcesGrailsPlugin {
                 pluginManager = ref('pluginManager')
             }
         }
+        
+        grailsResourceProcessor(org.grails.plugin.resource.ResourceProcessor) {
+            grailsLinkGenerator = ref('grailsLinkGenerator')
+            if (springConfig.containsBean('grailsResourceLocator')) {
+                grailsResourceLocator = ref('grailsResourceLocator')
+            }
+            grailsApplication = ref('grailsApplication')
+        }
+        
+        // Legacy service name
+        springConfig.addAlias "resourceService", "grailsResourceProcessor"
     }
     
     def doWithWebDescriptor = { webXml ->
@@ -93,7 +104,8 @@ class ResourcesGrailsPlugin {
             filtersToAdd << [   
                 name:'ResourcesDevModeFilter', 
                 filterClass:"org.grails.plugin.resource.DevModeSanityFilter",
-                urlPatterns:['/*']
+                urlPatterns:['/*'],
+                dispatchers:['REQUEST']
             ]
         }
         
@@ -122,6 +134,11 @@ class ResourcesGrailsPlugin {
                     'filter-mapping' {
                         'filter-name'(f.name)
                         'url-pattern'(p)
+                        if (f.dispatchers) {
+                            for (d in f.dispatchers) {
+                                'dispatcher'(d)
+                            }
+                        }
                     }
                 }
             }
@@ -129,8 +146,8 @@ class ResourcesGrailsPlugin {
     }
 
     def doWithDynamicMethods = { applicationContext ->
-        applicationContext.resourceService.staticUrlPrefix = "/${getUriPrefix(application)}"
-        applicationContext.resourceService.reload()
+        applicationContext.grailsResourceProcessor.staticUrlPrefix = "/${getUriPrefix(application)}"
+        applicationContext.grailsResourceProcessor.reload()
     }
 
     boolean isResourceWeShouldProcess(File file) {
@@ -143,13 +160,13 @@ class ResourcesGrailsPlugin {
     def onChange = { event ->
         if (event.source instanceof FileSystemResource) {
             if (isResourceWeShouldProcess(event.source.file)) {
-                event.application.mainContext.resourceService.reload()
+                event.application.mainContext.grailsResourceProcessor.reload()
             }
         } else {
             [getResourceMapperArtefactHandler().TYPE, getResourcesArtefactHandler().TYPE].each {
                 if (handleChange(application, event, it, log)) {
                     log.info("reloading resources due to change of $event.source.name")
-                    event.application.mainContext.resourceService.reload()
+                    event.application.mainContext.grailsResourceProcessor.reload()
                 }
             }
         }
@@ -175,7 +192,7 @@ class ResourcesGrailsPlugin {
     }
 
     def onConfigChange = { event ->
-        event.application.mainContext.resourceService.reload()
+        event.application.mainContext.grailsResourceProcessor.reload()
     }
 
     /**

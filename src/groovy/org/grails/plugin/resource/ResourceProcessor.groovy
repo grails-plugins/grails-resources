@@ -20,6 +20,8 @@ import org.codehaus.groovy.grails.plugins.PluginManagerHolder
 
 import org.grails.plugin.resource.util.ResourceMetaStore
 
+import org.apache.commons.logging.LogFactory
+
 /**
  * This is where it all happens.
  *
@@ -29,10 +31,12 @@ import org.grails.plugin.resource.util.ResourceMetaStore
  * @author Marc Palmer (marc@grailsrocks.com)
  * @author Luke Daley (ld@ldaley.com)
  */
-class ResourceService implements InitializingBean {
+class ResourceProcessor implements InitializingBean {
     
     static transactional = false
     
+    def log = LogFactory.getLog(ResourceProcessor)
+
     static final PATH_MATCHER = new AntPathMatcher()
     static IMPLICIT_MODULE = "__@adhoc-files@__"
     static SYNTHETIC_MODULE = "__@synthetic-files@__"
@@ -54,7 +58,7 @@ class ResourceService implements InitializingBean {
     ]
 
     def grailsLinkGenerator
-    def grailsResourceLocator
+    def grailsResourceLocator // A Grails 2-only bean
     
     def staticUrlPrefix
     
@@ -77,6 +81,7 @@ class ResourceService implements InitializingBean {
     
     List adHocIncludes
     List adHocExcludes 
+    List optionalDispositions
     
     void updateDependencyOrder() {
         def modules = (modulesByName.collect { it.value }).findAll { !(it.name in [IMPLICIT_MODULE, SYNTHETIC_MODULE]) }
@@ -107,6 +112,8 @@ class ResourceService implements InitializingBean {
 
         adHocExcludes = getConfigParamOrDefault('adhoc.excludes', [])
         adHocExcludes = adHocExcludes.collect { it.startsWith('/') ? it : '/'+it }
+
+        optionalDispositions = getConfigParamOrDefault('optional.dispositions', ['inline', 'image'])
     }
     
     File getWorkDir() {
@@ -168,7 +175,7 @@ class ResourceService implements InitializingBean {
         if (log.debugEnabled) {
             log.debug "Handling ad-hoc resource ${request.requestURI}"
         }
-        def uri = ResourceService.removeQueryParams(extractURI(request, true))
+        def uri = ResourceProcessor.removeQueryParams(extractURI(request, true))
         
         // Only handle it if it should be included in processing
         if (canProcessAdHocResource(uri)) {
@@ -223,7 +230,7 @@ class ResourceService implements InitializingBean {
             log.debug "Handling resource ${request.requestURI}"
         }
         // Find the ResourceMeta for the request, or create it
-        def uri = ResourceService.removeQueryParams(extractURI(request, false))
+        def uri = ResourceProcessor.removeQueryParams(extractURI(request, false))
         def inf
         try {
             inf = getResourceMetaForURI(uri, false)
@@ -758,7 +765,7 @@ class ResourceService implements InitializingBean {
         
         if (!typeOverride) {
             // Strip off query args
-            def extUrl = ResourceService.removeQueryParams(uri)
+            def extUrl = ResourceProcessor.removeQueryParams(uri)
             
             def ext = FilenameUtils.getExtension(extUrl)
             if (log.debugEnabled) {
@@ -923,7 +930,7 @@ class ResourceService implements InitializingBean {
                     }
                 }
                 result << m.key
-            } else if (m.value && m.key != ResourceService.IMPLICIT_MODULE) {
+            } else if (m.value && m.key != ResourceProcessor.IMPLICIT_MODULE) {
                 throw new IllegalArgumentException("No module found with name [${m.key}]")
             }
         }
@@ -954,7 +961,7 @@ class ResourceService implements InitializingBean {
         def dispositions = request[REQ_ATTR_DISPOSITIONS_REMAINING] 
         // Return a new set of HEAD + DEFER if there is nothing in the request currently, this is our baseline
         if (dispositions == null) {
-            dispositions = new HashSet(DEFAULT_DISPOSITION_LIST)
+            dispositions = new HashSet()
             request[REQ_ATTR_DISPOSITIONS_REMAINING] = dispositions
         }
         return dispositions 
@@ -971,7 +978,22 @@ class ResourceService implements InitializingBean {
             request[REQ_ATTR_DISPOSITIONS_REMAINING] = [disposition] as Set
         }
     }
-
+    
+    void addModuleDispositionsToRequest(request, String moduleName) {
+        if (log.debugEnabled) {
+            log.debug "Adding module dispositions for module [${moduleName}]"
+        } 
+        def module = modulesByName[moduleName]
+        if (module) {   
+            if (log.debugEnabled) {
+                log.debug "Adding module's dispositions to request: ${module.requiredDispositions}"
+            } 
+            for (d in module.requiredDispositions) {
+                addDispositionToRequest(request, d)
+            }
+        }
+    }
+ 
     /**
      * Add a disposition to the current request's set of them
      */

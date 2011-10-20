@@ -16,7 +16,7 @@ class BundleResourceMapper {
     
     def phase = MapperPhase.AGGREGATION
     
-    def resourceService
+    def grailsResourceProcessor
     
     static MIMETYPE_TO_RESOURCE_META_CLASS = [
         'text/css': CSSBundleResourceMeta,
@@ -47,10 +47,10 @@ class BundleResourceMapper {
             // Find/create bundle for this extension type
             def bundle = "/bundle-$bundleId.${resource.sourceUrlExtension}"
             
-            def bundleResource = resourceService.findSyntheticResourceForURI(bundle)
+            def bundleResource = grailsResourceProcessor.findSyntheticResourceForURI(bundle)
             if (!bundleResource) {
                 // Creates a new resource and empty file
-                bundleResource = resourceService.newSyntheticResource(bundle, resType)
+                bundleResource = grailsResourceProcessor.newSyntheticResource(bundle, resType)
                 bundleResource.contentType = resource.contentType
                 bundleResource.disposition = resource.disposition
                 bundleResource.processedFile.createNewFile()

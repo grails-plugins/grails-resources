@@ -19,6 +19,7 @@ class ResourceTagLib {
     static namespace = "r"
     
     static REQ_ATTR_PREFIX_PAGE_FRAGMENTS = 'resources.plugin.page.fragments'
+    static REQ_ATTR_PREFIX_AUTO_DISPOSITION = 'resources.plugin.auto.disposition'
     
     static writeAttrs( attrs, output) {
         // Output any remaining user-specified attributes
@@ -69,7 +70,7 @@ class ResourceTagLib {
         appleicon:[rel:'apple-touch-icon']
     ]
     
-    def resourceService
+    def grailsResourceProcessor
     
     def grailsLinkGenerator
     
@@ -114,6 +115,8 @@ class ResourceTagLib {
                 log.debug "adding module [$name] (mandatory:${mandatory}) to resource module tracker for request ${request}"
             }
             trk[name] = mandatory
+            
+            grailsResourceProcessor.addModuleDispositionsToRequest(request, name)
             return true
         } else {
             if (log.debugEnabled) {
@@ -124,14 +127,14 @@ class ResourceTagLib {
     }
     
     /**
-     *
+     * Render a link
      * @attr uri
      * @attr type
      */
     def doResourceLink = { attrs ->
         def uri = attrs.remove('uri')
         def type = attrs.remove('type')
-        def urlForExtension = ResourceService.removeQueryParams(uri)
+        def urlForExtension = ResourceProcessor.removeQueryParams(uri)
         if (!type) {
             type = FilenameUtils.getExtension(urlForExtension)
         }
@@ -170,6 +173,7 @@ class ResourceTagLib {
         out << external(attrs)
     }
 
+    // Set the flag used by def filter to sanity check
     private void needsResourceLayout() {
         request.setAttribute('resources.need.layout', true)
     }
@@ -263,7 +267,7 @@ class ResourceTagLib {
         
         def trk = request.resourceModuleTracker
         if (!trk) {
-            declareModuleRequiredByPage(ResourceService.IMPLICIT_MODULE, false)
+            declareModuleRequiredByPage(ResourceProcessor.IMPLICIT_MODULE, false)
         }
         
         def mandatory = attrs.strict == null ? true : attrs.strict.toString() != 'false'
@@ -296,7 +300,9 @@ class ResourceTagLib {
         }
         needsResourceLayout()
         
-        def trkName = makePageFragmentKey(type, disposition)
+        def trkName = ResourceTagLib.makePageFragmentKey(type, disposition)
+        grailsResourceProcessor.addDispositionToRequest(request, disposition)
+        
         def trk = request[trkName]
         if (!trk) {
             trk = []
@@ -305,13 +311,25 @@ class ResourceTagLib {
         trk << fragment
     }
     
-    private String makePageFragmentKey(String type, String disposition) {
+    private static String makePageFragmentKey(String type, String disposition) {
         "${REQ_ATTR_PREFIX_PAGE_FRAGMENTS}:${type}:${disposition}"
     }
     
     private consumePageFragments(String type, String disposition) {
-        def fraggles = request[makePageFragmentKey(type, disposition)] ?: Collections.EMPTY_LIST
+        def fraggles = request[ResourceTagLib.makePageFragmentKey(type, disposition)] ?: Collections.EMPTY_LIST
         return fraggles
+    }
+    
+    private static String makeAutoDispositionKey( String disposition) {
+        "${REQ_ATTR_PREFIX_AUTO_DISPOSITION}:${disposition}"
+    }
+
+    private isAutoLayoutDone(disposition) {
+        request[ResourceTagLib.makeAutoDispositionKey(disposition)]
+    }
+    
+    private autoLayoutDone(disposition) {
+        request[ResourceTagLib.makeAutoDispositionKey(disposition)] = true
     }
     
     /**
@@ -322,26 +340,28 @@ class ResourceTagLib {
             log.debug "laying out resources for request ${request}: ${attrs}"
         }
 
-        def remainingDispositions = resourceService.getRequestDispositionsRemaining(request)
+        def remainingDispositions = grailsResourceProcessor.getRequestDispositionsRemaining(request)
         def dispositionToRender = attrs.disposition
         if (!dispositionToRender) {
-            if (remainingDispositions.contains(ResourceService.DISPOSITION_HEAD)) {
-                dispositionToRender = ResourceService.DISPOSITION_HEAD
-            } else if (remainingDispositions.contains(ResourceService.DISPOSITION_DEFER)) {
-                dispositionToRender = ResourceService.DISPOSITION_DEFER
+            if (!isAutoLayoutDone(ResourceProcessor.DISPOSITION_HEAD)) {
+                dispositionToRender = ResourceProcessor.DISPOSITION_HEAD
+                autoLayoutDone(ResourceProcessor.DISPOSITION_HEAD)
+            } else if (!isAutoLayoutDone(ResourceProcessor.DISPOSITION_DEFER)) {
+                dispositionToRender = ResourceProcessor.DISPOSITION_DEFER
+                autoLayoutDone(ResourceProcessor.DISPOSITION_DEFER)
             } else {
                 if (log.warnEnabled) {
                     log.warn "You seem to have too many r:layoutResources invocations with no disposition specified. It has already been called twice."
                 }
                 return
             }
-        } else if (!remainingDispositions.contains(disposition)) {
+        } else if (!remainingDispositions.contains(dispositionToRender)) {
             if (log.warnEnabled) {
                 log.warn "A request was made to render resources for disposition [${dispositionToRender}] but there are no resources scheduled for that disposition, or it has already been rendered"
             }
             return
         }
-
+        
         if (log.debugEnabled) {
             log.debug "Rendering resources for disposition [${dispositionToRender}]"
         }
@@ -350,12 +370,12 @@ class ResourceTagLib {
         if (log.debugEnabled) {
             log.debug "Rendering resources, modules in tracker: ${trk}"
         }
-        def modulesNeeded = trk ? resourceService.getAllModuleNamesRequired(trk) : []
+        def modulesNeeded = trk ? grailsResourceProcessor.getAllModuleNamesRequired(trk) : []
         if (log.debugEnabled) {
             log.debug "Rendering resources, modules needed: ${modulesNeeded}"
         }
 
-        def modulesInOrder = resourceService.getModulesInDependencyOrder(modulesNeeded)
+        def modulesInOrder = grailsResourceProcessor.getModulesInDependencyOrder(modulesNeeded)
         if (log.debugEnabled) {
             log.debug "Rendering non-deferred resources, modules: ${modulesInOrder}..."
         }
@@ -374,7 +394,7 @@ class ResourceTagLib {
         if (log.debugEnabled) {
             log.debug "Removing outstanding request disposition: ${dispositionToRender}"
         }
-        resourceService.removeDispositionFromRequest(request, dispositionToRender)
+        grailsResourceProcessor.removeDispositionFromRequest(request, dispositionToRender)
     }
 
     private layoutPageScripts(String disposition) {
@@ -398,9 +418,9 @@ class ResourceTagLib {
     }
 
     protected getModuleByName(name) {
-        def module = resourceService.getModule(name)
+        def module = grailsResourceProcessor.getModule(name)
         if (!module) {
-            if (name != ResourceService.IMPLICIT_MODULE) {
+            if (name != ResourceProcessor.IMPLICIT_MODULE) {
                 throw new IllegalArgumentException("No module found with name [$name]")
             }
         }
@@ -433,7 +453,7 @@ class ResourceTagLib {
             log.debug "Rendering the resources of module [${name}]: ${module.dump()}"
         }
         
-        def debugMode = resourceService.isDebugMode(request)
+        def debugMode = grailsResourceProcessor.isDebugMode(request)
         
         for (r in module.resources) { 
             if (!r.exists() && !r.actualUrl?.contains('://')) {
@@ -489,7 +509,7 @@ class ResourceTagLib {
             }
         }
         
-        def debugMode = resourceService.isDebugMode(request)
+        def debugMode = grailsResourceProcessor.isDebugMode(request)
 
         // Get out quick and add param to tell filter we don't want any fancy stuff
         if (debugMode) {
@@ -522,10 +542,10 @@ class ResourceTagLib {
             uri = forcePrefixedWithSlash(uri)
         }
         // Chop off context path
-        def reluri = ResourceService.removeQueryParams(abs ? uri : uri[ctxPath.size()..-1])
+        def reluri = ResourceProcessor.removeQueryParams(abs ? uri : uri[ctxPath.size()..-1])
         
         // Get or create ResourceMeta
-        def res = resourceService.getResourceMetaForURI(reluri, true, null, { res ->
+        def res = grailsResourceProcessor.getResourceMetaForURI(reluri, true, null, { res ->
             // If this is an ad hoc resource, we need to store if it can be deferred or not
             if (disposition != null) {
                 res.disposition = disposition
@@ -541,7 +561,7 @@ class ResourceTagLib {
             return [uri:baseUrl ? baseUrl+linkUrl : linkUrl, resource:res]
         } else {
             // Only apply static prefix if the resource actually has ResourceMeta created for it
-            uri = res ? ctxPath+resourceService.staticUrlPrefix+linkUrl : ctxPath+linkUrl
+            uri = res ? ctxPath+grailsResourceProcessor.staticUrlPrefix+linkUrl : ctxPath+linkUrl
             return [uri:uri, resource:res]
         }
     }

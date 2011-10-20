@@ -4,7 +4,7 @@ import grails.test.GroovyPagesTestCase
 
 class ResourceTagLibIntegTests extends GroovyPagesTestCase {
     
-    def resourceService
+    def grailsResourceProcessor
     
     protected makeMockResource(uri) {
         [

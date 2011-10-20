@@ -37,7 +37,7 @@
             </r:script>
 
             <p>Resource cache info:</p>
-            <pre>${grailsApplication.mainContext.resourceService.dumpResources().encodeAsHTML()}</pre>
+            <pre>${grailsApplication.mainContext.grailsResourceProcessor.dumpResources().encodeAsHTML()}</pre>
 
             <g:set var="deferred">
                 <r:layoutResources/>

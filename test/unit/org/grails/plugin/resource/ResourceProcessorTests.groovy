@@ -8,15 +8,15 @@ import groovy.util.ConfigObject
 
 import grails.test.*
 
-class ResourceServiceTests extends GrailsUnitTestCase {
+class ResourceProcessorTests extends GrailsUnitTestCase {
     def svc
     
     protected void setUp() {
         super.setUp()
-        mockLogging(ResourceService, true)
+        mockLogging(ResourceProcessor, true)
         FileUtils.cleanDirectory(new File('./test-tmp/'));
 
-        svc = new ResourceService()
+        svc = new ResourceProcessor()
         
         svc.grailsApplication = [
             config : [grails:[resources:[work:[dir:'./test-tmp']]]],

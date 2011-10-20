@@ -55,7 +55,7 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
         r.processedFile << new ByteArrayInputStream(css.bytes)
 
         CSSRewriterResourceMapper.newInstance().with {
-            resourceService = svc
+            grailsResourceProcessor = svc
             map(r, new ConfigObject())
         }
 
@@ -102,7 +102,7 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
         r.processedFile << new ByteArrayInputStream(css.bytes)
         
         CSSRewriterResourceMapper.newInstance().with {
-            resourceService = svc
+            grailsResourceProcessor = svc
             map(r, new ConfigObject())
         }
 
@@ -147,7 +147,7 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
         r.processedFile << new ByteArrayInputStream(css.bytes)
     
         CSSRewriterResourceMapper.newInstance().with {
-            resourceService = svc
+            grailsResourceProcessor = svc
             map(r, new ConfigObject())
         }
 
@@ -199,7 +199,7 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
         r.processedFile << new ByteArrayInputStream(css.bytes)
 
         CSSRewriterResourceMapper.newInstance().with {
-            resourceService = svc
+            grailsResourceProcessor = svc
             map(r, new ConfigObject())
         }
 

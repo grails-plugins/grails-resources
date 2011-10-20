@@ -15,8 +15,8 @@ class CSSLinkProcessor {
     // We need to successfully match any kind of url(), mappers are responsible for checking type
     static CSS_URL_PATTERN = ~/(url\s*\(['"]?\s*['"]?)(.+?)(\s*['"]?\s*['"]?\))/
     
-    boolean isCSSRewriteCandidate(resource, resourceService) {
-        def enabled = resourceService.config.rewrite.css instanceof Boolean ? resourceService.config.rewrite.css : true
+    boolean isCSSRewriteCandidate(resource, grailsResourceProcessor) {
+        def enabled = grailsResourceProcessor.config.rewrite.css instanceof Boolean ? grailsResourceProcessor.config.rewrite.css : true
         def yes = enabled && (resource.contentType == "text/css" || resource.tagAttributes?.type == "css")
         if (log.debugEnabled) {
             log.debug "Resource ${resource.actualUrl} being CSS rewritten? $yes"
@@ -29,9 +29,9 @@ class CSSLinkProcessor {
      * NOTE: This needs to run after any plugins that move resources around, but before any that obliterate
      * the content i.e. before minify or gzip
      */
-    void process(ResourceMeta resource, resourceService, Closure urlMapper) {
+    void process(ResourceMeta resource, grailsResourceProcessor, Closure urlMapper) {
         
-        if (!isCSSRewriteCandidate(resource, resourceService)) {
+        if (!isCSSRewriteCandidate(resource, grailsResourceProcessor)) {
             if (log.debugEnabled) {
                 log.debug "CSS link processor skipping ${resource} because its not a CSS rewrite candidate"
             }

@@ -15,10 +15,10 @@ class CSSBundleResourceMeta extends AggregatedResourceMeta {
     def log = LogFactory.getLog(this.class)
 
     @Override
-    void beginPrepare(resourceService) {
+    void beginPrepare(grailsResourceProcessor) {
         def out = getWriter()
         out << '@charset "UTF-8";\n'
         
-        buildAggregateResource(resourceService)
+        buildAggregateResource(grailsResourceProcessor)
     }
 }

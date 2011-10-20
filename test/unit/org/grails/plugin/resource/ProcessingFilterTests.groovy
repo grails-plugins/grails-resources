@@ -10,7 +10,7 @@ class ProcessingFilterTests extends GroovyTestCase {
     void testResourceIsNotProcessedByBothFiltersIfHandledByFirst() {
         def filter = new ProcessingFilter()
         filter.adhoc = false
-        filter.resourceService = [
+        filter.grailsResourceProcessor = [
             isDebugMode: { req -> false },
             processDeclaredResource: { req, resp -> resp.committed = true }
         ]
@@ -28,13 +28,13 @@ class ProcessingFilterTests extends GroovyTestCase {
 void doFilter(ServletRequest request, ServletResponse response,
     FilterChain chain) throws IOException, ServletException {
 
-    def debugging = resourceService.isDebugMode(request)
+    def debugging = grailsResourceProcessor.isDebugMode(request)
     request['resources.debug'] = debugging
     if (!debugging) {
         if (adhoc) {
-            resourceService.processAdHocResource(request, response)
+            grailsResourceProcessor.processAdHocResource(request, response)
         } else {
-            resourceService.processDeclaredResource(request, response)
+            grailsResourceProcessor.processDeclaredResource(request, response)
         }
     }
 
