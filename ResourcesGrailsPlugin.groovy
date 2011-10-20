@@ -13,6 +13,9 @@ import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
  */
 class ResourcesGrailsPlugin {
 
+    static DEFAULT_URI_PREFIX = 'static'
+    static DEFAULT_ADHOC_PATTERNS = ["/images/*", "*.css", "*.js"].asImmutable()
+
     def version = "1.1"
     def grailsVersion = "1.2 > *"
 
@@ -44,8 +47,14 @@ class ResourcesGrailsPlugin {
     def description = 'HTML resource management enhancements to replace g.resource etc.'
     def documentation = "http://grails.org/plugin/resources"
 
-    static DEFAULT_URI_PREFIX = 'static'
-    static DEFAULT_ADHOC_PATTERNS = ["/images/*", "*.css", "*.js"].asImmutable()
+    def license = "APACHE"
+    def organization = [ name: "Grails Community", url: "http://grails.org/" ]
+    def developers = [
+            [ name: "Marc Palmer", email: "marc@grailsrocks.com" ],
+            [ name: "Luke Daley", email: "ld@ldaley.com" ] 
+    ]
+    def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPRESOURCES" ]
+    def scm = [ url: "https://github.com/grails-plugins/grails-resources" ]
     
     def getResourcesConfig(application) {
         application.config.grails.resources
