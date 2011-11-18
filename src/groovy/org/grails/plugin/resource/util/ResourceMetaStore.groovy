@@ -91,7 +91,8 @@ class ResourceMetaStore {
                         log.debug "Creating resource for URI $uri returned ${resource}"
                     }
                 } catch (Throwable t) {
-                    latches[uri] = CLOSED_LATCH // so that future calls for broken (not found) resources don't block forever
+                    thisLatch.countDown() // reset this in case anyone else has reference to it
+                    latches.remove(uri) // Ditch the latch, so that next attempt will try again in case we are mid-reload/init
                     if (t instanceof FileNotFoundException) {
                         log.warn t.message
                     } else {
