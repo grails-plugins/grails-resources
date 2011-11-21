@@ -1,9 +1,6 @@
 modules = {
     'jquery' { 
         resource id:'jquery-js', url:'js/jquery/jquery-1.4.2.min.js', exclude:'minify', disposition:'head', bundle:'jq'
-/*        resource url:'js/jquery/jquery-1.4.2.min.js', disposition:'head', 
-            linkOverride: 'http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js'
-*/
     }
     'jquery-ui' {
         dependsOn 'jquery'

@@ -29,4 +29,13 @@ class ResourceMetaStoreTests extends GrailsUnitTestCase {
         assertEquals ResourceMetaStore.CLOSED_LATCH, store.latches["/jquery/images/bg.png"]
         assertEquals ResourceMetaStore.CLOSED_LATCH, store.latches["/jquery/images/_bg.png"]
     }
+
+    void testRequestingResourceThatDoesNotExist() {
+        def store = new ResourceMetaStore()
+        def resURI = '/images/idonotexist.jpg'
+        def res = store.getOrCreateAdHocResource(resURI, { throw new FileNotFoundException('Where my file?') } )
+        assertNull "Resource should not have existed", res
+        
+        assertNull store.latches[resURI]
+    }
 }
