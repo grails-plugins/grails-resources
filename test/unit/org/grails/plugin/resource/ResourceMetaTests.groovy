@@ -73,10 +73,14 @@ class ResourceMetaTests extends GrailsUnitTestCase {
             ["notgonnahappen/_yyyyyy.png", '/_xxxxxx.css', '/notgonnahappen/_yyyyyy.png'],
             ["../notgonnahappen/really/_yyyyyy.png", '/css/_xxxxxx.css', '/notgonnahappen/really/_yyyyyy.png'],
             ["../../notgonnahappen/really/_yyyyyy.png", '/css/deep/_xxxxxx.css', '/notgonnahappen/really/_yyyyyy.png'],
-            ["../../_yyyyyy.png", '/css/deep/_xxxxxx.css', '/_yyyyyy.png']
+            ["../../_yyyyyy.png", '/css/deep/_xxxxxx.css', '/_yyyyyy.png'],
+            ["_xxxx.png", '/css/_zzzzz.css', '/css/_xxxx.png'],
+            ["../css/_xxxx.png", '/css2/_zzzzz.css', '/css/_xxxx.png'],
+            ["../css2/_xxxx.png", '/css/_zzzzz.css', '/css2/_xxxx.png']
         ]
 
         data.each { d ->
+            println "Trying: ${d}"
             def r = new ResourceMeta(actualUrl:d[2])
             assertEquals d[0], r.relativeTo(new ResourceMeta(actualUrl:d[1]) )
         }

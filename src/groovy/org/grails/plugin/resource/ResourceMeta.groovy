@@ -333,10 +333,10 @@ class ResourceMeta {
     String relativeTo(ResourceMeta base) {
         def baseDirStr = base.actualUrlParent
         def thisDirStr = this.actualUrlParent
-        boolean isChild = thisDirStr.startsWith(baseDirStr)
+        boolean isChild = thisDirStr.startsWith(baseDirStr+'/')
         if (isChild) {
             // Truncate to the part that is after the base dir
-            return this.actualUrl[baseDirStr.size()+1..-1]
+            return this.actualUrl[thisDirStr.size()+1..-1]
         } else {
             def result = new StringBuilder()
 
