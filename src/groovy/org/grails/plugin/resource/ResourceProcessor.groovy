@@ -47,6 +47,14 @@ class ResourceProcessor implements InitializingBean {
     static DISPOSITION_HEAD = 'head'
     static DISPOSITION_DEFER = 'defer'
     static DEFAULT_DISPOSITION_LIST = [DISPOSITION_HEAD, DISPOSITION_DEFER]
+    static DEFAULT_ADHOC_INCLUDES = [
+        '**/*.*'
+    ]
+    
+    static DEFAULT_ADHOC_EXCLUDES = [
+        '**/.svn/**/*.*', 
+        '**/.git/**/*.*'
+    ]
     
     static DEFAULT_MODULE_SETTINGS = [
         css:[disposition: 'head'],
@@ -108,10 +116,10 @@ class ResourceProcessor implements InitializingBean {
     
     void afterPropertiesSet() {
         processingEnabled = getConfigParamOrDefault('processing.enabled', true)
-        adHocIncludes = getConfigParamOrDefault('adhoc.includes', ['**/*.*'])
+        adHocIncludes = getConfigParamOrDefault('adhoc.includes', DEFAULT_ADHOC_INCLUDES)
         adHocIncludes = adHocIncludes.collect { it.startsWith('/') ? it : '/'+it }
 
-        adHocExcludes = getConfigParamOrDefault('adhoc.excludes', [])
+        adHocExcludes = getConfigParamOrDefault('adhoc.excludes', DEFAULT_ADHOC_EXCLUDES)
         adHocExcludes = adHocExcludes.collect { it.startsWith('/') ? it : '/'+it }
 
         optionalDispositions = getConfigParamOrDefault('optional.dispositions', ['inline', 'image'])
@@ -139,19 +147,19 @@ class ResourceProcessor implements InitializingBean {
         return uriStart < request.requestURI.size() ? request.requestURI[uriStart..-1] : ''
     }
 
-    boolean canProcessAdHocResource(uri) {
+    boolean canProcessLegacyResource(uri) {
         // Apply our own url filtering rules because servlet mapping uris are too lame
         boolean included = adHocIncludes.find { p ->
             PATH_MATCHER.match(p, uri) 
         }
         if (log.debugEnabled) {
-            log.debug "Ad-hoc resource ${uri} matched includes? ${included}"
+            log.debug "Legacy resource ${uri} matched includes? ${included}"
         }
 
         if (included) {
             included = !(adHocExcludes.find { PATH_MATCHER.match(it, uri) })
             if (log.debugEnabled) {
-                log.debug "Ad-hoc resource ${uri} passed excludes? ${included}"
+                log.debug "Legacy resource ${uri} passed excludes? ${included}"
             }
         }
         
@@ -172,16 +180,16 @@ class ResourceProcessor implements InitializingBean {
      * This involves looking it up by source uri. Therefore the same resource may have multiple mappings in the 
      * processedResourcesByURI map but they should not be conflicting.
      */
-    boolean processAdHocResource(request, response) {
+    boolean processLegacyResource(request, response) {
         if (log.debugEnabled) {
-            log.debug "Handling ad-hoc resource ${request.requestURI}"
+            log.debug "Handling Legacy resource ${request.requestURI}"
         }
         def uri = ResourceProcessor.removeQueryParams(extractURI(request, true))
         
         // Only handle it if it should be included in processing
-        if (canProcessAdHocResource(uri)) {
+        if (canProcessLegacyResource(uri)) {
             if (log.debugEnabled) {
-                log.debug "Attempting to render ad-hoc resource ${request.requestURI}"
+                log.debug "Attempting to render legacy resource ${request.requestURI}"
             }
             // @todo query params are lost at this point for ad hoc resources, this needs fixing?
             def res
@@ -226,7 +234,7 @@ class ResourceProcessor implements InitializingBean {
      * Process a URI where the input URI matches a cached and declared resource URI,
      * without any redirects. This is the real deal
      */ 
-    void processDeclaredResource(request, response) {
+    void processModernResource(request, response) {
         if (log.debugEnabled) {
             log.debug "Handling resource ${request.requestURI}"
         }
@@ -361,7 +369,7 @@ class ResourceProcessor implements InitializingBean {
                 return null
             }
             
-            if (!canProcessAdHocResource(uri)) {
+            if (!canProcessLegacyResource(uri)) {
                 if (log.debugEnabled) {
                     log.debug("Skipping ad-hoc resource $uri as it is excluded")
                 }

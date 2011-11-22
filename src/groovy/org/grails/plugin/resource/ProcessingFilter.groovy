@@ -34,9 +34,9 @@ class ProcessingFilter implements Filter {
         }
         if (!debugging) {
             if (adhoc) {
-                grailsResourceProcessor.processAdHocResource(request, response)
+                grailsResourceProcessor.processLegacyResource(request, response)
             } else {
-                grailsResourceProcessor.processDeclaredResource(request, response)
+                grailsResourceProcessor.processModernResource(request, response)
             }
         }
 

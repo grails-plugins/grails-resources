@@ -12,7 +12,7 @@ class ProcessingFilterTests extends GroovyTestCase {
         filter.adhoc = false
         filter.grailsResourceProcessor = [
             isDebugMode: { req -> false },
-            processDeclaredResource: { req, resp -> resp.committed = true }
+            processModernResource: { req, resp -> resp.committed = true }
         ]
 
         def rq = new MockHttpServletRequest()
@@ -24,23 +24,4 @@ class ProcessingFilterTests extends GroovyTestCase {
         
         filter.doFilter(rq, rp, fakeChain)
     }
-/*
-void doFilter(ServletRequest request, ServletResponse response,
-    FilterChain chain) throws IOException, ServletException {
-
-    def debugging = grailsResourceProcessor.isDebugMode(request)
-    request['resources.debug'] = debugging
-    if (!debugging) {
-        if (adhoc) {
-            grailsResourceProcessor.processAdHocResource(request, response)
-        } else {
-            grailsResourceProcessor.processDeclaredResource(request, response)
-        }
-    }
-
-    if (!response.committed) {
-        chain.doFilter(request, response)
-    }
-}
-*/
 }

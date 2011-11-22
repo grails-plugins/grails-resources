@@ -64,7 +64,7 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
         assertEquals '/somehack.xml#whatever', meta.linkUrl
     }
 
-    void testProcessAdHocResourceIncludesExcludes() {
+    void testProcessLegacyResourceIncludesExcludes() {
         
         svc.adHocIncludes = ['/**/*.css', '/**/*.js', '/images/**']
         svc.adHocExcludes = ['/**/*.exe', '/**/*.gz', '/unsafe/**/*.css']
@@ -89,13 +89,13 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
                 sendRedirect: { uri -> }
             ]
             
-            svc.processAdHocResource(request, response)
+            svc.processLegacyResource(request, response)
             
             assertEquals "Failed on ${d.requestURI}", d.expected, didHandle
         }
     }
 
-    void testProcessAdHocResourceIncludesExcludesSpecificFile() {
+    void testProcessLegactResourceIncludesExcludesSpecificFile() {
         
         svc.adHocIncludes = ['/**/*.js']
         svc.adHocExcludes = ['/**/js/something.js']
@@ -118,7 +118,7 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
                 sendRedirect: { uri -> }
             ]
             
-            svc.processAdHocResource(request, response)
+            svc.processLegacyResource(request, response)
             
             assertEquals "Failed on ${d.requestURI}", d.expected, didHandle
         }

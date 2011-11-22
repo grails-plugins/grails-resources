@@ -330,6 +330,10 @@ class ResourceMeta {
         return sourceUrlParamsAndFragment ? url + sourceUrlParamsAndFragment : url
     }
     
+    /**
+     * Calculate the URI of this resource relative to the base resource.
+     * All resource URLs must be app-relative with no ../ or ./
+     */
     String relativeTo(ResourceMeta base) {
         def baseDirStr = base.actualUrlParent
         def thisDirStr = this.actualUrlParent
