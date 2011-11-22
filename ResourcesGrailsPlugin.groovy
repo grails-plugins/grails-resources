@@ -7,6 +7,10 @@ import org.springframework.core.io.FileSystemResource
 
 import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
 
+import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.ScheduledFuture
+
 /**
  * @author Marc Palmer (marc@grailsrocks.com)
  * @author Luke Daley (ld@ldaley.com)
@@ -162,20 +166,33 @@ class ResourcesGrailsPlugin {
     boolean isResourceWeShouldProcess(File file) {
         // @todo Improve this, but for now tracing the ancestry of every file is seriously zzzz and overkill
         // when STS creats 100s of .class changes
+        // @todo need to exclude .svn folders also
         boolean shouldProcess = (file.parent.indexOf('WEB-INF') < 0) && (file.parent.indexOf('META-INF') < 0)
         return shouldProcess
+    }
+    
+    ScheduledThreadPoolExecutor delayedChangeThrottle = new ScheduledThreadPoolExecutor(1)
+    ScheduledFuture reloadTask
+    static final RELOAD_THROTTLE_DELAY = 2
+    
+    void triggerReload(grailsResourceProcessor) {
+        reloadTask?.cancel(false)
+        reloadTask = delayedChangeThrottle.schedule( { 
+            grailsResourceProcessor.reload()
+        }, RELOAD_THROTTLE_DELAY, TimeUnit.SECONDS)
     }
     
     def onChange = { event ->
         if (event.source instanceof FileSystemResource) {
             if (isResourceWeShouldProcess(event.source.file)) {
-                event.application.mainContext.grailsResourceProcessor.reload()
+                log.info("Scheduling reload of resources due to change of file $event.source.file")
+                triggerReload(event.application.mainContext.grailsResourceProcessor)
             }
         } else {
             [getResourceMapperArtefactHandler().TYPE, getResourcesArtefactHandler().TYPE].each {
                 if (handleChange(application, event, it, log)) {
-                    log.info("reloading resources due to change of $event.source.name")
-                    event.application.mainContext.grailsResourceProcessor.reload()
+                    log.info("Scheduling reload of due to change of $event.source.name")
+                    triggerReload(event.application.mainContext.grailsResourceProcessor)
                 }
             }
         }
