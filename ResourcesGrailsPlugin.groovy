@@ -11,6 +11,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.ScheduledFuture
 
+import org.springframework.util.AntPathMatcher
+
 /**
  * @author Marc Palmer (marc@grailsrocks.com)
  * @author Luke Daley (ld@ldaley.com)
@@ -21,7 +23,7 @@ class ResourcesGrailsPlugin {
     static DEFAULT_ADHOC_PATTERNS = ["/images/*", "*.css", "*.js"].asImmutable()
 
     def version = "1.1.2.BUILD-SNAPSHOT"
-    def grailsVersion = "1.2 > *"
+    def grailsVersion = "1.3 > *"
 
     def loadAfter = ['logging'] // retained to ensure correct loading under Grails < 2.0
 
@@ -163,23 +165,37 @@ class ResourcesGrailsPlugin {
         applicationContext.grailsResourceProcessor.reload()
     }
 
+    static PATH_MATCHER = new AntPathMatcher()
+    static RELOADABLE_RESOURCE_EXCLUDES = [
+        '**/.svn/**/*.*', 
+        '**/.git/**/*.*',
+        'WEB-INF/**/*.*',
+        'META-INF/**/*.*'
+    ]
+    
     boolean isResourceWeShouldProcess(File file) {
-        // @todo Improve this, but for now tracing the ancestry of every file is seriously zzzz and overkill
-        // when STS creats 100s of .class changes
-        // @todo need to exclude .svn folders also
-        boolean shouldProcess = (file.parent.indexOf('WEB-INF') < 0) && (file.parent.indexOf('META-INF') < 0)
+        // Make windows filenams safe for matching
+        def baseDir = new File('.', 'web-app').canonicalPath+'/'
+        def fileName = file.canonicalPath.replaceAll('\\\\', '/').substring(baseDir.size())
+        println "Base dir is [$baseDir] checking for matches against [${fileName}]"
+        boolean shouldProcess = !(RELOADABLE_RESOURCE_EXCLUDES.any { PATH_MATCHER.match(it, fileName ) })
         return shouldProcess
     }
     
     ScheduledThreadPoolExecutor delayedChangeThrottle = new ScheduledThreadPoolExecutor(1)
     ScheduledFuture reloadTask
-    static final RELOAD_THROTTLE_DELAY = 2
+    static final RELOAD_THROTTLE_DELAY = 500
     
     void triggerReload(grailsResourceProcessor) {
         reloadTask?.cancel(false)
         reloadTask = delayedChangeThrottle.schedule( { 
-            grailsResourceProcessor.reload()
-        }, RELOAD_THROTTLE_DELAY, TimeUnit.SECONDS)
+            try {
+                grailsResourceProcessor.reload()
+            } catch (Throwable t) {
+                println "Resource reload failed!"
+                t.printStackTrace()
+            }
+        }, RELOAD_THROTTLE_DELAY, TimeUnit.MILLISECONDS)
     }
     
     def onChange = { event ->
