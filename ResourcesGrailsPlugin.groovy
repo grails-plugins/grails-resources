@@ -162,7 +162,7 @@ class ResourcesGrailsPlugin {
 
     def doWithDynamicMethods = { applicationContext ->
         applicationContext.grailsResourceProcessor.staticUrlPrefix = "/${getUriPrefix(application)}"
-        applicationContext.grailsResourceProcessor.reload()
+        applicationContext.grailsResourceProcessor.reloadAll()
     }
 
     static PATH_MATCHER = new AntPathMatcher()
@@ -186,11 +186,11 @@ class ResourcesGrailsPlugin {
     ScheduledFuture reloadTask
     static final RELOAD_THROTTLE_DELAY = 500
     
-    void triggerReload(grailsResourceProcessor) {
+    void triggerReload(Closure reloader) {
         reloadTask?.cancel(false)
         reloadTask = delayedChangeThrottle.schedule( { 
             try {
-                grailsResourceProcessor.reload()
+                reloader()
             } catch (Throwable t) {
                 println "Resource reload failed!"
                 t.printStackTrace()
@@ -201,15 +201,20 @@ class ResourcesGrailsPlugin {
     def onChange = { event ->
         if (event.source instanceof FileSystemResource) {
             if (isResourceWeShouldProcess(event.source.file)) {
-                log.info("Scheduling reload of resources due to change of file $event.source.file")
-                triggerReload(event.application.mainContext.grailsResourceProcessor)
-            }
-        } else {
-            [getResourceMapperArtefactHandler().TYPE, getResourcesArtefactHandler().TYPE].each {
-                if (handleChange(application, event, it, log)) {
-                    log.info("Scheduling reload of due to change of $event.source.name")
-                    triggerReload(event.application.mainContext.grailsResourceProcessor)
+                log.info("Scheduling reload of resource files due to change of file $event.source.file")
+                triggerReload {
+                    event.application.mainContext.grailsResourceProcessor.reloadChangedFiles()
                 }
+            }
+        } else if (handleChange(application, event, getResourceMapperArtefactHandler().TYPE, log)) {
+            log.info("Scheduling reload of mappers due to change of $event.source.name")
+            triggerReload {
+                event.application.mainContext.grailsResourceProcessor.reloadMappers()
+            }
+        } else if (handleChange(application, event, getResourcesArtefactHandler().TYPE, log)) {
+            log.info("Scheduling reload of modules due to change of $event.source.name")
+            triggerReload {
+                event.application.mainContext.grailsResourceProcessor.reloadModules()
             }
         }
     }
@@ -234,7 +239,7 @@ class ResourcesGrailsPlugin {
     }
 
     def onConfigChange = { event ->
-        event.application.mainContext.grailsResourceProcessor.reload()
+        event.application.mainContext.grailsResourceProcessor.reloadModules()
     }
 
     /**

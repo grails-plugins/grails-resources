@@ -79,23 +79,7 @@ class ResourceMeta {
      */
     String disposition
 
-    //@todo impl this later
-    //String cachedTagText
-    
-    /**
-     * The delegate to actually use when linking, if any. Think bundling.
-     */
-    ResourceMeta delegate
-    
-    void delegateTo(ResourceMeta target) {
-        delegate = target
-    }
-    
-    Resource originalResource
-    
-    File processedFile
-    
-    long originalLastMod
+    Set excludedMappers
     
     // For per-resource options like "nominify", 'nozip'
     Map attributes = [:]
@@ -105,6 +89,19 @@ class ResourceMeta {
 
     Closure prePostWrapper
 
+    // ***** Below here is state we determine at runtime during processing *******
+    
+    /**
+     * The delegate to actually use when linking, if any. Think bundling.
+     */
+    ResourceMeta delegate
+    
+    Resource originalResource
+    
+    File processedFile
+    
+    long originalLastMod
+    
     // A list of Closures taking request & response. Delegates to resourceMeta
     List requestProcessors = []
     
@@ -122,7 +119,9 @@ class ResourceMeta {
     
     Integer originalContentLength = 0
 
-    Set excludedMappers
+    void delegateTo(ResourceMeta target) {
+        delegate = target
+    }
     
     boolean isOriginalAbsolute() {
         sourceUrl.indexOf(':/') > 0
@@ -328,6 +327,25 @@ class ResourceMeta {
     String relativeToWithQueryParams(ResourceMeta base) {
         def url = relativeTo(base)
         return sourceUrlParamsAndFragment ? url + sourceUrlParamsAndFragment : url
+    }
+    
+    /**
+     * Reset the resource state to how it was after loading from the module definition
+     * i.e. keep only declared info, nothing generated later during processing
+     */
+    void reset() {
+        this.@contentType = null
+        this.@actualUrl = null
+        this.@processedFile = null
+        this.@originalResource = null
+        this.@_resourceExists = false
+        this.@originalContentLength = 0
+        this.@_linkUrl = null
+        this.@delegate = null
+        this.@originalLastMod = 0
+        this.@contentLength = 0
+        this.@declaringResource = null
+        this.@requestProcessors.clear()
     }
     
     /**

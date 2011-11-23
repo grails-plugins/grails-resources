@@ -23,19 +23,22 @@ class DevModeSanityFilter implements Filter {
     void doFilter(ServletRequest request, ServletResponse response,
         FilterChain chain) throws IOException, ServletException {
 
-        chain.doFilter(request, response)
+        if (grailsResourceProcessor.reloading) {
+            response.writer << "<html><body><h1>Your new resources are still being processed...</h1></body></html>"
+        } else {
+            chain.doFilter(request, response)
 
-        if (request.getAttribute('resources.need.layout')) {
-            def dispositionsLeftOver = grailsResourceProcessor.getRequestDispositionsRemaining(request)
-            if (dispositionsLeftOver) {
-                def optionals = grailsResourceProcessor.optionalDispositions
-                dispositionsLeftOver -= optionals
+            if (request.getAttribute('resources.need.layout')) {
+                def dispositionsLeftOver = grailsResourceProcessor.getRequestDispositionsRemaining(request)
                 if (dispositionsLeftOver) {
-                    throw new RuntimeException("It looks like you are missing some calls to the r:layoutResources tag. "+
-                        "After rendering your page the following have not been rendered: ${dispositionsLeftOver}")
+                    def optionals = grailsResourceProcessor.optionalDispositions
+                    dispositionsLeftOver -= optionals
+                    if (dispositionsLeftOver) {
+                        throw new RuntimeException("It looks like you are missing some calls to the r:layoutResources tag. "+
+                            "After rendering your page the following have not been rendered: ${dispositionsLeftOver}")
+                    }
                 }
             }
         }
-
     }
 }

@@ -35,6 +35,8 @@ class ResourceProcessor implements InitializingBean {
     
     static transactional = false
     
+    boolean reloading
+    
     def log = LogFactory.getLog(ResourceProcessor)
 
     static final PATH_MATCHER = new AntPathMatcher()
@@ -52,8 +54,6 @@ class ResourceProcessor implements InitializingBean {
     ]
     
     static DEFAULT_ADHOC_EXCLUDES = [
-        '**/.svn/**/*.*', 
-        '**/.git/**/*.*'
     ]
     
     static DEFAULT_MODULE_SETTINGS = [
@@ -92,8 +92,13 @@ class ResourceProcessor implements InitializingBean {
     List adHocExcludes 
     List optionalDispositions
     
+    boolean isInternalModule(def moduleOrName) {
+        def n = moduleOrName instanceof ResourceModule ? moduleOrName.name : moduleOrName
+        return n in [IMPLICIT_MODULE, SYNTHETIC_MODULE]        
+    }
+    
     void updateDependencyOrder() {
-        def modules = (modulesByName.collect { it.value }).findAll { !(it.name in [IMPLICIT_MODULE, SYNTHETIC_MODULE]) }
+        def modules = (modulesByName.collect { it.value }).findAll { !isInternalModule(it) }
         def ordered = modules.collect { it.name }
 
         modules.each { m ->
@@ -405,6 +410,7 @@ class ResourceProcessor implements InitializingBean {
                 }
                 synchronized (mod.resources) {
                     // Prevent concurrent requests resulting in multiple additions of same resource
+                    // This relates specifically to the ad-hoc resources module
                     if (!mod.resources.find({ x -> x.sourceUrl == r.sourceUrl }) ) {
                         mod.resources << r
                     }
@@ -563,11 +569,7 @@ class ResourceProcessor implements InitializingBean {
         }
     }
     
-    void storeModule(ResourceModule m) {
-        if (log.debugEnabled) {
-            log.debug "Storing resource module definition ${m.dump()}"
-        }
-        
+    void prepareDeclaredResources(ResourceModule m) {
         m.resources.each { r ->
             def u = r.sourceUrl
             processedResourcesByURI.addDeclaredResource { ->
@@ -579,6 +581,15 @@ class ResourceProcessor implements InitializingBean {
             }
             allResourcesByOriginalSourceURI[u] = r
         }
+    }
+
+    void storeModule(ResourceModule m) {
+        if (log.debugEnabled) {
+            log.debug "Storing resource module definition ${m.dump()}"
+        }
+        
+        prepareDeclaredResources(m)
+
         modulesByName[m.name] = m
     }
     
@@ -633,23 +644,38 @@ class ResourceProcessor implements InitializingBean {
         modulesByName[name]
     }
         
+    void forgetModules() {
+        if (log.infoEnabled) {
+            log.info "Forgetting all known modules..."
+        }
+        modulesByName.clear()
+        modulesInDependencyOrder.clear()
+        
+        // If we forget modules we have to forget resources too
+        forgetResources()
+    }
+
     void forgetResources() {
         if (log.infoEnabled) {
             log.info "Forgetting all known resources..."
         }
-        modulesByName.clear()
-        modulesInDependencyOrder.clear()
+
+        // These are bi-products of resource processing so need to go
         syntheticResourcesByURI.clear()
+        modulesByName.remove(SYNTHETIC_MODULE)
+        modulesByName.remove(IMPLICIT_MODULE)
+
+        // This is cached data
         allResourcesByOriginalSourceURI.clear()
         processedResourcesByURI = new ResourceMetaStore()
     }
-    
-    private loadResources() {
+
+    private loadModules() {
         if (log.infoEnabled) {
             log.info "Loading resource declarations..."
         }
-        forgetResources()
-        
+        forgetModules()        
+
         def declarations = ModuleDeclarationsFactory.getModuleDeclarations(grailsApplication)
         
         def modules = []
@@ -729,10 +755,35 @@ class ResourceProcessor implements InitializingBean {
         // Create modules and prepare the resources
         modules.each { m -> module(m) }
         
-        // Now pre-prepare the bundles
+        updateDependencyOrder()
+
+        resourcesChanged()
+    }
+    
+    private resourcesChanged() {
+        // Now pre-prepare any aggregated resources
         prepareSyntheticResources()
         
         resolveResourceDependencies()
+    }
+
+    private loadResources() {
+        if (log.infoEnabled) {
+            log.info "Loading declared resources..."
+        }
+        forgetResources()
+                
+        // prepare the declared resources from existing module definitions
+        for (m in modulesInDependencyOrder) {
+            if (!isInternalModule(m)) {
+                def module = modulesByName[m]
+                // Reset them all in case this is a reload
+                module.resources*.reset() 
+                prepareDeclaredResources(module) 
+            }
+        }
+
+        resourcesChanged()
     }
 
     void resolveResourceDependencies() {
@@ -891,10 +942,50 @@ class ResourceProcessor implements InitializingBean {
         }
     }
     
-    def reload() {
-        log.info("Performing a full reload")
+    private void loadMappers() {
         resourceMappers = ResourceMappersFactory.createResourceMappers(grailsApplication, config.mappers)
-        loadResources()
+    }
+
+    synchronized reloadMappers() {
+        reloading = true
+        try {
+            log.info("Performing a resource mapper reload")
+            loadMappers()
+            loadResources()
+        } finally {
+            reloading = false
+        }
+    }
+    
+    synchronized reloadModules() {
+        reloading = true
+        try {
+            log.info("Performing a module definition reload")
+            loadModules()
+        } finally {
+            reloading = false
+        }
+    }
+
+    synchronized reloadChangedFiles() {
+        reloading = true
+        try {
+            log.info("Performing a changed file reload")
+            loadResources()
+        } finally {
+            reloading = false
+        }
+    }
+    
+    void reloadAll() {
+        reloading = true
+        try {
+            log.info("Performing a full reload")
+            loadMappers()
+            loadModules()
+        } finally {
+            reloading = false
+        }
     }
     
 
