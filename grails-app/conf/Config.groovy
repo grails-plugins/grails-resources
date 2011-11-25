@@ -33,7 +33,7 @@ environments {
                 dependsOn 'blueprint'
                 resource 'css/main.css'
                 resource url:'js/application.js', exclude:["bundle"]
-                resource url:'images/grails_logo.png', attrs:[width:200, height:100], disposition:'inline'
+                resource url:'images/grails_logo.png', attrs:[width:400, height:100], disposition:'inline'
             }
             jqueryGoogle { 
                 defaultBundle false 

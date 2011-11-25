@@ -10,6 +10,7 @@ import org.apache.commons.io.FilenameUtils
 import javax.servlet.ServletRequest
 import grails.util.Environment
 import org.springframework.util.AntPathMatcher
+import groovyx.gpars.GParsPool
 
 import grails.spring.BeanBuilder
 import org.grails.plugin.resource.mapper.ResourceMappersFactory
@@ -568,18 +569,31 @@ class ResourceProcessor implements InitializingBean {
             r.wasProcessedByMapper(m, appliedMapper)
         }
     }
+
+    void prepareSingleDeclaredResource(ResourceMeta r, Closure postPrepare = null) {
+        processedResourcesByURI.addDeclaredResource { ->
+            try {
+                prepareResource(r, false)
+            } catch (FileNotFoundException fnfe) {
+                log.warn fnfe.message
+            }
+        }
+        if (postPrepare) {
+            postPrepare()
+        }
+    }
     
     void prepareDeclaredResources(ResourceModule m) {
-        m.resources.each { r ->
-            def u = r.sourceUrl
-            processedResourcesByURI.addDeclaredResource { ->
-                try {
-                    prepareResource(r, false)
-                } catch (FileNotFoundException fnfe) {
-                    log.warn fnfe.message
+        GParsPool.withPool(10) { pool ->
+            m.resources.each { r ->
+                def u = r.sourceUrl
+                def code = {
+                    prepareSingleDeclaredResource(r) {
+                        allResourcesByOriginalSourceURI[u] = r
+                    }
                 }
+                code.callAsync()
             }
-            allResourcesByOriginalSourceURI[u] = r
         }
     }
 
@@ -597,39 +611,7 @@ class ResourceProcessor implements InitializingBean {
         storeModule(new ResourceModule(name, this))
     }
 
-    /**
-     * @deprecated
-     */
-    def module(String name, String url) {
-        storeModule(new ResourceModule(name, [url:url], false, this))
-    }
-
-    /**
-     * @deprecated
-     */
-    def module(String name, Map urlInfo) {
-        storeModule(new ResourceModule(name, urlInfo, false, this))
-    }
-
-    /**
-     * @deprecated
-     */
-    def module(String name, List urlsOrInfos) {
-        storeModule(new ResourceModule(name, urlsOrInfos, false, this))
-    }
-
-    /**
-     * @deprecated
-     */
-    def module(String name, List urlsOrInfos, List moduleDeps) {
-        def m = new ResourceModule(name, urlsOrInfos, false, this)
-        storeModule(m)
-        moduleDeps?.each { d ->
-            m.addModuleDependency(d)
-        }
-    }
-    
-    def module(builderInfo) {
+    def defineModuleFromBuilder(builderInfo) {
         def m = new ResourceModule(builderInfo.name, builderInfo.resources, builderInfo.defaultBundle, this)
         storeModule(m)
         builderInfo.dependencies?.each { d ->
@@ -753,7 +735,7 @@ class ResourceProcessor implements InitializingBean {
         }
         
         // Create modules and prepare the resources
-        modules.each { m -> module(m) }
+        modules.each { m -> defineModuleFromBuilder(m) }
         
         updateDependencyOrder()
 
@@ -806,13 +788,7 @@ class ResourceProcessor implements InitializingBean {
             log.info "Preparing declared synthetic resources: ${resources?.sourceUrl}"
         }
         resources?.each { r ->            
-            processedResourcesByURI.addDeclaredResource { ->
-                try {
-                    prepareResource(r, false)
-                } catch (FileNotFoundException fnfe) {
-                    log.warn fnfe.message
-                }
-            }
+            prepareSingleDeclaredResource(r)
         }
     }
     
@@ -946,6 +922,9 @@ class ResourceProcessor implements InitializingBean {
         resourceMappers = ResourceMappersFactory.createResourceMappers(grailsApplication, config.mappers)
     }
 
+    /**
+     * Reload just the mappers and just the resources - keep the existing module definitiosn
+     */
     synchronized reloadMappers() {
         reloading = true
         try {
@@ -956,6 +935,7 @@ class ResourceProcessor implements InitializingBean {
             reloading = false
         }
     }
+    
     
     synchronized reloadModules() {
         reloading = true

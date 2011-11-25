@@ -40,13 +40,13 @@ class AggregatedResourceMeta extends ResourceMeta {
     }
 
     void buildAggregateResource(grailsResourceProcessor) {
-        def out = getWriter()
-        
         // @todo I'm not sure we really want this here?
         grailsResourceProcessor.updateDependencyOrder()
         def moduleOrder = grailsResourceProcessor.modulesInDependencyOrder
 
         def newestLastMod = 0
+        
+        def bundledContent = new StringBuilder()
         
         // Add the resources to the file in the order determined by module dependencies!
         moduleOrder.each { m ->
@@ -56,8 +56,8 @@ class AggregatedResourceMeta extends ResourceMeta {
                     if (log.debugEnabled) {
                         log.debug "Appending contents of ${r.processedFile} to ${processedFile}"
                     }
-                    out << r.processedFile.getText("UTF-8")
-                    out << "\r\n"
+                    bundledContent << r.processedFile.getText("UTF-8")
+                    bundledContent << "\r\n"
                     
                     if (r.originalLastMod > newestLastMod) {
                         newestLastMod = r.originalLastMod
@@ -66,6 +66,8 @@ class AggregatedResourceMeta extends ResourceMeta {
             }
         }
         
+        def out = getWriter()
+        out << bundledContent
         out << "\r\n"
         out.close()
         

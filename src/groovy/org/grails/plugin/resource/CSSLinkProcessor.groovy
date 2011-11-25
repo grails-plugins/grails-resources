@@ -39,32 +39,58 @@ class CSSLinkProcessor {
         }
         
         // Move existing to tmp file, then write to the correct file
-        def origFile = new File(resource.processedFile.toString()+'.tmp')
+        def origFileTempCopy = new File(resource.processedFile.toString()+'.tmp')
         
-        // Make sure it doesn't exist already
-        new File(origFile.toString()).delete() // On MS Windows if we don't do this origFile gets corrupt after delete
+        // Make sure temp file doesn't exist already
+        new File(origFileTempCopy.toString()).delete() // On MS Windows if we don't do this origFileTempCopy gets corrupt after delete
         
-        resource.processedFile.renameTo(origFile)
-        def rewrittenFile = resource.processedFile
+        // Move the existing file to temp
+        resource.processedFile.renameTo(origFileTempCopy)
+
         if (log.debugEnabled) {
             log.debug "Pre-processing CSS resource ${resource.sourceUrl} to rewrite links"
         }
 
-        // Replace all urls to resources we know about to their processed urls
-        rewrittenFile.withPrintWriter("utf-8") { writer ->
-           origFile.eachLine('UTF-8') { line ->
-               def fixedLine = line.replaceAll(CSS_URL_PATTERN) { Object[] args ->
-                   def prefix = args[1]
-                   def originalUrl = args[2].trim()
-                   def suffix = args[3]
+        /*        
+        def len = origFileTempCopy.length()
+        println "len: ${len}"
+        def inMemoryStream = new ByteArrayOutputStream((len + (len >> 2)).toInteger())
+        def inMemoryOutput = new PrintWriter(inMemoryStream)
 
-                   return urlMapper(prefix, originalUrl, suffix)
-               }
-               writer.println(fixedLine)
-            }
-        }  
+        println  "Original data: ${origFileTempCopy.bytes.size()}"
+        def originalFileReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(origFileTempCopy.bytes), 'UTF-8'))
+        // Replace all urls to resources we know about to their processed urls
+        String line = originalFileReader.readLine()
+        println "reading"
+        while (line != null) {
+           println "reading: $line"
+           def fixedLine = line.replaceAll(CSS_URL_PATTERN) { Object[] args ->
+               def prefix = args[1]
+               def originalUrl = args[2].trim()
+               def suffix = args[3]
+
+               return urlMapper(prefix, originalUrl, suffix)
+           }
+           println "writing $fixedLine"
+           inMemoryOutput.println(fixedLine)
+           
+           line = originalFileReader.readLine()
+        }
+        
+        inMemoryOutput.flush()
+        resource.processedFile.bytes = inMemoryStream.toByteArray()
+ */
+        def inputCss = origFileTempCopy.getText('UTF-8')
+        def processedCss = inputCss.replaceAll(CSS_URL_PATTERN) { Object[] args ->
+               def prefix = args[1]
+               def originalUrl = args[2].trim()
+               def suffix = args[3]
+
+               return urlMapper(prefix, originalUrl, suffix)
+        }
+        resource.processedFile.setText(processedCss, 'UTF-8')
         
         // Delete the temp file
-        origFile.delete()      
+        origFileTempCopy.delete()      
     }
 }
