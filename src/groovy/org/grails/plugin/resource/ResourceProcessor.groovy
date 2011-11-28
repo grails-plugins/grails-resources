@@ -996,7 +996,6 @@ class ResourceProcessor implements InitializingBean {
         reloading = true
         try {
             log.info("Performing a module definition reload")
-            Thread.sleep(5000)
             resetStats()
 
             ResourceProcessorBatch reloadBatch = new ResourceProcessorBatch()
