@@ -10,6 +10,20 @@ import grails.util.Environment
  * @author Marc Palmer (marc@grailsrocks.com)
  */
 class DevModeSanityFilter implements Filter {
+    static RELOADING_DOC = """
+<html>
+<head>
+<meta http-equiv=\"refresh\" content="1"></meta>
+<style type="text/css" media="screen">
+    body {font-size:75%;color:#222;background:#fff;font-family:"Helvetica Neue", Arial, Helvetica, sans-serif; text-align: center;margin-top:200px}
+    h1 {font-weight:normal;color:#111;}
+</style>
+</head>
+<body>
+<h1>Resources are being processed, please wait...</h1>
+</body>
+</html>"""
+    
     def grailsResourceProcessor
     
     void init(FilterConfig config) throws ServletException {
@@ -24,7 +38,8 @@ class DevModeSanityFilter implements Filter {
         FilterChain chain) throws IOException, ServletException {
 
         if (grailsResourceProcessor.reloading) {
-            response.writer << "<html><body><h1>Your new resources are still being processed...</h1></body></html>"
+            response.contentType = "text/html"
+            response.writer << RELOADING_DOC
         } else {
             chain.doFilter(request, response)
 

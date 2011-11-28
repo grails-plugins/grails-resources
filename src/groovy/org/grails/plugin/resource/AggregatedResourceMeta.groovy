@@ -54,6 +54,9 @@ class AggregatedResourceMeta extends ResourceMeta {
 
     protected initFile(grailsResourceProcessor) {
         def commaPos = sourceUrl.indexOf(',') 
+        if (commaPos == -1) {
+            commaPos = sourceUrl.size()
+        }
         actualUrl = commaPos ? sourceUrl[0..commaPos-1] : sourceUrl
 
         processedFile = grailsResourceProcessor.makeFileForURI(actualUrl)

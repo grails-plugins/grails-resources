@@ -153,4 +153,42 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
         svc.removeDispositionFromRequest(request, 'defer')
         assertTrue((['image'] as Set) == svc.getRequestDispositionsRemaining(request))
     }
+
+    void testDependencyOrdering() {
+        svc.modulesByName = [
+            a: [name:'a', dependsOn:['b']],
+            e: [name:'e', dependsOn:['f', 'a']],
+            b: [name:'b', dependsOn:['c']],
+            c: [name:'c', dependsOn:['q']],
+            d: [name:'d', dependsOn:['b', 'c']],
+            f: [name:'f', dependsOn:['d']],
+            z: [name:'z', dependsOn:[]],
+            q: [name:'q', dependsOn:[]]
+        ]
+        svc.updateDependencyOrder()
+
+        def res = svc.modulesInDependencyOrder
+        def pos = { v ->
+            res.indexOf(v)
+        }
+
+        println "Dependency order: ${res}"
+        
+        assertEquals res.size()-2, svc.modulesByName.keySet().size() // take off the synth + adhoc
+        
+        assertTrue pos('a') > pos('b')
+
+        assertTrue pos('e') > pos('f')
+        assertTrue pos('e') > pos('a')
+
+        assertTrue pos('b') > pos('c')
+
+        assertTrue pos('c') > pos('q')
+
+        assertTrue pos('d') > pos('b')
+        assertTrue pos('d') > pos('c')
+
+        assertTrue pos('f') > pos('d')
+    }
 }
+

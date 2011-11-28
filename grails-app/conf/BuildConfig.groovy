@@ -24,9 +24,12 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.jboss.com/maven2/"
     }
     dependencies {
-        build 'org.codehaus.gpars:gpars:0.12'
+//        build 'org.codehaus.gpars:gpars:0.12'
     }
     plugins {        
+        build(":webxml:1.3") {
+            export = false
+        }
         build(":release:1.0.0.RC3") {
             export = false
         }

@@ -51,35 +51,6 @@ class CSSLinkProcessor {
             log.debug "Pre-processing CSS resource ${resource.sourceUrl} to rewrite links"
         }
 
-        /*        
-        def len = origFileTempCopy.length()
-        println "len: ${len}"
-        def inMemoryStream = new ByteArrayOutputStream((len + (len >> 2)).toInteger())
-        def inMemoryOutput = new PrintWriter(inMemoryStream)
-
-        println  "Original data: ${origFileTempCopy.bytes.size()}"
-        def originalFileReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(origFileTempCopy.bytes), 'UTF-8'))
-        // Replace all urls to resources we know about to their processed urls
-        String line = originalFileReader.readLine()
-        println "reading"
-        while (line != null) {
-           println "reading: $line"
-           def fixedLine = line.replaceAll(CSS_URL_PATTERN) { Object[] args ->
-               def prefix = args[1]
-               def originalUrl = args[2].trim()
-               def suffix = args[3]
-
-               return urlMapper(prefix, originalUrl, suffix)
-           }
-           println "writing $fixedLine"
-           inMemoryOutput.println(fixedLine)
-           
-           line = originalFileReader.readLine()
-        }
-        
-        inMemoryOutput.flush()
-        resource.processedFile.bytes = inMemoryStream.toByteArray()
- */
         def inputCss = origFileTempCopy.getText('UTF-8')
         def processedCss = inputCss.replaceAll(CSS_URL_PATTERN) { Object[] args ->
                def prefix = args[1]

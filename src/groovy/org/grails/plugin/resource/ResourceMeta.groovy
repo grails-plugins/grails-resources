@@ -132,8 +132,6 @@ class ResourceMeta {
     }
     
     boolean needsProcessing() {
-        println "Orig res [${sourceUrl}] lastmod: ${originalResource?.lastModified()}"
-        println "originalLastMod: ${originalLastMod}"
         !originalResource || (originalResource.lastModified() != originalLastMod)
     }
     

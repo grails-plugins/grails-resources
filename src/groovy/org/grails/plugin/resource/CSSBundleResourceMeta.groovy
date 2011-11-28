@@ -18,12 +18,10 @@ class CSSBundleResourceMeta extends AggregatedResourceMeta {
     void beginPrepare(grailsResourceProcessor) {
         initFile(grailsResourceProcessor)
         
-        println "Outputting charset"
         def out = getWriter()
         out << '@charset "UTF-8";\n'
         out.flush()
 
-        println "Outputting content"
         buildAggregateResource(grailsResourceProcessor)
     }
 }

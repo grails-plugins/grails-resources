@@ -27,7 +27,9 @@ class AggregatedResourceMetaTests extends GrailsUnitTestCase {
         mockResSvc = [
             config : [ ],
             updateDependencyOrder: { -> },
-            modulesInDependencyOrder: [module.name]
+            modulesInDependencyOrder: [module.name],
+            getMimeType: { String str -> 'text/plain' },
+            makeFileForURI: { uri -> new File(f, uri)} // @todo only works on unix sorry chaps not enough time to fix this
         ]
         
     }
@@ -56,13 +58,13 @@ class AggregatedResourceMetaTests extends GrailsUnitTestCase {
     void testUpdatesMetadata() {
         def r = new AggregatedResourceMeta()
         
-        def r1 = makeRes('aggtest/file1.css', "/* file 1 */")
-        def r2 = makeRes('aggtest/file2.css', "/* file 2 */")
+        def r1 = makeRes('/aggtest/file1.css', "/* file 1 */")
+        def r2 = makeRes('/aggtest/file2.css', "/* file 2 */")
         
         r.add(r1)
         r.add(r2)
 
-        r.processedFile = new File('./test-tmp/aggtest1.css')
+        r.sourceUrl = '/aggtest1.css'
         assertFalse r.exists()
         
         r.beginPrepare(mockResSvc)

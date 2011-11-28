@@ -10,7 +10,7 @@ import org.apache.commons.io.FilenameUtils
 import javax.servlet.ServletRequest
 import grails.util.Environment
 import org.springframework.util.AntPathMatcher
-import groovyx.gpars.GParsPool
+//import groovyx.gpars.GParsPool
 
 import grails.spring.BeanBuilder
 import org.grails.plugin.resource.mapper.ResourceMappersFactory
@@ -100,20 +100,31 @@ class ResourceProcessor implements InitializingBean {
         return n in [IMPLICIT_MODULE, SYNTHETIC_MODULE]        
     }
     
+    /**
+     * Topographic Sort ordering for a Directed Acyclic Graph of dependencies.
+     * Less scary than it seemed, but still a bit hard to read. Think about vectors and edges.
+     * Visit wikipedia.
+     */
     void updateDependencyOrder() {
         def modules = (modulesByName.collect { it.value }).findAll { !isInternalModule(it) }
-        def ordered = modules.collect { it.name }
-
-        modules.each { m ->
-            def currentIdx = ordered.indexOf(m.name)
-            m.dependsOn?.each { dm ->
-                def idx = ordered.indexOf(dm)
-                if (idx > currentIdx) {
-                    ordered.remove(m.name)
-                    ordered.add(idx, m.name)
-                    currentIdx = idx
+        def noIncomingEdges = modules.findAll { l -> !modules.any { l in it.dependsOn }  }
+        def ordered = []
+        Set visited = new HashSet()
+        
+        def visit
+        visit = { n -> 
+            if (!(n.name in visited)) {
+                visited << n.name
+                def incomingEdges = modules.findAll { mod -> mod.name in n.dependsOn }
+                for (m in incomingEdges) {
+                    visit(m)
                 }
+                ordered << n.name
             }
+        }
+
+        for (module in noIncomingEdges) {
+            visit(module)
         }
         
         ordered << IMPLICIT_MODULE
@@ -794,8 +805,10 @@ class ResourceProcessor implements InitializingBean {
         // prepare the declared resources from existing module definitions
 
         for (m in modulesInDependencyOrder) {
+            if (isInternalModule(m)) {
+                continue
+            }
             def module = modulesByName[m]
-
             // Reset them all in case this is a reload
             // @todo parallelize
             for (r in module?.resources) {
@@ -816,7 +829,6 @@ class ResourceProcessor implements InitializingBean {
 
     void dumpStats() {
         statistics.each { cat, subcats ->
-            println "Statistics for [$cat]:"
             subcats.each { sc, v ->
                 println "  ${sc} = $v"
             }
@@ -984,7 +996,7 @@ class ResourceProcessor implements InitializingBean {
         reloading = true
         try {
             log.info("Performing a module definition reload")
-
+            Thread.sleep(5000)
             resetStats()
 
             ResourceProcessorBatch reloadBatch = new ResourceProcessorBatch()

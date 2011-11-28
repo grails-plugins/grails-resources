@@ -13,6 +13,8 @@ import java.util.concurrent.ScheduledFuture
 
 import org.springframework.util.AntPathMatcher
 
+import grails.plugin.webxml.FilterManager
+
 /**
  * @author Marc Palmer (marc@grailsrocks.com)
  * @author Luke Daley (ld@ldaley.com)
@@ -62,6 +64,12 @@ class ResourcesGrailsPlugin {
     def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPRESOURCES" ]
     def scm = [ url: "https://github.com/grails-plugins/grails-resources" ]
     
+    def webXmlFilterOrder = [
+       DeclaredResourcesPluginFilter: FilterManager.DEFAULT_POSITION - 300,
+       AdHocResourcesPluginFilter:    FilterManager.DEFAULT_POSITION - 250,
+       ResourcesDevModeFilter:        FilterManager.RELOAD_POSITION + 100
+    ]
+
     def getResourcesConfig(application) {
         application.config.grails.resources
     }
