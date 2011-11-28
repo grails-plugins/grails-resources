@@ -98,6 +98,10 @@ class ResourceMeta {
     
     Resource originalResource
     
+    Long originalSize
+    
+    Long processedSize
+
     File processedFile
     
     long originalLastMod
@@ -125,6 +129,12 @@ class ResourceMeta {
     
     boolean isOriginalAbsolute() {
         sourceUrl.indexOf(':/') > 0
+    }
+    
+    boolean needsProcessing() {
+        println "Orig res [${sourceUrl}] lastmod: ${originalResource?.lastModified()}"
+        println "originalLastMod: ${originalLastMod}"
+        !originalResource || (originalResource.lastModified() != originalLastMod)
     }
     
     void updateContentLength() {
@@ -155,6 +165,9 @@ class ResourceMeta {
             _resourceExists = processedFile.exists()
             if (!this.originalLastMod && _resourceExists) {
                 this.originalLastMod = processedFile.lastModified()
+            }
+            if (this.originalSize == null) {
+                this.originalSize = _resourceExists ? processedFile.length() : 0
             }
         } else if (originalResource) {
             _resourceExists = originalResource.exists()            
@@ -346,6 +359,11 @@ class ResourceMeta {
         this.@contentLength = 0
         this.@declaringResource = null
         this.@requestProcessors.clear()
+        attributes.keySet.each { k ->
+            if (k.startsWith('processed.by.')) {
+                attributes.remove(k)
+            }
+        }
     }
     
     /**

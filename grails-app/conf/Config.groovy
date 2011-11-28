@@ -12,7 +12,7 @@ log4j = {
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
 	       'org.codehaus.groovy.grails.web.pages' //  GSP
     debug   'grails.app',
-            'org.grails.plugin.resource'
+            'org.grails.plugin.resource.ResourceProcessor'
     
 }
 

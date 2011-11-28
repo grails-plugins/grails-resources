@@ -140,7 +140,10 @@ class ResourceMapper {
         } catch (MissingMethodException e) {
             if (artefact.class == e.type && e.method == "map") {
                 throw new Exception("The resource mapper '$name' does not implement the appropriate map method")
+            } else {
+                throw e
             }
+            
         }
         
         if (log.debugEnabled) {

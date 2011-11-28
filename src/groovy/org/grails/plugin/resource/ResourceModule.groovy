@@ -165,7 +165,7 @@ class ResourceModule {
     Set<String> getRequiredDispositions() {
         if (!dispositions) {
             dispositions = (resources.findAll { r -> 
-                println "Found module disposition: ${r.disposition} "
+                println "Found module disposition: ${r.disposition} for resource ${r.sourceUrl}"
                 r.disposition
             }).disposition as Set
         }

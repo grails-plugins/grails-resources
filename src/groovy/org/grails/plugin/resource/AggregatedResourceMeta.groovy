@@ -17,7 +17,19 @@ class AggregatedResourceMeta extends ResourceMeta {
     def resources = []
     def inheritedModuleDependencies = new HashSet()
 
+    void reset() {
+        super.reset()
+    }
+
+    boolean containsResource(ResourceMeta r) {
+        resources.find { r.sourceUrl == it.sourceUrl }
+    }
+    
     void add(ResourceMeta r, Closure postProcessor = null) {
+        if (containsResource(r)) {
+            return
+        }   
+        
         resources << r
         inheritedModuleDependencies << r.module
         
@@ -25,6 +37,12 @@ class AggregatedResourceMeta extends ResourceMeta {
         sourceUrl = "${sourceUrl}, ${r.sourceUrl}"
         
         r.delegateTo(this)
+
+        if (this.originalSize == null) {
+            this.originalSize = 0
+        }
+        this.originalSize += (r.originalSize ?: 0)
+        
         if (postProcessor) {
             postProcessor(this)
         }
@@ -34,14 +52,24 @@ class AggregatedResourceMeta extends ResourceMeta {
         processedFile.newWriter('UTF-8', true)
     }
 
+    protected initFile(grailsResourceProcessor) {
+        def commaPos = sourceUrl.indexOf(',') 
+        actualUrl = commaPos ? sourceUrl[0..commaPos-1] : sourceUrl
+
+        processedFile = grailsResourceProcessor.makeFileForURI(actualUrl)
+        processedFile.createNewFile()
+
+        this.contentType = grailsResourceProcessor.getMimeType(actualUrl)
+    }
+
     @Override
     void beginPrepare(grailsResourceProcessor) {
+        initFile(grailsResourceProcessor)
+
         buildAggregateResource(grailsResourceProcessor)
     }
 
     void buildAggregateResource(grailsResourceProcessor) {
-        // @todo I'm not sure we really want this here?
-        grailsResourceProcessor.updateDependencyOrder()
         def moduleOrder = grailsResourceProcessor.modulesInDependencyOrder
 
         def newestLastMod = 0

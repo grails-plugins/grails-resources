@@ -37,6 +37,15 @@ class ResourceMetaStore {
         }
     }
 
+    /**
+     * For development reloading only, evict the meta for a URI so that we can regenerate it
+     */
+    void evict(String uri) {
+        // @todo this probably creates a dev-time race condition where you get 404s
+        resourcesByURI.remove(uri)
+        latches.remove(uri)
+    }
+    
     private addResource(resource, boolean adHocResource = false) {
         def uris = new HashSet()
 

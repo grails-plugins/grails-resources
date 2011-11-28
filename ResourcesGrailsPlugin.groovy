@@ -177,7 +177,6 @@ class ResourcesGrailsPlugin {
         // Make windows filenams safe for matching
         def baseDir = new File('.', 'web-app').canonicalPath+'/'
         def fileName = file.canonicalPath.replaceAll('\\\\', '/').substring(baseDir.size())
-        println "Base dir is [$baseDir] checking for matches against [${fileName}]"
         boolean shouldProcess = !(RELOADABLE_RESOURCE_EXCLUDES.any { PATH_MATCHER.match(it, fileName ) })
         return shouldProcess
     }

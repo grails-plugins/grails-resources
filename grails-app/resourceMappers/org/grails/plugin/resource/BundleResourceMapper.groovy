@@ -45,15 +45,16 @@ class BundleResourceMapper {
             }
 
             // Find/create bundle for this extension type
-            def bundle = "/bundle-$bundleId.${resource.sourceUrlExtension}"
+            def bundlename = "bundle-$bundleId.${resource.sourceUrlExtension}"
+            def bundleURI = "/${bundlename}"
             
-            def bundleResource = grailsResourceProcessor.findSyntheticResourceForURI(bundle)
+            def bundleResource = grailsResourceProcessor.findSyntheticResourceById(bundlename)
             if (!bundleResource) {
                 // Creates a new resource and empty file
-                bundleResource = grailsResourceProcessor.newSyntheticResource(bundle, resType)
+                bundleResource = grailsResourceProcessor.newSyntheticResource(bundleURI, resType)
+                bundleResource.id = bundlename
                 bundleResource.contentType = resource.contentType
                 bundleResource.disposition = resource.disposition
-                bundleResource.processedFile.createNewFile()
             }
 
             // After we update this, the resource's linkUrl will return the url of the bundle
