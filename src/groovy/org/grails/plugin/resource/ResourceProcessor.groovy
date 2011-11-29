@@ -828,9 +828,11 @@ class ResourceProcessor implements InitializingBean {
     }
 
     void dumpStats() {
-        statistics.each { cat, subcats ->
-            subcats.each { sc, v ->
-                println "  ${sc} = $v"
+        if (log.debugEnabled) {
+            statistics.each { cat, subcats ->
+                subcats.each { sc, v ->
+                    log.debug "  ${sc} = $v"
+                }
             }
         }
     }
