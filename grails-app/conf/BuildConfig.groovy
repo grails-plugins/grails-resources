@@ -27,11 +27,10 @@ grails.project.dependency.resolution = {
 //        build 'org.codehaus.gpars:gpars:0.12'
     }
     plugins {        
-        build(":webxml:1.3") {
-            export = false
-        }
+        provided(":webxml:1.3") 
         build(":release:1.0.0.RC3") {
             export = false
         }
     }
 }
+resproc
