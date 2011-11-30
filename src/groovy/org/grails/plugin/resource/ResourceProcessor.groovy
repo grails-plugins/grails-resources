@@ -794,7 +794,7 @@ class ResourceProcessor implements InitializingBean {
     private resourcesChanged(ResourceProcessorBatch batch) {
         prepareResourceBatch(batch)
 
-        resolveResourceDependencies()
+        resolveSyntheticResourceDependencies()
     }
 
     private loadResources(ResourceProcessorBatch resBatch) {
@@ -837,7 +837,10 @@ class ResourceProcessor implements InitializingBean {
         }
     }
     
-    void resolveResourceDependencies() {
+    /**
+     *
+     */
+    void resolveSyntheticResourceDependencies() {
         // @todo:
         // 1. Go through all SYNTHETIC resources 
         // 2. Add all resources before it in the current module as deps to the resources
