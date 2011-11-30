@@ -2,6 +2,13 @@ There are various configuration options to control processing of your resources.
 
 All of these config variables can of course be set per-environment.
 
+h2. Setting the location of processed static resources
+
+By default the plugin writes processed resources to a temporary directory.
+
+You can change this to a directory that exists in a reliable location and hence can be used to server resources via e.g. Apache,
+by assigning a full filesystem path value to *grails.resources.work.dir*
+
 h2. Change the /static/ URI prefix: grails.resources.uri.prefix
 
 By default the plugin serves the modified static resources from URIs beginning with <appcontext>/static/.
