@@ -267,7 +267,7 @@ class ResourceTagLib {
         
         def trk = request.resourceModuleTracker
         if (!trk) {
-            declareModuleRequiredByPage(ResourceProcessor.IMPLICIT_MODULE, false)
+            declareModuleRequiredByPage(ResourceProcessor.ADHOC_MODULE, false)
         }
         
         def mandatory = attrs.strict == null ? true : attrs.strict.toString() != 'false'
@@ -372,11 +372,14 @@ class ResourceTagLib {
         if (log.debugEnabled) {
             log.debug "Rendering resources, modules in tracker: ${trk}"
         }
+        
+        // @todo cache this, expensive and invariant except after reloads
         def modulesNeeded = trk ? grailsResourceProcessor.getAllModuleNamesRequired(trk) : []
         if (log.debugEnabled) {
             log.debug "Rendering resources, modules needed: ${modulesNeeded}"
         }
-
+        
+        // @todo Cache results of this because it is reasonably expensive per request
         def modulesInOrder = grailsResourceProcessor.getModulesInDependencyOrder(modulesNeeded)
         if (log.debugEnabled) {
             log.debug "Rendering non-deferred resources, modules: ${modulesInOrder}..."
@@ -423,7 +426,7 @@ class ResourceTagLib {
     protected getModuleByName(name) {
         def module = grailsResourceProcessor.getModule(name)
         if (!module) {
-            if (name != ResourceProcessor.IMPLICIT_MODULE) {
+            if (name != ResourceProcessor.ADHOC_MODULE) {
                 throw new IllegalArgumentException("No module found with name [$name]")
             }
         }
@@ -465,7 +468,7 @@ class ResourceTagLib {
             if (log.debugEnabled) {
                 log.debug "Resource: ${r.sourceUrl} - disposition ${r.disposition} - rendering disposition ${renderingDisposition}"
             }
-            if (r.disposition == renderingDisposition) {
+            if (!r.delegating && (r.disposition == renderingDisposition)) {
                 def args = [:]
                 // args.uri needs to be the source uri used to identify the resource locally
                 args.uri = debugMode ? r.originalUrl : "${r.actualUrl}"

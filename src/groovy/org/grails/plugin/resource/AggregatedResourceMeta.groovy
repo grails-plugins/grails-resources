@@ -15,7 +15,6 @@ class AggregatedResourceMeta extends ResourceMeta {
     def log = LogFactory.getLog(this.class)
 
     def resources = []
-    def inheritedModuleDependencies = new HashSet()
 
     void reset() {
         super.reset()
@@ -31,10 +30,11 @@ class AggregatedResourceMeta extends ResourceMeta {
         }   
         
         resources << r
-        inheritedModuleDependencies << r.module
         
         // Update our aggregated sourceUrl
         sourceUrl = "${sourceUrl}, ${r.sourceUrl}"
+        // Update our deps
+        module.dependsOn.addAll( r.module.dependsOn - module.name )
         
         r.delegateTo(this)
 

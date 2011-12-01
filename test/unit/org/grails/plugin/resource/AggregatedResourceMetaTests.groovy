@@ -57,6 +57,7 @@ class AggregatedResourceMetaTests extends GrailsUnitTestCase {
      */
     void testUpdatesMetadata() {
         def r = new AggregatedResourceMeta()
+        r.module = new ResourceModule(name:'synth1')
         
         def r1 = makeRes('/aggtest/file1.css', "/* file 1 */")
         def r2 = makeRes('/aggtest/file2.css', "/* file 2 */")

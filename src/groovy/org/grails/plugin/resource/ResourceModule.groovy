@@ -15,7 +15,7 @@ class ResourceModule {
     
     List<ResourceMeta> resources = new CopyOnWriteArrayList<ResourceMeta>()
 
-    List<String> dependsOn = []
+    HashSet<String> dependsOn = []
     def defaultBundle
     
     def pluginManager

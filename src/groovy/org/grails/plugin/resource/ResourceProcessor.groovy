@@ -42,8 +42,8 @@ class ResourceProcessor implements InitializingBean {
     def log = LogFactory.getLog(ResourceProcessor)
 
     static final PATH_MATCHER = new AntPathMatcher()
-    static IMPLICIT_MODULE = "__@adhoc-files@__"
-    static SYNTHETIC_MODULE = "__@synthetic-files@__"
+    static ADHOC_MODULE = "__@adhoc-files@__"
+    static SYNTHETIC_MODULE_PREFIX = "__@synthetic-files@__"
     static REQ_ATTR_DEBUGGING = 'resources.debug'
     static REQ_ATTR_DISPOSITIONS_REMAINING = 'resources.dispositions.remaining'
     static REQ_ATTR_DISPOSITIONS_DONE = "resources.dispositions.done"
@@ -97,38 +97,41 @@ class ResourceProcessor implements InitializingBean {
     
     boolean isInternalModule(def moduleOrName) {
         def n = moduleOrName instanceof ResourceModule ? moduleOrName.name : moduleOrName
-        return n in [IMPLICIT_MODULE, SYNTHETIC_MODULE]        
+        return n == ADHOC_MODULE || n.startsWith(SYNTHETIC_MODULE_PREFIX)
     }
     
     /**
-     * Topographic Sort ordering for a Directed Acyclic Graph of dependencies.
+     * Topological Sort ordering for a Directed Acyclic Graph of dependencies.
      * Less scary than it seemed, but still a bit hard to read. Think about vectors and edges.
      * Visit wikipedia.
      */
     void updateDependencyOrder() {
-        def modules = (modulesByName.collect { it.value }).findAll { !isInternalModule(it) }
+        def modules = (modulesByName.collect { it.value }).findAll { it != ADHOC_MODULE }
         def noIncomingEdges = modules.findAll { l -> !modules.any { l in it.dependsOn }  }
         def ordered = []
         Set visited = new HashSet()
         
         def visit
-        visit = { n -> 
+        visit = { n, Set visitedOnCallStack -> 
+            if (n.name in visitedOnCallStack) {
+                throw new IllegalArgumentException("Cyclic module dependency on ${n.name}. This module depends on ${n.dependsOn}")
+            }
+            visitedOnCallStack << n.name
             if (!(n.name in visited)) {
                 visited << n.name
                 def incomingEdges = modules.findAll { mod -> mod.name in n.dependsOn }
                 for (m in incomingEdges) {
-                    visit(m)
+                    visit(m, visitedOnCallStack.clone())
                 }
                 ordered << n.name
             }
         }
 
         for (module in noIncomingEdges) {
-            visit(module)
+            visit(module, [] as Set)
         }
         
-        ordered << IMPLICIT_MODULE
-        ordered << SYNTHETIC_MODULE 
+        ordered << ADHOC_MODULE
         
         modulesInDependencyOrder = ordered
     }
@@ -328,7 +331,7 @@ class ResourceProcessor implements InitializingBean {
     }
     
     ResourceMeta findSyntheticResourceById(bundleId) {
-        def mod = modulesByName[SYNTHETIC_MODULE]
+        def mod = modulesByName[SYNTHETIC_MODULE_PREFIX+bundleId]
         if (mod) {
             return mod.resources.find { r -> r.id == bundleId }
         } else {
@@ -336,12 +339,12 @@ class ResourceProcessor implements InitializingBean {
         }
     }
     
-    ResourceMeta newSyntheticResource(String uri, Class<ResourceMeta> type) {
+    ResourceMeta newSyntheticResource(String bundleId, Class<ResourceMeta> type) {
         if (log.debugEnabled) {
-            log.debug "Creating synthetic resource of type ${type} for URI [${uri}]"
+            log.debug "Creating synthetic resource of type ${type} for URI [${bundleId}]"
         }
-        def synthModule = getOrCreateSyntheticOrImplicitModule(true)
-        def agg = synthModule.addNewSyntheticResource(type, uri, this)
+        def synthModule = getOrCreateModule(SYNTHETIC_MODULE_PREFIX+bundleId)
+        def agg = synthModule.addNewSyntheticResource(type, '/'+bundleId, this)
         
         if (log.debugEnabled) {
             log.debug "synthetic module resources: ${synthModule.resources}"
@@ -350,20 +353,17 @@ class ResourceProcessor implements InitializingBean {
         return agg
     }
     
-    ResourceModule getOrCreateSyntheticOrImplicitModule(boolean synthetic) {
+    ResourceModule getOrCreateModule(String name) {
         def mod
-        def moduleName = synthetic ? SYNTHETIC_MODULE : IMPLICIT_MODULE
         // We often get multiple simultaneous requests at startup and this causes
         // multiple creates and loss of concurrently processed resources
-        synchronized (moduleName) {
-            mod = getModule(moduleName)
-            if (!mod) {
-                if (log.debugEnabled) {
-                    log.debug "Creating module: $moduleName"
-                }
-                defineModule(moduleName)
-                mod = getModule(moduleName)
+        mod = getModule(name)
+        if (!mod) {
+            if (log.debugEnabled) {
+                log.debug "Creating module: $name"
             }
+            defineModule(name)
+            mod = getModule(name)
         }
         return mod
     }
@@ -398,7 +398,7 @@ class ResourceProcessor implements InitializingBean {
             
             // If we don't already have it, its either not been declared in the DSL or its Synthetic and its
             // not already been retrieved
-            def mod = getOrCreateSyntheticOrImplicitModule(false)
+            def mod = getOrCreateModule(ADHOC_MODULE)
     
             // Need to create ad-hoc resource, its not synthetic
             if (log.debugEnabled) {
@@ -694,8 +694,12 @@ class ResourceProcessor implements InitializingBean {
         }
 
         // These are bi-products of resource processing so need to go
-        modulesByName.remove(SYNTHETIC_MODULE)
-        modulesByName.remove(IMPLICIT_MODULE)
+        for (k in modulesByName.keySet()) {
+            if (l.startsWith(SYNTHETIC_MODULE_PREFIX)) {
+                modulesByName.remove(k)
+            }
+        }
+        modulesByName.remove(ADHOC_MODULE)
 
         // This is cached data
         allResourcesByOriginalSourceURI.clear()
@@ -786,15 +790,14 @@ class ResourceProcessor implements InitializingBean {
         
         modules.each { m -> defineModuleFromBuilder(m, batch) }
         
-        updateDependencyOrder()
-        
         resourcesChanged(batch)
     }
     
     private resourcesChanged(ResourceProcessorBatch batch) {
         prepareResourceBatch(batch)
 
-        resolveSyntheticResourceDependencies()
+        // Do this here because dep order depends on synthetic modules created by bundles
+        updateDependencyOrder()        
     }
 
     private loadResources(ResourceProcessorBatch resBatch) {
@@ -836,19 +839,7 @@ class ResourceProcessor implements InitializingBean {
             }
         }
     }
-    
-    /**
-     *
-     */
-    void resolveSyntheticResourceDependencies() {
-        // @todo:
-        // 1. Go through all SYNTHETIC resources 
-        // 2. Add all resources before it in the current module as deps to the resources
-        // 3. Iterate over module deps of resource's owning module, in module dep order
-        // 4. Add all their resources as deps, before existing deps
-        // 5. Repeat 2-4 for all resources on all declared modules, in module dep order (bottom up)
-    }
-    
+
     static removeQueryParams(uri) {
         def qidx = uri.indexOf('?')
         qidx > 0 ? uri[0..qidx-1] : uri
@@ -1052,32 +1043,47 @@ class ResourceProcessor implements InitializingBean {
     void resetStats() {
         statistics.clear()
     }
+
+    def gatherDependenciesOfModules(moduleNameList, Set<String> results = []) {
+        println "Gather deps of modules ${moduleNameList}, adding to results: ${results}"
+        for (m in moduleNameList) {
+            println "Trying $m"
+            def module = getModule(m)
+            if (module) {
+                println "Adding $m to results"
+                results << m
+
+                if (module.dependsOn) {
+                    def newNames = module.dependsOn - results
+                    println "Adding dependencies ${newNames} to results"
+                    if (newNames) {
+                        gatherDependenciesOfModules(newNames, results)
+                    }
+                }
+            
+            } else {
+                throw new IllegalArgumentException("No module found with name [${m}]")
+            }
+        }
+        println "Returning results: $results"
+        return results
+    }
     
     /**
      * Return a list of all the names of all modules required (included the input modules) to 
      * satisfy the dependencies of the input list of module names.
      */
     def getAllModuleNamesRequired(moduleNameList) {
-        def result = []
-
-        for (m in moduleNameList) {
-            def module = getModule(m)
-            if (module) {
-                if (module.dependsOn) {
-                    result.addAll(getAllModuleNamesRequired(module.dependsOn))
-                }
-                result << m
-            } else {
-                throw new IllegalArgumentException("No module found with name [${m}]")
-            }
-        }
-        
-        return result
+        HashSet result = [] + moduleNameList
+        gatherDependenciesOfModules(moduleNameList, result)
+        return result as List
     }
     
     /**
      * Return a list of all the names of all modules required (included the input modules) to 
      * satisfy the dependencies of the input list of module names.
+     *
+     * This checks only those that are absolutely required, i.e. skips ADHOC
      */
     def getAllModuleNamesRequired(Map <String, Boolean> moduleNamesAndMandatory) {
         def result = []
@@ -1094,7 +1100,7 @@ class ResourceProcessor implements InitializingBean {
                     }
                 }
                 result << m.key
-            } else if (m.value && m.key != ResourceProcessor.IMPLICIT_MODULE) {
+            } else if (m.value && m.key != ResourceProcessor.ADHOC_MODULE) {
                 throw new IllegalArgumentException("No module found with name [${m.key}]")
             }
         }

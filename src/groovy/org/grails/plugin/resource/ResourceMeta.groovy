@@ -123,8 +123,10 @@ class ResourceMeta {
     
     Integer originalContentLength = 0
 
-    void delegateTo(ResourceMeta target) {
+    void delegateTo(AggregatedResourceMeta target) {
         delegate = target
+        // Add the synthetic resource's module so this depend on it correctly now
+        module.addModuleDependency(target.module.name)
     }
     
     boolean isOriginalAbsolute() {

@@ -174,7 +174,7 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
 
         println "Dependency order: ${res}"
         
-        assertEquals res.size()-2, svc.modulesByName.keySet().size() // take off the synth + adhoc
+        assertEquals res.size()-1, svc.modulesByName.keySet().size() // take off the synth + adhoc
         
         assertTrue pos('a') > pos('b')
 
@@ -189,6 +189,44 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
         assertTrue pos('d') > pos('c')
 
         assertTrue pos('f') > pos('d')
+    }
+
+    void testDependencyOrderingDetectsCircularRefs() {
+        svc.modulesByName = [
+            a: [name:'a', dependsOn:['b']],
+            e: [name:'e', dependsOn:['f', 'a']],
+            b: [name:'b', dependsOn:['c']],
+            c: [name:'c', dependsOn:['e']],
+            f: [name:'f', dependsOn:['d']],
+            d: [name:'d', dependsOn:[]]
+        ]
+        shouldFail(IllegalArgumentException) {
+            svc.updateDependencyOrder()
+            def res = svc.modulesInDependencyOrder
+            println "Dependency order: ${res}"
+        }
+    }
+
+    void testGetAllModuleNamesRequired() {
+        svc.modulesByName = [
+            jquery: [name:'jquery', dependsOn:[]],
+            jqueryui: [name:'jqueryui', dependsOn:['jquery','bundle-1']],
+            blueprint: [name:'blueprint', dependsOn:['bundle-1']],
+            app: [name:'app', dependsOn:['bundle-1', 'jqueryui', 'blueprint']],
+            common: [name:'common', dependsOn:['bundle-1']],
+            'bundle-1': [name:'bundle-1', dependsOn:['jquery']]
+        ]
+        def res = svc.getAllModuleNamesRequired(['app', 'common'])
+
+        def has = { v -> res.indexOf(v) > -1 }
+        
+        assertTrue has('jquery')
+        assertTrue has('jqueryui')
+        assertTrue has('blueprint')
+        assertTrue has('app')
+        assertTrue has('common')
+        assertTrue has('bundle-1')
+        
     }
 }
 

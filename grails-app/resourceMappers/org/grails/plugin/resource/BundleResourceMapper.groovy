@@ -46,12 +46,11 @@ class BundleResourceMapper {
 
             // Find/create bundle for this extension type
             def bundlename = "bundle-$bundleId.${resource.sourceUrlExtension}"
-            def bundleURI = "/${bundlename}"
             
             def bundleResource = grailsResourceProcessor.findSyntheticResourceById(bundlename)
             if (!bundleResource) {
                 // Creates a new resource and empty file
-                bundleResource = grailsResourceProcessor.newSyntheticResource(bundleURI, resType)
+                bundleResource = grailsResourceProcessor.newSyntheticResource(bundlename, resType)
                 bundleResource.id = bundlename
                 bundleResource.contentType = resource.contentType
                 bundleResource.disposition = resource.disposition

@@ -250,8 +250,8 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         assertEquals true, tracker.thingOne
         assertTrue tracker.containsKey('thingTwo')
         assertEquals true, tracker.thingOne
-        assertTrue tracker.containsKey(ResourceProcessor.IMPLICIT_MODULE)
-        assertEquals false, tracker[ResourceProcessor.IMPLICIT_MODULE]
+        assertTrue tracker.containsKey(ResourceProcessor.ADHOC_MODULE)
+        assertEquals false, tracker[ResourceProcessor.ADHOC_MODULE]
     }
     
     def testRequireIndicatesModuleNotMandatory() {
@@ -268,7 +268,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         assertEquals false, tracker.thingOne
         assertTrue tracker.containsKey('thingTwo')
         assertEquals false, tracker.thingTwo
-        assertTrue tracker.containsKey(ResourceProcessor.IMPLICIT_MODULE)
-        assertEquals false, tracker[ResourceProcessor.IMPLICIT_MODULE]
+        assertTrue tracker.containsKey(ResourceProcessor.ADHOC_MODULE)
+        assertEquals false, tracker[ResourceProcessor.ADHOC_MODULE]
     }
 }
