@@ -33,4 +33,3 @@ grails.project.dependency.resolution = {
         }
     }
 }
-resproc
