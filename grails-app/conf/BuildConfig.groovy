@@ -28,6 +28,9 @@ grails.project.dependency.resolution = {
     }
     plugins {        
         provided(":webxml:1.3.1") 
+        build(":tomcat:$grailsVersion") {
+            export = false
+        }
         build(":release:1.0.0.RC3") {
             export = false
         }
