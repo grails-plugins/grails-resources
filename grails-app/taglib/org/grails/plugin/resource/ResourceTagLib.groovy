@@ -560,7 +560,10 @@ class ResourceTagLib {
 
         def baseUrl = '' // @todo get from config
         if (linkUrl.contains('://') || baseUrl) {
-            // @todo do we need to toggle http/https here based on current request protocol?
+            if (!linkUrl.startsWith(request.scheme + "://") && linkUrl.contains('://') ) {
+              linkUrl = request.scheme + linkUrl.substring(linkUrl.indexOf(':'))
+            } // @todo ignore baseUrl for the time being as we are not getting it as above
+            
             return [uri:baseUrl ? baseUrl+linkUrl : linkUrl, resource:res]
         } else {
             // Only apply static prefix if the resource actually has ResourceMeta created for it
