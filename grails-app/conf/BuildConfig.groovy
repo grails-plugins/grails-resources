@@ -27,7 +27,7 @@ grails.project.dependency.resolution = {
 //        build 'org.codehaus.gpars:gpars:0.12'
     }
     plugins {        
-        provided(":webxml:1.3.1") 
+        provided(":webxml:1.4.1") 
         build(":tomcat:$grailsVersion") {
             export = false
         }
