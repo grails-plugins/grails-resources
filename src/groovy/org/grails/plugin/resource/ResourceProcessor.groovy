@@ -805,18 +805,14 @@ class ResourceProcessor implements InitializingBean {
         // prepare the declared resources from existing module definitions
 
         for (m in modulesInDependencyOrder) {
-            if (isInternalModule(m)) {
-                continue
-            }
             def module = modulesByName[m]
             // Reset them all in case this is a reload
-            // @todo parallelize
             for (r in module?.resources) {
                 if (log.debugEnabled) {
                     log.debug "Does resource [${r.sourceUrl}] need processing? ${r.needsProcessing()}"
                 }
         
-                if (r.needsProcessing()) {
+                if (!r.delegating && r.needsProcessing()) {
                     r.reset() 
                     resourceInfo.evict(r.sourceUrl)
                     resBatch.add(r)

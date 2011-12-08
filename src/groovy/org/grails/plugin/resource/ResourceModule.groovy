@@ -18,6 +18,7 @@ class ResourceModule {
     List<String> dependsOn = []
     def defaultBundle
     
+    
     def pluginManager
     
     private HashSet<String> dispositions
