@@ -198,8 +198,8 @@ class ResourcesGrailsPlugin {
             try {
                 reloader()
             } catch (Throwable t) {
-                println "Resource reload failed!"
-                t.printStackTrace()
+                println "Resource reload failed!:"
+                t.printStackTrace(System.out)
             }
         }, RELOAD_THROTTLE_DELAY, TimeUnit.MILLISECONDS)
     }
