@@ -16,7 +16,7 @@ class AggregatedResourceMeta extends ResourceMeta {
 
     def resources = []
     def inheritedModuleDependencies = new HashSet()
-
+    
     void reset() {
         super.reset()
     }
@@ -25,24 +25,22 @@ class AggregatedResourceMeta extends ResourceMeta {
         resources.find { r.sourceUrl == it.sourceUrl }
     }
     
+    @Override
+    boolean isDirty() {
+        resources.any { it.dirty }
+    }
+
     void add(ResourceMeta r, Closure postProcessor = null) {
-        if (containsResource(r)) {
-            return
-        }   
-        
-        resources << r
-        inheritedModuleDependencies << r.module
-        
-        // Update our aggregated sourceUrl
-        sourceUrl = "${sourceUrl}, ${r.sourceUrl}"
-        
         r.delegateTo(this)
 
-        if (this.originalSize == null) {
-            this.originalSize = 0
-        }
-        this.originalSize += (r.originalSize ?: 0)
+        if (!containsResource(r)) {
+            resources << r
+            inheritedModuleDependencies << r.module
         
+            // Update our aggregated sourceUrl
+            sourceUrl = "${sourceUrl}, ${r.sourceUrl}"
+        }
+
         if (postProcessor) {
             postProcessor(this)
         }
@@ -69,6 +67,8 @@ class AggregatedResourceMeta extends ResourceMeta {
     void beginPrepare(grailsResourceProcessor) {
         initFile(grailsResourceProcessor)
 
+        this.originalSize = resources.originalSize.sum()
+        
         buildAggregateResource(grailsResourceProcessor)
     }
 

@@ -18,6 +18,8 @@ import org.grails.plugin.resource.mapper.ResourceMapper
  */
 class ResourceMeta {
 
+    static final PROCESSED_BY_PREFIX = 'processed.by.'
+    
     def log = LoggerFactory.getLogger(ResourceMeta)
 
     /**
@@ -94,7 +96,7 @@ class ResourceMeta {
     /**
      * The delegate to actually use when linking, if any. Think bundling.
      */
-    ResourceMeta delegate
+    private ResourceMeta delegate
     
     Resource originalResource
     
@@ -111,6 +113,8 @@ class ResourceMeta {
     
     private String _linkUrl
     
+    private boolean processed
+    
     private Boolean _resourceExists
     
     /**
@@ -125,14 +129,22 @@ class ResourceMeta {
 
     void delegateTo(ResourceMeta target) {
         delegate = target
+        
+        // No more processing to be done on us
+        processed = true
     }
     
     boolean isOriginalAbsolute() {
         sourceUrl.indexOf(':/') > 0
     }
     
+    boolean isDirty() {
+        !originalResource || 
+        (originalResource.lastModified() != originalLastMod)
+    }
+    
     boolean needsProcessing() {
-        !originalResource || (originalResource.lastModified() != originalLastMod)
+        processed
     }
     
     void updateContentLength() {
@@ -251,6 +263,7 @@ class ResourceMeta {
         }
         updateContentLength()
         updateExists()
+        processed = true
     }
     
     boolean isDelegating() {
@@ -340,9 +353,14 @@ class ResourceMeta {
         return sourceUrlParamsAndFragment ? url + sourceUrlParamsAndFragment : url
     }
     
+    ResourceMeta getDelegate() {
+        delegate
+    }
+    
     /**
      * Reset the resource state to how it was after loading from the module definition
      * i.e. keep only declared info, nothing generated later during processing
+     * // @todo should we delete the file in here?
      */
     void reset() {
         this.@contentType = null
@@ -357,11 +375,8 @@ class ResourceMeta {
         this.@contentLength = 0
         this.@declaringResource = null
         this.@requestProcessors.clear()
-        attributes.keySet.each { k ->
-            if (k.startsWith('processed.by.')) {
-                attributes.remove(k)
-            }
-        }
+        this.@processed = false
+        attributes.entrySet().removeAll { it.key.startsWith(PROCESSED_BY_PREFIX) }
     }
     
     /**
@@ -421,7 +436,7 @@ class ResourceMeta {
     }
     
     void wasProcessedByMapper(ResourceMapper mapper, boolean processed = true) {
-        attributes["processed.by.${mapper.name}".toString()] = processed
+        attributes[PROCESSED_BY_PREFIX+mapper.name] = processed
     }
     
     String toString() {

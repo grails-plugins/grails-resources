@@ -619,12 +619,16 @@ class ResourceProcessor implements InitializingBean {
         
         def affectedSynthetics = []
         batch.each { r ->
+            r.reset() 
+            resourceInfo.evict(r.sourceUrl)
+
             prepareSingleDeclaredResource(r) {
                 def u = r.sourceUrl
                 allResourcesByOriginalSourceURI[u] = r
             }
+
             if (r.delegating) {
-                if (!(affectedSynthetics.find { it.id == r.delegate.id })) {
+                if (!(affectedSynthetics.find { it == r.delegate })) {
                     affectedSynthetics << r.delegate
                 }
             }
@@ -635,7 +639,12 @@ class ResourceProcessor implements InitializingBean {
             log.debug "Preparing synthetic resources"
         }
         for (r in affectedSynthetics) {
+            if (log.debugEnabled) {
+                log.debug "Preparing synthetic resource: ${r.sourceUrl}"
+            }
+            
             r.reset()
+            resourceInfo.evict(r.sourceUrl)
             
             prepareSingleDeclaredResource(r) {
                 def u = r.sourceUrl
@@ -797,29 +806,36 @@ class ResourceProcessor implements InitializingBean {
         resolveSyntheticResourceDependencies()
     }
 
+    private collectResourcesThatNeedProcessing(module, batch) {
+        // Reset them all in case this is a reload
+        for (r in module?.resources) {
+            if (log.debugEnabled) {
+                log.debug "Has resource [${r.sourceUrl}] changed? ${r.dirty}"
+            }
+    
+            if (r.dirty) {
+                batch.add(r)
+            }
+        }
+    }
+
     private loadResources(ResourceProcessorBatch resBatch) {
         if (log.infoEnabled) {
             log.info "Loading declared resources..."
         }
                 
-        // prepare the declared resources from existing module definitions
-
+        // Check for any declared or ad hoc resources that need processing
         for (m in modulesInDependencyOrder) {
-            def module = modulesByName[m]
-            // Reset them all in case this is a reload
-            for (r in module?.resources) {
-                if (log.debugEnabled) {
-                    log.debug "Does resource [${r.sourceUrl}] need processing? ${r.needsProcessing()}"
-                }
-        
-                if (!r.delegating && r.needsProcessing()) {
-                    r.reset() 
-                    resourceInfo.evict(r.sourceUrl)
-                    resBatch.add(r)
-                }
+            if (m != SYNTHETIC_MODULE) {
+                def module = modulesByName[m]
+                collectResourcesThatNeedProcessing(module, resBatch)
             }
         }
-        
+/* @todo add this later when we understand what less-css-resources needs
+        // Now do the derived synthetic resources as we know any changed components
+        // have now been reset
+        collectResourcesThatNeedProcessing(modulesByName[SYNTHETIC_MODULE], resBatch)
+    */
         resourcesChanged(resBatch)
     }
 
