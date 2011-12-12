@@ -56,8 +56,8 @@ You can control the list of matching resources on a per-mapper basis. Mappers pr
 So for example to add .less files to processing by the CSS rewriters (necessary for correct behaviour with bundle mapper):
 
 {code:java}
-grails.resources.cssrewriter.includes = ['**/*.css', '**/*.less']
-grails.resources.csspreprocessor.includes = ['**/*.css', '**/*.less']
+grails.resources.mappers.cssrewriter.includes = ['**/*.css', '**/*.less']
+grails.resources.mappers.csspreprocessor.includes = ['**/*.css', '**/*.less']
 {code}
 
 You can also use this to ensure that only resources under a specific folder are processed.
@@ -69,9 +69,9 @@ h2. Excluding specific resource patterns per-mapper:grails.resources.<mappername
 There may be times when a mapper is processing too many files - those that may have already been processed or that may become damaged by the mapping (i.e. incompatibilities due to relative code loading by JS code). Simply add the resource names or patterns to that mapper's excludes:
 
 {code:java}
-grails.resources.cssrewriter.excludes = ['unsafe/**']
-grails.resources.csspreprocessor.excludes = ['unsafe/**']
-grails.resources.bundle.excludes = ['unsafe/**/*.css']
+grails.resources.mappers.cssrewriter.excludes = ['unsafe/**']
+grails.resources.mappers.csspreprocessor.excludes = ['unsafe/**']
+grails.resources.mappers.bundle.excludes = ['unsafe/**/*.css']
 {code}
  
 Note that the value you provide *replaces* the default list supplied by the mapper.
