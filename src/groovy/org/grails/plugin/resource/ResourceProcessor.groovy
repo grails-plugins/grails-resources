@@ -382,13 +382,6 @@ class ResourceProcessor implements InitializingBean {
         // Declared resources will already exist, but ad-hoc or synthetic may need to be created
         def res = resourceInfo.getOrCreateAdHocResource(uri) { -> 
 
-            if (!createAdHocResourceIfNeeded) {
-                if (log.warnEnabled) {
-                    log.warn("We can't create resources on the fly unless they are 'ad-hoc', we're going to 404. Resource URI: $uri")
-                }
-                return null
-            }
-            
             if (!canProcessLegacyResource(uri)) {
                 if (log.debugEnabled) {
                     log.debug("Skipping ad-hoc resource $uri as it is excluded")
