@@ -69,6 +69,7 @@ class ResourceMetaTests extends GrailsUnitTestCase {
             // Expected, base, target
             ["../images/logo.png", '/css/main.css', '/images/logo.png'],
             ["../logo.png", '/css/main.css', '/logo.png'],
+            [ 'images/ui-bg_fine-grain_10_eceadf_60x60.png', '/css/xx/jquery-ui-1.8.16.custom.css', "/css/xx/images/ui-bg_fine-grain_10_eceadf_60x60.png"],
             ["_yyyyyy.png", '/_xxxxxx.css', '/_yyyyyy.png'],
             ["notgonnahappen/_yyyyyy.png", '/_xxxxxx.css', '/notgonnahappen/_yyyyyy.png'],
             ["../notgonnahappen/really/_yyyyyy.png", '/css/_xxxxxx.css', '/notgonnahappen/really/_yyyyyy.png'],
