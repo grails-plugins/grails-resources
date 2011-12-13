@@ -1,12 +1,127 @@
-<html>
-    <head>
-        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
-        <title>4. Using resources</title>
-        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
-    </head>
-    <body class="body">
-    <h1><a name="4. Using resources">4. Using resources</a></h1>Now that you know how to declare resources, you need to use them in your page.<p class="paragraph"/>There are several tags for this purpose, but the primary means is to use the <a href="../ref/Tags/require.html" class="Tags">require</a> tag to indicate which modules you need, and the <a href="../ref/Tags/layoutResources.html" class="Tags">layoutResources</a> tag to perform the rendering of the resources.<p class="paragraph"/>The <a href="../ref/Tags/require.html" class="Tags">require</a> tag causes the framework to look up all the resources required to satisfy your module dependencies. However nothing is rendered at that point.<p class="paragraph"/>The <a href="../ref/Tags/layoutResources.html" class="Tags">layoutResources</a> tag is called to render the resources themselves (and internally it calls into <a href="../ref/Tags/external.html" class="Tags">external</a> tag for each resource). This tag has special behaviour, in that the first time you call it, it automatically renders only resources with disposition "head". The second time you call it, it automatically renders only resources with disposition "defer".
-<h2><a name="4.1 Linking to CSS, JavaScript etc.">4.1 Linking to CSS, JavaScript etc.</a></h2>So you need to add two calls to <a href="../ref/Tags/layoutResources.html" class="Tags">layoutResources</a> tag to your GSP page or sitemesh layout. Normally you will place it in your sitemesh layout:<p class="paragraph"/>Your grails-app/views/layouts/main.gsp:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>4 Using resources 1.1.5</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/1.%20Overview.html"><strong>1</strong><span>Overview</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/2.%20Concepts.html"><strong>2</strong><span>Concepts</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/3.%20Declaring%20resources.html"><strong>3</strong><span>Declaring resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/4.%20Using%20resources.html"><strong>4</strong><span>Using resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/5.%20Overriding%20resources.html"><strong>5</strong><span>Overriding resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/6.%20Creating%20custom%20mappers.html"><strong>6</strong><span>Creating custom mappers</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/7.%20Writing%20plugins%20that%20use%20Resources.html"><strong>7</strong><span>Writing plugins that use Resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/8.%20Debugging.html"><strong>8</strong><span>Debugging</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/9.%20Configuration.html"><strong>9</strong><span>Configuration</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>HTML resource management enhancements to replace g.resource etc.</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/3.%20Declaring%20resources.html">&lt;&lt; <strong>3</strong><span>Declaring resources</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/5.%20Overriding%20resources.html"><strong>5</strong><span>Overriding resources</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>4 Using resources - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Marc Palmer (marc@grailsrocks.com)</p>
+
+                    <p><strong>Version:</strong> 1.1.5</p>
+
+                    
+                </div>
+
+                
+                <div id="table-of-content">
+                    <h2>Table of Contents</h2>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#4.1%20Linking%20to%20CSS,%20JavaScript%20etc."><strong>4.1</strong><span>Linking to CSS, JavaScript etc.</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#4.2%20Linking%20to%20images"><strong>4.2</strong><span>Linking to images</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#4.3%20Linking%20to%20resources%20explicitly,%20bypassing%20modules"><strong>4.3</strong><span>Linking to resources explicitly, bypassing modules</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#4.4%20Including%20pieces%20of%20JavaScript%20code%20generated%20at%20runtime"><strong>4.4</strong><span>Including pieces of JavaScript code generated at runtime</span></a>
+                    </div>
+                    
+                </div>
+                
+
+                
+
+<h1 id="4. Using resources">4 Using resources</h1>
+Now that you know how to declare resources, you need to use them in your page.<p class="paragraph"/>There are several tags for this purpose, but the primary means is to use the <a href="../ref/Tags/require.html" class="Tags">require</a> tag to indicate which modules you need, and the <a href="../ref/Tags/layoutResources.html" class="Tags">layoutResources</a> tag to perform the rendering of the resources.<p class="paragraph"/>The <a href="../ref/Tags/require.html" class="Tags">require</a> tag causes the framework to look up all the resources required to satisfy your module dependencies. However nothing is rendered at that point.<p class="paragraph"/>The <a href="../ref/Tags/layoutResources.html" class="Tags">layoutResources</a> tag is called to render the resources themselves (and internally it calls into <a href="../ref/Tags/external.html" class="Tags">external</a> tag for each resource). This tag has special behaviour, in that the first time you call it, it automatically renders only resources with disposition "head". The second time you call it, it automatically renders only resources with disposition "defer".
+
+
+
+<h2 id="4.1 Linking to CSS, JavaScript etc.">4.1 Linking to CSS, JavaScript etc.</h2>
+So you need to add two calls to <a href="../ref/Tags/layoutResources.html" class="Tags">layoutResources</a> tag to your GSP page or sitemesh layout. Normally you will place it in your sitemesh layout:<p class="paragraph"/>Your grails-app/views/layouts/main.gsp:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
    <span class="xml&#45;tag">&#60;head&#62;</span>
       <span class="xml&#45;tag">&#60;g:layoutTitle/&#62;</span>
       <span class="xml&#45;tag">&#60;r:layoutResources/&#62;</span>
@@ -28,19 +143,31 @@
            Hello World
       <span class="xml&#45;tag">&#60;/div&#62;</span>  
    <span class="xml&#45;tag">&#60;/body&#62;</span>
-<span class="xml&#45;tag">&#60;/html&#62;</span></pre></div><p class="paragraph"/><h2><a name="4.2 Linking to images">4.2 Linking to images</a></h2>When you need to render an &#60;img&#62; tag that you wish to be subject to the Resources processing chain (e.g. to make it eternally cacheable) you should use the &#60;r:img&#62; tag:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;r:img uri=<span class="xml&#45;quote">"images/logo.png"</span> width=<span class="xml&#45;quote">"100"</span> height=<span class="xml&#45;quote">"50"</span>/&#62;</span><p class="paragraph"/><span class="xml&#45;tag">&#60;r:img dir=<span class="xml&#45;quote">"images"</span> file=<span class="xml&#45;quote">"logo.png"</span> width=<span class="xml&#45;quote">"100"</span> height=<span class="xml&#45;quote">"50"</span>/&#62;</span></pre></div><p class="paragraph"/>Usually this will produce a link to an undeclared resource. However you can declare images in modules and specify extra attributes in "attrs" to supply e.g. the width and height:<p class="paragraph"/><div class="code"><pre>modules = &#123;
+<span class="xml&#45;tag">&#60;/html&#62;</span></pre></div><p class="paragraph"/>
+
+
+<h2 id="4.2 Linking to images">4.2 Linking to images</h2>
+When you need to render an &#60;img&#62; tag that you wish to be subject to the Resources processing chain (e.g. to make it eternally cacheable) you should use the &#60;r:img&#62; tag:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;r:img uri=<span class="xml&#45;quote">"images/logo.png"</span> width=<span class="xml&#45;quote">"100"</span> height=<span class="xml&#45;quote">"50"</span>/&#62;</span><p class="paragraph"/><span class="xml&#45;tag">&#60;r:img dir=<span class="xml&#45;quote">"images"</span> file=<span class="xml&#45;quote">"logo.png"</span> width=<span class="xml&#45;quote">"100"</span> height=<span class="xml&#45;quote">"50"</span>/&#62;</span></pre></div><p class="paragraph"/>Usually this will produce a link to an undeclared resource. However you can declare images in modules and specify extra attributes in "attrs" to supply e.g. the width and height:<p class="paragraph"/><div class="code"><pre>modules = &#123;
     images &#123;
         resource url:'images/logo.png', attrs:&#91;width:100, height:50, alt:'Our logo'&#93;, disposition:'inline'
         resource url:'images/icon/add.png', attrs:&#91;width:32, height:32, alt:'Add'&#93;, disposition:'inline'
     &#125;
 &#125;</pre></div><p class="paragraph"/>Once you have done this, using &#60;r:img&#62; to reference them would automatically set the width, height and other attributes.<p class="paragraph"/>The disposition "inline" is optional - as long as you don't have any other modules that "dependOn" the images module and link using r:resource or r:img, you won't need this.
-<h2><a name="4.3 Linking to resources explicitly, bypassing modules">4.3 Linking to resources explicitly, bypassing modules</a></h2>Sometimes you may need to link to a specific resource, or produce a URL pointing to the specific resource without rendering links to all the modules it depends on - or outside of a context where you can call &#60;r:layoutResources/&#62;. You may even wish to link to an undeclared resource, but still want it to be subject to processing on the fly.<p class="paragraph"/>To link to CSS or other resources that are not declared in a module you use &#60;r:external&#62;:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;r:external uri=<span class="xml&#45;quote">"js/custom.js"</span>/&#62;</span>
+
+
+
+<h2 id="4.3 Linking to resources explicitly, bypassing modules">4.3 Linking to resources explicitly, bypassing modules</h2>
+Sometimes you may need to link to a specific resource, or produce a URL pointing to the specific resource without rendering links to all the modules it depends on - or outside of a context where you can call &#60;r:layoutResources/&#62;. You may even wish to link to an undeclared resource, but still want it to be subject to processing on the fly.<p class="paragraph"/>To link to CSS or other resources that are not declared in a module you use &#60;r:external&#62;:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;r:external uri=<span class="xml&#45;quote">"js/custom.js"</span>/&#62;</span>
 <span class="xml&#45;tag">&#60;script type=<span class="xml&#45;quote">"text/javascript"</span>&#62;</span>
     var urlOfCSSToLoadInJSCode = '$&#123;r.external(uri:<span class="xml&#45;quote">"css/custom.css"</span>).encodeAsJavaScript()';
 <span class="xml&#45;tag">&#60;/script&#62;</span>
-<span class="xml&#45;tag">&#60;r:external uri=<span class="xml&#45;quote">"icons/favicon.ico"</span>/&#62;</span></pre></div><p class="paragraph"/>This would output the &#60;script&#62; and &#60;link&#62; tags required to include those resources, without rendering their dependencies first - whether the resource is declared in a module or not. The example shows how you might pass the URL of a resource to some JavaScript code for use later at runtime.<p class="paragraph"/><h2><a name="4.4 Including pieces of JavaScript code generated at runtime">4.4 Including pieces of JavaScript code generated at runtime</a></h2>Often in an application, especially those using custom Grails tags and rich UIs, you will need to render fragments of JavaScript code while the page is being rendered. It is not always possible to know what JS code there will be in the page until the render process is finished.<p class="paragraph"/>The <a href="../ref/Tags/script.html" class="Tags">script</a> tag allows you to specify sections of JavaScript text during page rendering, but if using Sitemesh layouts, you will be able to have these fragments appear either in &#60;head&#62; or deferred to the end of the page, just like other JavaScript resources.<p class="paragraph"/>This integrates with the disposition mechanism, allowing you to throw your JavaScript into a specific location:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;r:script/&#62;</span>
+<span class="xml&#45;tag">&#60;r:external uri=<span class="xml&#45;quote">"icons/favicon.ico"</span>/&#62;</span></pre></div><p class="paragraph"/>This would output the &#60;script&#62; and &#60;link&#62; tags required to include those resources, without rendering their dependencies first - whether the resource is declared in a module or not. The example shows how you might pass the URL of a resource to some JavaScript code for use later at runtime.<p class="paragraph"/>
+
+
+<h2 id="4.4 Including pieces of JavaScript code generated at runtime">4.4 Including pieces of JavaScript code generated at runtime</h2>
+Often in an application, especially those using custom Grails tags and rich UIs, you will need to render fragments of JavaScript code while the page is being rendered. It is not always possible to know what JS code there will be in the page until the render process is finished.<p class="paragraph"/>The <a href="../ref/Tags/script.html" class="Tags">script</a> tag allows you to specify sections of JavaScript text during page rendering, but if using Sitemesh layouts, you will be able to have these fragments appear either in &#60;head&#62; or deferred to the end of the page, just like other JavaScript resources.<p class="paragraph"/>This integrates with the disposition mechanism, allowing you to throw your JavaScript into a specific location:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;r:script&#62;</span>
     window.alert('This is the end of the page!');
-<span class="xml&#45;tag">&#60;/r:script&#62;</span><p class="paragraph"/><span class="xml&#45;tag">&#60;r:script disposition='head'/&#62;</span>
+<span class="xml&#45;tag">&#60;/r:script&#62;</span><p class="paragraph"/><span class="xml&#45;tag">&#60;r:script disposition='head'&#62;</span>
     window.alert('This is the head of the page!');
 <span class="xml&#45;tag">&#60;/r:script&#62;</span></pre></div><p class="paragraph"/>What happens is the &#60;r:script&#62; tag stashes your fragment in the request attributes until &#60;r:layoutResources/&#62; is called - when it is pulled out of the attributes and rendered according to the current disposition being rendered.<p class="paragraph"/>This is ideal for other custom Grails GSP taglibs to use to write out their JS code used to e.g. set up UI elements:<p class="paragraph"/><div class="code"><pre>class MyCustomTagLib &#123;
     def datePicker = &#123;
@@ -49,5 +176,94 @@
         &#125;
     &#125;
 &#125;</pre></div><p class="paragraph"/>The order of code is preserved, and all such fragments are rendered <strong class="bold">after</strong> all the modules required by the page (in that disposition) have been included.
-    </body>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/3.%20Declaring%20resources.html">&lt;&lt; <strong>3</strong><span>Declaring resources</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/5.%20Overriding%20resources.html"><strong>5</strong><span>Overriding resources</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Mappers</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Mappers/bundle.html">bundle</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Mappers/csspreprocessor.html">csspreprocessor</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Mappers/cssrewriter.html">cssrewriter</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Resources</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Resources/getProperty.html">getProperty</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Resources/invokeMethod.html">invokeMethod</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Tags</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Tags/external.html">external</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/img.html">img</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/layoutResources.html">layoutResources</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/require.html">require</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/resource.html">resource</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/resourceLink.html">resourceLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/script.html">script</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/use.html">use</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
 </html>

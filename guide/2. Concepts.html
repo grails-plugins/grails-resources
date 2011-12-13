@@ -1,11 +1,194 @@
-<html>
-    <head>
-        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
-        <title>2. Concepts</title>
-        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
-    </head>
-    <body class="body">
-    <h1><a name="2. Concepts">2. Concepts</a></h1>There are several concepts introduced in the Resources framework with which you may not be familiar.<p class="paragraph"/>It may help you to understand the rest of the documentation if you familiarize yourself with these first.<p class="paragraph"/><h2>Resources</h2><p class="paragraph"/>By resources we mean typically static resources that are used to render your application views, or other files served to your users.<p class="paragraph"/>This includes CSS, JavaScript and usually some icons and images.<p class="paragraph"/><h2>Modules</h2><p class="paragraph"/>In the resources framework, you define resource modules that have a name and contain one or more resources. You use GSP tags to indicate which modules your pages need.<p class="paragraph"/><h2>Module dependencies</h2><p class="paragraph"/>Specifying module dependencies means that you don't have to worry about the order of resource inclusion in your pages. By telling the framework which modules require other modules, you allow it to decide the correct order.<p class="paragraph"/>Just like Grails transitive dependencies, this will pull in all the modules required if you require one module that has other dependencies.<p class="paragraph"/><h2>Mappers</h2><p class="paragraph"/>Resource mappers are Grails artefacts that participate in the processing of resources. You start with a copy of the original resource, and after applying all the necessary mappers, you have the - typically mutated - final file to serve to users.<p class="paragraph"/>Mappers can modify and/or move and rename the file.<p class="paragraph"/>The person who declares resources can choose to exclude specific mappers per-resource, to prevent double-processing of resources that have been supplied pre-processed, such as pre-minified JS libraries.<p class="paragraph"/><h2>Mapper phases</h2><p class="paragraph"/>Resource mappers are applied in a specific order, denoted by a series of well-defined phases. This ensures that the right processing happens at the right times.<p class="paragraph"/><h2>Mapper operation</h2><p class="paragraph"/>Resource mappers often have an "operation" grouping, for example Yahoo UI and Google CSS minifier mappers might both have the operation name "minify", but unique mapper names. This allows the user to exclude a whole family of mappers on a per-resource basis.<p class="paragraph"/><h2>Undeclared Resources</h2><p class="paragraph"/>Undeclared resources are those that you link to using the Resources framework tags such as <a href="../ref/Tags/require.html" class="Tags">require</a>, <a href="../ref/Tags/img.html" class="Tags">img</a> and <a href="../ref/Tags/external.html" class="Tags">external</a> (or Grails 1.4 and higher g:resource/g:img and other linking tags that are resources-aware) but you <strong class="bold">did not explicitly declare in any modules</strong>.<p class="paragraph"/><h2>Ad-hoc/Legacy Resources</h2><p class="paragraph"/>Ad-hoc resources are tags that do not use the Resources mechanisms to create their links. Prior to Grails 1.4 this means links created with g:xxx tags instead of the r:xxx tags and hardcoded links to resources. For Grails 1.4 and higher these can only occur for hardcoded links to resources.<p class="paragraph"/><h2>Bundling</h2><p class="paragraph"/>Bundling is the act of aggregating two or more resources of the same type into one file. This reduces the number of requests the browser must make to your site, thus speeding up the page load time.<p class="paragraph"/><h2>CSS Rewriting</h2><p class="paragraph"/>Rewriting CSS is the act of changing any URLs in your CSS files so that they continue to point to the correct resource even if the CSS is bundled into a new file and/or moved to a new location in the filesystem.<p class="paragraph"/>When you bundle files, or move them to reduce link URL size (as the Cached-Resources plugin does), without URL rewriting this would break the links from your bundled file to other resources.<p class="paragraph"/><h2>Disposition</h2><p class="paragraph"/>The disposition of a resource indicates where in the response you would like the link to appear. By default the "head" disposition causes links to be rendered in the &#60;head&#62; section, and "defer" disposition causes links to JavaScript to be rendered at the end of the body.
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>2 Concepts 1.1.5</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
 
-    </body>
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/1.%20Overview.html"><strong>1</strong><span>Overview</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/2.%20Concepts.html"><strong>2</strong><span>Concepts</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/3.%20Declaring%20resources.html"><strong>3</strong><span>Declaring resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/4.%20Using%20resources.html"><strong>4</strong><span>Using resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/5.%20Overriding%20resources.html"><strong>5</strong><span>Overriding resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/6.%20Creating%20custom%20mappers.html"><strong>6</strong><span>Creating custom mappers</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/7.%20Writing%20plugins%20that%20use%20Resources.html"><strong>7</strong><span>Writing plugins that use Resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/8.%20Debugging.html"><strong>8</strong><span>Debugging</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/9.%20Configuration.html"><strong>9</strong><span>Configuration</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>HTML resource management enhancements to replace g.resource etc.</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/1.%20Overview.html">&lt;&lt; <strong>1</strong><span>Overview</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/3.%20Declaring%20resources.html"><strong>3</strong><span>Declaring resources</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>2 Concepts - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Marc Palmer (marc@grailsrocks.com)</p>
+
+                    <p><strong>Version:</strong> 1.1.5</p>
+
+                    
+                </div>
+
+                
+
+                
+
+<h1 id="2. Concepts">2 Concepts</h1>
+There are several concepts introduced in the Resources framework with which you may not be familiar.<p class="paragraph"/>It may help you to understand the rest of the documentation if you familiarize yourself with these first.<p class="paragraph"/><h2>Resources</h2><p class="paragraph"/>By resources we mean typically static resources that are used to render your application views, or other files served to your users.<p class="paragraph"/>This includes CSS, JavaScript and usually some icons and images.<p class="paragraph"/><h2>Modules</h2><p class="paragraph"/>In the resources framework, you define resource modules that have a name and contain one or more resources. You use GSP tags to indicate which modules your pages need.<p class="paragraph"/><h2>Module dependencies</h2><p class="paragraph"/>Specifying module dependencies means that you don't have to worry about the order of resource inclusion in your pages. By telling the framework which modules require other modules, you allow it to decide the correct order.<p class="paragraph"/>Just like Grails transitive dependencies, this will pull in all the modules required if you require one module that has other dependencies.<p class="paragraph"/><h2>Mappers</h2><p class="paragraph"/>Resource mappers are Grails artefacts that participate in the processing of resources. You start with a copy of the original resource, and after applying all the necessary mappers, you have the - typically mutated - final file to serve to users.<p class="paragraph"/>Mappers can modify and/or move and rename the file.<p class="paragraph"/>The person who declares resources can choose to exclude specific mappers per-resource, to prevent double-processing of resources that have been supplied pre-processed, such as pre-minified JS libraries.<p class="paragraph"/><h2>Mapper phases</h2><p class="paragraph"/>Resource mappers are applied in a specific order, denoted by a series of well-defined phases. This ensures that the right processing happens at the right times.<p class="paragraph"/><h2>Mapper operation</h2><p class="paragraph"/>Resource mappers often have an "operation" grouping, for example Yahoo UI and Google CSS minifier mappers might both have the operation name "minify", but unique mapper names. This allows the user to exclude a whole family of mappers on a per-resource basis.<p class="paragraph"/><h2>Undeclared Resources</h2><p class="paragraph"/>Undeclared resources are those that you link to using the Resources framework tags such as <a href="../ref/Tags/require.html" class="Tags">require</a>, <a href="../ref/Tags/img.html" class="Tags">img</a> and <a href="../ref/Tags/external.html" class="Tags">external</a> (or Grails 1.4 and higher g:resource/g:img and other linking tags that are resources-aware) but you <strong class="bold">did not explicitly declare in any modules</strong>.<p class="paragraph"/><h2>Ad-hoc/Legacy Resources</h2><p class="paragraph"/>Ad-hoc resources are tags that do not use the Resources mechanisms to create their links. Prior to Grails 1.4 this means links created with g:xxx tags instead of the r:xxx tags and hardcoded links to resources. For Grails 1.4 and higher these can only occur for hardcoded links to resources.<p class="paragraph"/><h2>Bundling</h2><p class="paragraph"/>Bundling is the act of aggregating two or more resources of the same type into one file. This reduces the number of requests the browser must make to your site, thus speeding up the page load time.<p class="paragraph"/><h2>CSS Rewriting</h2><p class="paragraph"/>Rewriting CSS is the act of changing any URLs in your CSS files so that they continue to point to the correct resource even if the CSS is bundled into a new file and/or moved to a new location in the filesystem.<p class="paragraph"/>When you bundle files, or move them to reduce link URL size (as the Cached-Resources plugin does), without URL rewriting this would break the links from your bundled file to other resources.<p class="paragraph"/><h2>Disposition</h2><p class="paragraph"/>The disposition of a resource indicates where in the response you would like the link to appear. By default the "head" disposition causes links to be rendered in the &#60;head&#62; section, and "defer" disposition causes links to JavaScript to be rendered at the end of the body.
+
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/1.%20Overview.html">&lt;&lt; <strong>1</strong><span>Overview</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/3.%20Declaring%20resources.html"><strong>3</strong><span>Declaring resources</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Mappers</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Mappers/bundle.html">bundle</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Mappers/csspreprocessor.html">csspreprocessor</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Mappers/cssrewriter.html">cssrewriter</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Resources</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Resources/getProperty.html">getProperty</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Resources/invokeMethod.html">invokeMethod</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Tags</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Tags/external.html">external</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/img.html">img</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/layoutResources.html">layoutResources</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/require.html">require</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/resource.html">resource</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/resourceLink.html">resourceLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/script.html">script</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/use.html">use</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
 </html>

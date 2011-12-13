@@ -1,22 +1,146 @@
-<html>
-    <head>
-        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
-        <title>6. Creating custom mappers</title>
-        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
-    </head>
-    <body class="body">
-    <h1><a name="6. Creating custom mappers">6. Creating custom mappers</a></h1>The resource processing chain uses ResourceMapper artefacts to do the work.<p class="paragraph"/>You can create your own ResourceMapper artefacts inside your application or plugins to perform tasks such as;
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>6 Creating custom mappers 1.1.5</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/1.%20Overview.html"><strong>1</strong><span>Overview</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/2.%20Concepts.html"><strong>2</strong><span>Concepts</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/3.%20Declaring%20resources.html"><strong>3</strong><span>Declaring resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/4.%20Using%20resources.html"><strong>4</strong><span>Using resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/5.%20Overriding%20resources.html"><strong>5</strong><span>Overriding resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/6.%20Creating%20custom%20mappers.html"><strong>6</strong><span>Creating custom mappers</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/7.%20Writing%20plugins%20that%20use%20Resources.html"><strong>7</strong><span>Writing plugins that use Resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/8.%20Debugging.html"><strong>8</strong><span>Debugging</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/9.%20Configuration.html"><strong>9</strong><span>Configuration</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>HTML resource management enhancements to replace g.resource etc.</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/5.%20Overriding%20resources.html">&lt;&lt; <strong>5</strong><span>Overriding resources</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/7.%20Writing%20plugins%20that%20use%20Resources.html"><strong>7</strong><span>Writing plugins that use Resources</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>6 Creating custom mappers - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Marc Palmer (marc@grailsrocks.com)</p>
+
+                    <p><strong>Version:</strong> 1.1.5</p>
+
+                    
+                </div>
+
+                
+                <div id="table-of-content">
+                    <h2>Table of Contents</h2>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#6.1%20Defining%20a%20mapper"><strong>6.1</strong><span>Defining a mapper</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#6.2%20Mapper%20phases%20and%20priority"><strong>6.2</strong><span>Mapper phases and priority</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#6.3%20Operation"><strong>6.3</strong><span>Operation</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#6.4%20Processing%20only%20the%20right%20types%20of%20files"><strong>6.4</strong><span>Processing only the right types of files</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#6.5%20Adding%20response%20headers%20and%20intercepting%20requests"><strong>6.5</strong><span>Adding response headers and intercepting requests</span></a>
+                    </div>
+                    
+                </div>
+                
+
+                
+
+<h1 id="6. Creating custom mappers">6 Creating custom mappers</h1>
+The resource processing chain uses ResourceMapper artefacts to do the work.<p class="paragraph"/>You can create your own ResourceMapper artefacts inside your application or plugins to perform tasks such as;
 <ul class="star">
 <li>Moving and renaming resources</li>
 <li>Changing the contents of resource files (compress, minify, compile etc)</li>
 <li>Set HTTP response headers when requests are processed</li>
 </ul><p class="paragraph"/>Resource mappers only get the chance to map (process) each resource once - the final resource is then stored on disk to serve future requests.
-<h2><a name="6.1 Defining a mapper">6.1 Defining a mapper</a></h2>Defining a resource mapper is easy. You create a file with ResourceMapper.groovy as the file suffix, in the grails-app/resourceMappers folder.<p class="paragraph"/>The name of the mapper is extracted from the filename like any other Grails artefact, for example "TestResourceMapper" yields a mapper with name "test".<p class="paragraph"/>Example grails-app/resourceMappers/TestResourceMapper.groovy:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.MUTATION<p class="paragraph"/>    def map(resource, config) &#123;
+
+
+
+<h2 id="6.1 Defining a mapper">6.1 Defining a mapper</h2>
+Defining a resource mapper is easy. You create a file with ResourceMapper.groovy as the file suffix, in the grails-app/resourceMappers folder.<p class="paragraph"/>The name of the mapper is extracted from the filename like any other Grails artefact, for example "TestResourceMapper" yields a mapper with name "test".<p class="paragraph"/>Example grails-app/resourceMappers/TestResourceMapper.groovy:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.MUTATION<p class="paragraph"/>    def map(resource, config) &#123;
         def file = <span class="java&#45;keyword">new</span> File(resource.processedFile.parentFile, <span class="java&#45;quote">"_$&#123;resource.processedFile.name&#125;"</span>)
         assert resource.processedFile.renameTo(file)
         resource.processedFile = file
         resource.updateActualUrlFromProcessedFile()
-    &#125;<p class="paragraph"/>&#125;</pre></div><p class="paragraph"/>The only method a mapper must implement is <strong class="bold">map(resource, config)</strong> which is passed the <a href="http://github.com/grails-plugins/grails-resources/blob/master/src/groovy/org/grails/plugin/resource/ResourceMeta.groovy" target="blank">ResourceMeta</a> object that represents the resource and the mapper-specific config variables pulled out of grails.resources.&#60;mappername&#62;.<p class="paragraph"/>This method can do whatever it needs to the resource's file, provided it calls the updateActualUrlFromProcessedFile() method if the resource moves, unless you patch ResourceMeta.actualUrl manually.<p class="paragraph"/>You can change other properties of the resource, such as change the content type of the resource, add or modify tagAttributes (which are passed through when rendering the link for the resource).<p class="paragraph"/>That's all you need to do to create a mapper. The best way to learn how they work is to study the source of <a href="http://grails.org/plugin/cached-resources" target="blank">Cached-Resources</a> and <a href="http://grails.org/plugin/zipped-resources" target="blank">Zipped-Resources</a> plugins.<p class="paragraph"/><h2><a name="6.2 Mapper phases and priority">6.2 Mapper phases and priority</a></h2>The example mapper shows the "phase" property being set to MapperPhase.MUTATION. The <a href="http://github.com/grails-plugins/grails-resources/blob/master/src/groovy/org/grails/plugin/resource/mapper/MapperPhase.groovy" target="blank">MapperPhase</a> enumeration provides the possible mapping phases in the order in which they occur during processing of resources:<p class="paragraph"/><div class="code"><pre>enum MapperPhase &#123;
+    &#125;<p class="paragraph"/>&#125;</pre></div><p class="paragraph"/>The only method a mapper must implement is <strong class="bold">map(resource, config)</strong> which is passed the <a href="http://github.com/grails-plugins/grails-resources/blob/master/src/groovy/org/grails/plugin/resource/ResourceMeta.groovy" target="blank">ResourceMeta</a> object that represents the resource and the mapper-specific config variables pulled out of <code>grails.resources.mappers.&#60;mappername&#62;</code>.
+NOTE: The name of the mapper is always in all lower case.<p class="paragraph"/>This method can do whatever it needs to the resource's file, provided it calls the updateActualUrlFromProcessedFile() method if the resource moves, unless you patch ResourceMeta.actualUrl manually.<p class="paragraph"/>You can change other properties of the resource, such as change the content type of the resource, add or modify tagAttributes (which are passed through when rendering the link for the resource).<p class="paragraph"/>That's all you need to do to create a mapper. The best way to learn how they work is to study the source of <a href="http://grails.org/plugin/cached-resources" target="blank">Cached-Resources</a> and <a href="http://grails.org/plugin/zipped-resources" target="blank">Zipped-Resources</a> plugins.
+
+
+
+<h2 id="6.2 Mapper phases and priority">6.2 Mapper phases and priority</h2>
+The example mapper shows the "phase" property being set to MapperPhase.MUTATION. The <a href="http://github.com/grails-plugins/grails-resources/blob/master/src/groovy/org/grails/plugin/resource/mapper/MapperPhase.groovy" target="blank">MapperPhase</a> enumeration provides the possible mapping phases in the order in which they occur during processing of resources:<p class="paragraph"/><div class="code"><pre>enum MapperPhase &#123;
     GENERATION, // create <span class="java&#45;keyword">new</span> assets = compile less files
     MUTATION, // alter/improve assets (may mean creating <span class="java&#45;keyword">new</span>/deleting aggregated resources) = spriting
     COMPRESSION, // reducing the file size but maintaining semantics = minify
@@ -29,9 +153,17 @@
     ABSOLUTISATION, // update inter asset references to their distributed equivalent = css links
     NOTIFICATION // let the world know about the <span class="java&#45;keyword">new</span> resources = cache invalidation
 &#125;</pre></div><p class="paragraph"/>In most cases it will be enough to specify your phase and operation (see next section). However in some cases there may be issues where multiple mappers in the same phase must operate in a specific order. In those cases a "priority" property can be set to specify the priority integer.<p class="paragraph"/>Mappers will be executed in phase order, in order of ascending priority within each phase. The default priority if not specified is equivalent to zero.
-<h2><a name="6.3 Operation">6.3 Operation</a></h2>The optional "operation" property allows you to specify the name of the kind of work performed by the mapper. Users can then prevent any mappers of this operation from executing on their resources.<p class="paragraph"/>The common example is to specify <strong class="bold">exclude:"minify"</strong> in a resource declaration to prevent any kind of minifying mapper from being applied to a resource that is already minified.<p class="paragraph"/>A similar operation called e.g. "compress" could be used to prevent duplicate zipping of resources that may have been pre-compressed (such as images).<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.COMPRESS<p class="paragraph"/>    def operation = <span class="java&#45;quote">"compression"</span><p class="paragraph"/>    def map(resource, config) &#123;
+
+
+
+<h2 id="6.3 Operation">6.3 Operation</h2>
+The optional "operation" property allows you to specify the name of the kind of work performed by the mapper. Users can then prevent any mappers of this operation from executing on their resources.<p class="paragraph"/>The common example is to specify <strong class="bold">exclude:"minify"</strong> in a resource declaration to prevent any kind of minifying mapper from being applied to a resource that is already minified.<p class="paragraph"/>A similar operation called e.g. "compress" could be used to prevent duplicate zipping of resources that may have been pre-compressed (such as images).<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.COMPRESS<p class="paragraph"/>    def operation = <span class="java&#45;quote">"compression"</span><p class="paragraph"/>    def map(resource, config) &#123;
         // Zip the file here
-    &#125;<p class="paragraph"/>&#125;</pre></div><p class="paragraph"/>Note the operations and mapper names occupy the same namespace so that the "exclude" argument on resource declarations can apply to either.<p class="paragraph"/>Resources will fail fast at runtime if an operation is specified on any mapper, where there is also a mapper with a name the same as the operation.<p class="paragraph"/><h2><a name="6.4 Processing only the right types of files">6.4 Processing only the right types of files</a></h2>Often a mapper is only meant to target certain file types or file patterns. Make it easier for your users by operating correctly out of the box by specifying defaultExcludes and/or defaultIncludes for your mapper, which will filter the resources passed to your mapper:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.MUTATION<p class="paragraph"/>    <span class="java&#45;keyword">static</span> defaultExcludes = &#91;
+    &#125;<p class="paragraph"/>&#125;</pre></div><p class="paragraph"/>Note the operations and mapper names occupy the same namespace so that the "exclude" argument on resource declarations can apply to either.<p class="paragraph"/>Resources will fail fast at runtime if an operation is specified on any mapper, where there is also a mapper with a name the same as the operation.<p class="paragraph"/>
+
+
+<h2 id="6.4 Processing only the right types of files">6.4 Processing only the right types of files</h2>
+Often a mapper is only meant to target certain file types or file patterns. Make it easier for your users by operating correctly out of the box by specifying defaultExcludes and/or defaultIncludes for your mapper, which will filter the resources passed to your mapper:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.MUTATION<p class="paragraph"/>    <span class="java&#45;keyword">static</span> defaultExcludes = &#91;
         '&#42;&#42;/&#42;.png',
         '&#42;&#42;/&#42;.gif',
         '&#42;&#42;/&#42;.jpg',
@@ -42,7 +174,11 @@
     <span class="java&#45;keyword">static</span> defaultIncludes = &#91; '/images/&#42;&#42;' &#93;<p class="paragraph"/>    def map(resource, config) &#123;
         &#8230;
     &#125;</pre></div><p class="paragraph"/>These defaults can be overidden by the user with the <strong class="bold">grails.resources.&#60;mappername&#62;.includes</strong> and <strong class="bold">grails.resources.&#60;mappername&#62;.excludes</strong> Config variables.
-<h2><a name="6.5 Adding response headers and intercepting requests">6.5 Adding response headers and intercepting requests</a></h2>Resource mappers also have the opportunity to take part in response handling so that they can adjust the response headers if necessary. You may need to adapt the handling of the current request to the request headers supplied.<p class="paragraph"/>Note that this cannot be used to change how the resource is mapped - the mapping is performed once only, but the response headers can be customized  every time the file is requested.<p class="paragraph"/>As an example, the Zipped-Resources plugin uses this mechanism to set the Content-Encoding header:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class ZipResourceMapper &#123;<p class="paragraph"/>    <span class="java&#45;keyword">static</span> phase = MapperPhase.ALTERNATEREPRESENTATION<p class="paragraph"/>    /&#42;&#42;
+
+
+
+<h2 id="6.5 Adding response headers and intercepting requests">6.5 Adding response headers and intercepting requests</h2>
+Resource mappers also have the opportunity to take part in response handling so that they can adjust the response headers if necessary. You may need to adapt the handling of the current request to the request headers supplied.<p class="paragraph"/>Note that this cannot be used to change how the resource is mapped - the mapping is performed once only, but the response headers can be customized  every time the file is requested.<p class="paragraph"/>As an example, the Zipped-Resources plugin uses this mechanism to set the Content-Encoding header:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class ZipResourceMapper &#123;<p class="paragraph"/>    <span class="java&#45;keyword">static</span> phase = MapperPhase.ALTERNATEREPRESENTATION<p class="paragraph"/>    /&#42;&#42;
      &#42; Rename the file to a hash of it's contents, and set caching headers 
      &#42;/
     def map(resource, config) &#123;
@@ -53,5 +189,94 @@
         &#125;    
     &#125;
 &#125;</pre></div><p class="paragraph"/>Here the mapper adds a Closure that takes the request and response objects to the resource's requestProcessors list. These will be called in the order they are defined on the resource.<p class="paragraph"/>
-    </body>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/5.%20Overriding%20resources.html">&lt;&lt; <strong>5</strong><span>Overriding resources</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/7.%20Writing%20plugins%20that%20use%20Resources.html"><strong>7</strong><span>Writing plugins that use Resources</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Mappers</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Mappers/bundle.html">bundle</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Mappers/csspreprocessor.html">csspreprocessor</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Mappers/cssrewriter.html">cssrewriter</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Resources</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Resources/getProperty.html">getProperty</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Resources/invokeMethod.html">invokeMethod</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Tags</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Tags/external.html">external</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/img.html">img</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/layoutResources.html">layoutResources</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/require.html">require</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/resource.html">resource</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/resourceLink.html">resourceLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/script.html">script</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/use.html">use</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
 </html>

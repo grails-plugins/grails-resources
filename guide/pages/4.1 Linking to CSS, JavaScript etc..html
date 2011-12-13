@@ -1,11 +1,105 @@
-<html>
-    <head>
-        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
-        <title>4.1 Linking to CSS, JavaScript etc.</title>
-        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
-    </head>
-    <body class="body">
-    So you need to add two calls to <a href="../ref/Tags/layoutResources.html" class="Tags">layoutResources</a> tag to your GSP page or sitemesh layout. Normally you will place it in your sitemesh layout:<p class="paragraph"/>Your grails-app/views/layouts/main.gsp:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>4.1 Linking to CSS, JavaScript etc. 1.1.5</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/1.%20Overview.html"><strong>1</strong><span>Overview</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/2.%20Concepts.html"><strong>2</strong><span>Concepts</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/3.%20Declaring%20resources.html"><strong>3</strong><span>Declaring resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/4.%20Using%20resources.html"><strong>4</strong><span>Using resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/5.%20Overriding%20resources.html"><strong>5</strong><span>Overriding resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/6.%20Creating%20custom%20mappers.html"><strong>6</strong><span>Creating custom mappers</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/7.%20Writing%20plugins%20that%20use%20Resources.html"><strong>7</strong><span>Writing plugins that use Resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/8.%20Debugging.html"><strong>8</strong><span>Debugging</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/9.%20Configuration.html"><strong>9</strong><span>Configuration</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>HTML resource management enhancements to replace g.resource etc.</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../../guide/3.%20Declaring%20resources.html">&lt;&lt; <strong>3</strong><span>Declaring resources</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../../guide/5.%20Overriding%20resources.html"><strong>5</strong><span>Overriding resources</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>4.1 Linking to CSS, JavaScript etc. - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Marc Palmer (marc@grailsrocks.com)</p>
+
+                    <p><strong>Version:</strong> 1.1.5</p>
+
+                    
+                </div>
+
+                
+
+                
+
+<h2 id="4.1 Linking to CSS, JavaScript etc.">4.1 Linking to CSS, JavaScript etc.</h2>
+So you need to add two calls to <a href="../ref/Tags/layoutResources.html" class="Tags">layoutResources</a> tag to your GSP page or sitemesh layout. Normally you will place it in your sitemesh layout:<p class="paragraph"/>Your grails-app/views/layouts/main.gsp:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
    <span class="xml&#45;tag">&#60;head&#62;</span>
       <span class="xml&#45;tag">&#60;g:layoutTitle/&#62;</span>
       <span class="xml&#45;tag">&#60;r:layoutResources/&#62;</span>
@@ -28,5 +122,94 @@
       <span class="xml&#45;tag">&#60;/div&#62;</span>  
    <span class="xml&#45;tag">&#60;/body&#62;</span>
 <span class="xml&#45;tag">&#60;/html&#62;</span></pre></div><p class="paragraph"/>
-    </body>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../../guide/3.%20Declaring%20resources.html">&lt;&lt; <strong>3</strong><span>Declaring resources</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../../guide/5.%20Overriding%20resources.html"><strong>5</strong><span>Overriding resources</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Mappers</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../../ref/Mappers/bundle.html">bundle</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Mappers/csspreprocessor.html">csspreprocessor</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Mappers/cssrewriter.html">cssrewriter</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Resources</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../../ref/Resources/getProperty.html">getProperty</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Resources/invokeMethod.html">invokeMethod</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Tags</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/external.html">external</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/img.html">img</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/layoutResources.html">layoutResources</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/require.html">require</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/resource.html">resource</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/resourceLink.html">resourceLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/script.html">script</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/use.html">use</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
 </html>

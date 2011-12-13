@@ -1,11 +1,119 @@
-<html>
-    <head>
-        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
-        <title>3.1 The resource DSL</title>
-        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
-    </head>
-    <body class="body">
-    There are few methods to call in the DSL. At the top level method calls taking a single Closure argument are translated into module names. The code in the nested closure represents the module definition.<p class="paragraph"/>A module definition can call dependsOn, defaultBundle and resource methods:<p class="paragraph"/><div class="code"><pre>modules = &#123;
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>3.1 The resource DSL 1.1.5</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/1.%20Overview.html"><strong>1</strong><span>Overview</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/2.%20Concepts.html"><strong>2</strong><span>Concepts</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/3.%20Declaring%20resources.html"><strong>3</strong><span>Declaring resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/4.%20Using%20resources.html"><strong>4</strong><span>Using resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/5.%20Overriding%20resources.html"><strong>5</strong><span>Overriding resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/6.%20Creating%20custom%20mappers.html"><strong>6</strong><span>Creating custom mappers</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/7.%20Writing%20plugins%20that%20use%20Resources.html"><strong>7</strong><span>Writing plugins that use Resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/8.%20Debugging.html"><strong>8</strong><span>Debugging</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/9.%20Configuration.html"><strong>9</strong><span>Configuration</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>HTML resource management enhancements to replace g.resource etc.</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../../guide/2.%20Concepts.html">&lt;&lt; <strong>2</strong><span>Concepts</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../../guide/4.%20Using%20resources.html"><strong>4</strong><span>Using resources</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>3.1 The resource DSL - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Marc Palmer (marc@grailsrocks.com)</p>
+
+                    <p><strong>Version:</strong> 1.1.5</p>
+
+                    
+                </div>
+
+                
+                <div id="table-of-content">
+                    <h2>Table of Contents</h2>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#3.1.1%20The%20dependsOn%20method"><strong>3.1</strong><span>The dependsOn method</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#3.1.2%20The%20resource%20method"><strong>3.2</strong><span>The resource method</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#3.1.3%20The%20defaultBundle%20method"><strong>3.3</strong><span>The defaultBundle method</span></a>
+                    </div>
+                    
+                </div>
+                
+
+                
+
+<h2 id="3.1 The resource DSL">3.1 The resource DSL</h2>
+There are few methods to call in the DSL. At the top level method calls taking a single Closure argument are translated into module names. The code in the nested closure represents the module definition.<p class="paragraph"/>A module definition can call dependsOn, defaultBundle and resource methods:<p class="paragraph"/><div class="code"><pre>modules = &#123;
     core &#123;
         dependsOn 'jquery, utils'
         defaultBundle 'ui'<p class="paragraph"/>        resource url:'/js/core.js', disposition: 'head'
@@ -22,5 +130,149 @@
     &#125;
 &#125;</pre></div><p class="paragraph"/>The above DSL defines three resource modules; 'core', 'utils' and 'forms'. The resources in these modules will be automatically bundled out of the box according to the module name, resulting in fewer files. You can override this with <strong class="bold">bundle:'someOtherName'</strong> on each resource, or call defaultBundle on the module
 
-    </body>
+
+
+<h2 id="3.1.1 The dependsOn method">3.1.1 The dependsOn method</h2>
+To declare that a module depends on another, you use dependsOn. It accepts a string or list of names. The string can be comma-delimited to specify multiple dependencies. You can also call dependsOn as many times as you like:<p class="paragraph"/><div class="code"><pre>modules = &#123;
+    core &#123;
+        dependsOn 'jquery, utils'
+        dependsOn 'other'
+        dependsOn(&#91;'heavy', 'metal'&#93;)
+    &#125;
+&#125;</pre></div>
+
+
+
+<h2 id="3.1.2 The resource method">3.1.2 The resource method</h2>
+
+Declaring a resource is done using the "resource" method. This takes either a single string URI or a map of arguments that define the URL of the resource and any other specific options you require.<p class="paragraph"/>The single-string argument variant is a simple shortcut for resources that are safe to use all defaults:<p class="paragraph"/><div class="code"><pre>modules = &#123;
+    ui &#123;
+        resource '/css/forms.css'
+        resource '/js/forms.js'
+    &#125;
+&#125;</pre></div><p class="paragraph"/>The more powerful map argument form accepts the following arguments:
+<ul class="star">
+<li>url - Required. The app-relative URL of the resource as a String, or a g:resource-style map of dir, file and plugin attributes.</li>
+<li>exclude - Optional. A comma-delimited String or a List of names of mappers/operations to exclude. The special "*" value excludes all mappers and operations - the resource will be passed-through as is. You can exclude specific operations such as "minify" if the resource has already been minified.</li>
+<li>bundle - Optional. The name of the bundle to put the resource into. See "Bundling" for more details</li>
+<li>disposition - Optional. The disposition of the resource. If not specified, it will default to a value appropriate for the type of the resource. For JavaScript this default is "defer". To force code into the &#60;head&#62;, set it to "head".</li>
+<li>attrs - Optional. Map of attribute names and values to pass through to the linking tag when the resource is rendered. e.g. use to pass attrs:media:'print' for print-only CSS, or "type". Note that supplying "attrs" will prevent bundling of the resource. Passing in "type" (which is passed through to <a href="../ref/Tags/external.html" class="Tags">external</a> tag) allows you to tell the framework that the resource is a specific type irrespective of the file extension. For example if you have a file that ends ".less" but you want the framework to treat it like CSS when rendering links, you need to set attrs:&#91;type:"css"&#93;.</li>
+<li>id - Optional. Module-unique id of the resource to be used when <a href="../guide/single.html#5.%20Overriding%20resources" class="guide">overriding</a> resource properties. Defaults to the url of the resource if none supplied.</li>
+<li>linkOverride - Optional. The URL to use when rendering links for the resource, instead of the processed resource's URL. Allows your external resources to participate in dependency management, and some niche CDN requirements.</li>
+<li>wrapper - Optional. A Closure that will be used to render the resource link. The correct markup for linking will be passed in. Used primarily for MSIE workarounds i.e: wrapper: &#123; s -&#62; "&#60;!--if lt IE 8&#62;$s&#60;!endif--&#62;" &#125;. Note that supplying a wrapper will prevent bundling of that resource.</li>
+</ul><p class="paragraph"/>Examples:<p class="paragraph"/><div class="code"><pre>modules = &#123;
+    core &#123;
+        resource url:&#91;dir:'css/blueprint',file:'screen.css'&#93;, attrs:&#91;media:'screen, projection'&#93;, bundle:'core&#45;ui'
+        resource url:&#91;dir:'css/blueprint',file:'ie.css'&#93;, attrs:&#91;media:'screen, projection'&#93;,  
+            wrapper: &#123; s &#45;&#62; <span class="java&#45;quote">"&#60;!&#45;&#45;&#91;<span class="java&#45;keyword">if</span> lt IE 8&#93;&#62;$s&#60;!&#91;endif&#93;&#45;&#45;&#62;"</span> &#125;<p class="paragraph"/>        resource id:'main&#45;js', url:'js/coreutils&#45;min.js', disposition: 'head', exclude:'minify'<p class="paragraph"/>        resource url:'js/lib.js', linkOverride:'http://mycdn.com/js/lib.js'
+    &#125;<p class="paragraph"/>    ui &#123;
+        resource url:'/css/forms.css', bundle:'core&#45;ui'
+        resource url:'/js/forms.js'
+    &#125;
+&#125;</pre></div>
+
+
+
+<h2 id="3.1.3 The defaultBundle method">3.1.3 The defaultBundle method</h2>
+By default, modules with more than one resource will be auto-bundled using the module name as a bundle name. You can override this by setting the default bundle name for the module by calling defaultBundle. This name can be the same as bundles used in other modules, to bundle resoures across module boundaries.<p class="paragraph"/>The method takes a String or boolean as parameter. A string sets the default bundle name, and passing in a boolean false will turn off all default bundling for that module.<p class="paragraph"/><div class="code"><pre>modules = &#123;
+    core &#123;
+        defaultBundle 'core&#45;ui'<p class="paragraph"/>        resource url:&#91;dir:'css/blueprint',file:'screen.css'&#93;, attrs:&#91;media:'screen, projection'&#93;
+        resource url:&#91;dir:'css/blueprint',file:'ie.css'&#93;, attrs:&#91;media:'screen, projection'&#93;,  
+            wrapper: &#123; s &#45;&#62; <span class="java&#45;quote">"&#60;!&#45;&#45;&#91;<span class="java&#45;keyword">if</span> lt IE 8&#93;&#62;$s&#60;!&#91;endif&#93;&#45;&#45;&#62;"</span> &#125;<p class="paragraph"/>        resource id:'main&#45;js', url:'js/coreutils&#45;min.js', disposition: 'head', exclude:'minify'<p class="paragraph"/>        resource url:'js/lib.js', linkOverride:'http://mycdn.com/js/lib.js'
+    &#125;<p class="paragraph"/>    ui &#123;
+        defaultBundle 'core&#45;ui'<p class="paragraph"/>        resource url:'/css/forms.css', bundle:'theme'
+        resource url:'/js/forms.js'
+    &#125;
+&#125;</pre></div><p class="paragraph"/>Here you can see that the fallback bundle for both modules is set to "core-ui" and individual resources can still override this.
+
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../../guide/2.%20Concepts.html">&lt;&lt; <strong>2</strong><span>Concepts</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../../guide/4.%20Using%20resources.html"><strong>4</strong><span>Using resources</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Mappers</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../../ref/Mappers/bundle.html">bundle</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Mappers/csspreprocessor.html">csspreprocessor</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Mappers/cssrewriter.html">cssrewriter</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Resources</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../../ref/Resources/getProperty.html">getProperty</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Resources/invokeMethod.html">invokeMethod</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Tags</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/external.html">external</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/img.html">img</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/layoutResources.html">layoutResources</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/require.html">require</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/resource.html">resource</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/resourceLink.html">resourceLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/script.html">script</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/use.html">use</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
 </html>

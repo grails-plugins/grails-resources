@@ -91,13 +91,56 @@ Package org.grails.plugin.resource
     </TR>
 
         <TR BGCOLOR="white" CLASS="TableRowColor">
+        <TD WIDTH="15%"><B><A HREF="AggregatedResourceMeta.html" title="class in org/grails/plugin/resource">AggregatedResourceMeta</A></B></TD>
+        <TD>Holder for info about a resource that is made up of other resources</TD>
+        </TR>
+
+        <TR BGCOLOR="white" CLASS="TableRowColor">
+        <TD WIDTH="15%"><B><A HREF="BundleResourceMapper.html" title="class in org/grails/plugin/resource">BundleResourceMapper</A></B></TD>
+        <TD>This mapper creates synthetic AggregatedResourceMeta instances for any bundle
+ names found in the resource declarations, and gathers up info about those resources
+ so that when the bundle itself is requested, the aggregated file is created and returned.</TD>
+        </TR>
+
+        <TR BGCOLOR="white" CLASS="TableRowColor">
+        <TD WIDTH="15%"><B><A HREF="CSSBundleResourceMeta.html" title="class in org/grails/plugin/resource">CSSBundleResourceMeta</A></B></TD>
+        <TD>Holder for info about a resource that is made up of other resources</TD>
+        </TR>
+
+        <TR BGCOLOR="white" CLASS="TableRowColor">
+        <TD WIDTH="15%"><B><A HREF="CSSLinkProcessor.html" title="class in org/grails/plugin/resource">CSSLinkProcessor</A></B></TD>
+        <TD>This class is used to parse out and replace CSS links</TD>
+        </TR>
+
+        <TR BGCOLOR="white" CLASS="TableRowColor">
+        <TD WIDTH="15%"><B><A HREF="CSSPreprocessorResourceMapper.html" title="class in org/grails/plugin/resource">CSSPreprocessorResourceMapper</A></B></TD>
+        <TD>This mapper is the first phase of CSS rewriting.</TD>
+        </TR>
+
+        <TR BGCOLOR="white" CLASS="TableRowColor">
         <TD WIDTH="15%"><B><A HREF="CSSRewriterResourceMapper.html" title="class in org/grails/plugin/resource">CSSRewriterResourceMapper</A></B></TD>
         <TD>This mapper is the second phase of CSS rewriting.</TD>
         </TR>
 
         <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceMetaTests.html" title="class in org/grails/plugin/resource">ResourceMetaTests</A></B></TD>
-        <TD></TD>
+        <TD WIDTH="15%"><B><A HREF="DevModeSanityFilter.html" title="class in org/grails/plugin/resource">DevModeSanityFilter</A></B></TD>
+        <TD>This just traps any obvious mistakes the user has made and warns them in dev mode</TD>
+        </TR>
+
+        <TR BGCOLOR="white" CLASS="TableRowColor">
+        <TD WIDTH="15%"><B><A HREF="JavaScriptBundleResourceMeta.html" title="class in org/grails/plugin/resource">JavaScriptBundleResourceMeta</A></B></TD>
+        <TD>Holder for info about a JS resource that is made up of other resources</TD>
+        </TR>
+
+        <TR BGCOLOR="white" CLASS="TableRowColor">
+        <TD WIDTH="15%"><B><A HREF="ProcessingFilter.html" title="class in org/grails/plugin/resource">ProcessingFilter</A></B></TD>
+        <TD>This is the servlet filter that handles all static resource requests and delegates to the service
+ to return them.</TD>
+        </TR>
+
+        <TR BGCOLOR="white" CLASS="TableRowColor">
+        <TD WIDTH="15%"><B><A HREF="ResourceMeta.html" title="class in org/grails/plugin/resource">ResourceMeta</A></B></TD>
+        <TD>Holder for info about a resource declaration at runtime</TD>
         </TR>
 
         <TR BGCOLOR="white" CLASS="TableRowColor">
@@ -106,68 +149,23 @@ Package org.grails.plugin.resource
         </TR>
 
         <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceModuleTests.html" title="class in org/grails/plugin/resource">ResourceModuleTests</A></B></TD>
+        <TD WIDTH="15%"><B><A HREF="ResourceProcessor.html" title="class in org/grails/plugin/resource">ResourceProcessor</A></B></TD>
+        <TD>This is where it all happens.</TD>
+        </TR>
+
+        <TR BGCOLOR="white" CLASS="TableRowColor">
+        <TD WIDTH="15%"><B><A HREF="ResourceProcessorBatch.html" title="class in org/grails/plugin/resource">ResourceProcessorBatch</A></B></TD>
         <TD></TD>
         </TR>
 
         <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceModulesBuilderTests.html" title="class in org/grails/plugin/resource">ResourceModulesBuilderTests</A></B></TD>
-        <TD></TD>
+        <TD WIDTH="15%"><B><A HREF="ResourceTagLib.html" title="class in org/grails/plugin/resource">ResourceTagLib</A></B></TD>
+        <TD>This taglib handles creation of all the links to resources, including the smart de-duping of them.</TD>
         </TR>
 
         <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceServiceTests.html" title="class in org/grails/plugin/resource">ResourceServiceTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceTagLibTests.html" title="class in org/grails/plugin/resource">ResourceTagLibTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="URLUtilsTests.html" title="class in org/grails/plugin/resource">URLUtilsTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="CSSRewriterResourceMapper.html" title="class in org/grails/plugin/resource">CSSRewriterResourceMapper</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceMetaTests.html" title="class in org/grails/plugin/resource">ResourceMetaTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceModule.html" title="class in org/grails/plugin/resource">ResourceModule</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceModuleTests.html" title="class in org/grails/plugin/resource">ResourceModuleTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceModulesBuilderTests.html" title="class in org/grails/plugin/resource">ResourceModulesBuilderTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceServiceTests.html" title="class in org/grails/plugin/resource">ResourceServiceTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceTagLibTests.html" title="class in org/grails/plugin/resource">ResourceTagLibTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="URLUtilsTests.html" title="class in org/grails/plugin/resource">URLUtilsTests</A></B></TD>
-        <TD></TD>
+        <TD WIDTH="15%"><B><A HREF="URLUtils.html" title="class in org/grails/plugin/resource">URLUtils</A></B></TD>
+        <TD>@author Marc Palmer (marc@grailsrocks.com)</TD>
         </TR>
 
 </TABLE>

@@ -1,32 +1,152 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>Resources Plugin 1.0.1 - Reference Documentation</title>
-        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Style" charset="utf-8"/>
+        <title>Resources Plugin 1.1.5</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8" />
         <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8" />
+    <script type="text/javascript">
+function addJsClass(el) {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
     </head>
-    <body class="body">
+
+    <body class="body" onload="addJsClass();">
+        <div id="navigation">
+            <ul>
+                <li>
+                    <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                        <a href="../guide/index.html" class="button">Table of contents</a>
+                        <div id="nav-summary-childs" style="display:none;">
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#1.%20Overview"><strong>1</strong><span>Overview</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#2.%20Concepts"><strong>2</strong><span>Concepts</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#3.%20Declaring%20resources"><strong>3</strong><span>Declaring resources</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#4.%20Using%20resources"><strong>4</strong><span>Using resources</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#5.%20Overriding%20resources"><strong>5</strong><span>Overriding resources</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#6.%20Creating%20custom%20mappers"><strong>6</strong><span>Creating custom mappers</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#7.%20Writing%20plugins%20that%20use%20Resources"><strong>7</strong><span>Writing plugins that use Resources</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#8.%20Debugging"><strong>8</strong><span>Debugging</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#9.%20Configuration"><strong>9</strong><span>Configuration</span></a></div>
+                            
+                        </div>
+                    </div>
+                </li>
+                <li class="separator selected">
+                    <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+                </li>
+            </ul>
+        </div>
         <div id="header">
-            <div class="images"><br/><br/>
-                <a href="http://grails.org" target="_blank"><img alt="The Grails Framework" src="../img/grails.png" border="0"/></a>
-                <span style="right:30px; top:20px; position:absolute;">
-                    <a href="../index.html" target="_top">Frames</a> | <a href="index.html" target="_top">No Frames</a><br/><br/>
-                    <a href="http://springsource.com" target="_blank"><img alt="SpringSource - A Division of VMware" src="../img/springsource-logo.png" border="0"/></a>
-                </span>
+            <div class="images clearfix">
+                
+                
             </div>
-            <div class="message">resources</div>
-            <h1>Resources Plugin - Reference Documentation</h1>
-            <p><strong>Authors:</strong> Marc Palmer (marc@grailsrocks.com)</p>
-            <p><strong>Version:</strong> 1.0.1</p>
-            <em></em>
+            <p>HTML resource management enhancements to replace g.resource etc.</p>
         </div>
 
-        <div id="toc">
-            <h2>Table of Contents</h2>
-            <div class="tocItem" style="margin-left:0px"><a href="#1. Overview">1. Overview</a></div><div class="tocItem" style="margin-left:10px"><a href="#1.1 Quick Start">1.1 Quick Start</a></div><div class="tocItem" style="margin-left:20px"><a href="#1.1.1 Make sure jQuery plugin is installed">1.1.1 Make sure jQuery plugin is installed</a></div><div class="tocItem" style="margin-left:20px"><a href="#1.1.2 Install jQuery UI and Blueprint plugins">1.1.2 Install jQuery UI and Blueprint plugins</a></div><div class="tocItem" style="margin-left:20px"><a href="#1.1.3 Edit your Sitemesh layout">1.1.3 Edit your Sitemesh layout</a></div><div class="tocItem" style="margin-left:20px"><a href="#1.1.4 Edit your GSP page to include jQuery">1.1.4 Edit your GSP page to include jQuery</a></div><div class="tocItem" style="margin-left:20px"><a href="#1.1.5 View the page source">1.1.5 View the page source</a></div><div class="tocItem" style="margin-left:20px"><a href="#1.1.6 Now optimize your application">1.1.6 Now optimize your application</a></div><div class="tocItem" style="margin-left:0px"><a href="#2. Concepts">2. Concepts</a></div><div class="tocItem" style="margin-left:0px"><a href="#3. Declaring resources">3. Declaring resources</a></div><div class="tocItem" style="margin-left:10px"><a href="#3.1 The resource DSL">3.1 The resource DSL</a></div><div class="tocItem" style="margin-left:20px"><a href="#3.1.1 The dependsOn method">3.1.1 The dependsOn method</a></div><div class="tocItem" style="margin-left:20px"><a href="#3.1.2 The resource method">3.1.2 The resource method</a></div><div class="tocItem" style="margin-left:20px"><a href="#3.1.3 The defaultBundle method">3.1.3 The defaultBundle method</a></div><div class="tocItem" style="margin-left:10px"><a href="#3.2 Resource artefacts">3.2 Resource artefacts</a></div><div class="tocItem" style="margin-left:10px"><a href="#3.3 Config.groovy">3.3 Config.groovy</a></div><div class="tocItem" style="margin-left:10px"><a href="#3.4 Bundling">3.4 Bundling</a></div><div class="tocItem" style="margin-left:0px"><a href="#4. Using resources">4. Using resources</a></div><div class="tocItem" style="margin-left:10px"><a href="#4.1 Linking to CSS, JavaScript etc.">4.1 Linking to CSS, JavaScript etc.</a></div><div class="tocItem" style="margin-left:10px"><a href="#4.2 Linking to images">4.2 Linking to images</a></div><div class="tocItem" style="margin-left:10px"><a href="#4.3 Linking to resources explicitly, bypassing modules">4.3 Linking to resources explicitly, bypassing modules</a></div><div class="tocItem" style="margin-left:10px"><a href="#4.4 Including pieces of JavaScript code generated at runtime">4.4 Including pieces of JavaScript code generated at runtime</a></div><div class="tocItem" style="margin-left:0px"><a href="#5. Overriding resources">5. Overriding resources</a></div><div class="tocItem" style="margin-left:0px"><a href="#6. Creating custom mappers">6. Creating custom mappers</a></div><div class="tocItem" style="margin-left:10px"><a href="#6.1 Defining a mapper">6.1 Defining a mapper</a></div><div class="tocItem" style="margin-left:10px"><a href="#6.2 Mapper phases and priority">6.2 Mapper phases and priority</a></div><div class="tocItem" style="margin-left:10px"><a href="#6.3 Operation">6.3 Operation</a></div><div class="tocItem" style="margin-left:10px"><a href="#6.4 Processing only the right types of files">6.4 Processing only the right types of files</a></div><div class="tocItem" style="margin-left:10px"><a href="#6.5 Adding response headers and intercepting requests">6.5 Adding response headers and intercepting requests</a></div><div class="tocItem" style="margin-left:0px"><a href="#7. Writing plugins that use Resources">7. Writing plugins that use Resources</a></div><div class="tocItem" style="margin-left:0px"><a href="#8. Debugging">8. Debugging</a></div><div class="tocItem" style="margin-left:0px"><a href="#9. Configuration">9. Configuration</a></div>
-        </div>
-        <div id="content">
-            <h1><a name="1. Overview">1. Overview</a></h1>
+
+        <table id="colset" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td id="col1">
+                    <div id="main" class="corner-all">
+
+                        <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                        <div class="project">
+                            <h1>Resources Plugin - Reference Documentation</h1>
+                            <p><strong>Authors:</strong> Marc Palmer (marc@grailsrocks.com)</p>
+                            <p><strong>Version:</strong> 1.1.5</p>
+                            
+                        </div>
+
+                        
+                        <div id="table-of-content">
+                            <h2>Table of Contents</h2>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#1.%20Overview"><strong>1</strong><span>Overview</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#1.1%20Quick%20Start"><strong>1.1</strong><span>Quick Start</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:20px"><a href="#1.1.1%20Make%20sure%20jQuery%20plugin%20is%20installed"><strong>1.1.1</strong><span>Make sure jQuery plugin is installed</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:20px"><a href="#1.1.2%20Install%20jQuery%20UI%20and%20Blueprint%20plugins"><strong>1.1.2</strong><span>Install jQuery UI and Blueprint plugins</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:20px"><a href="#1.1.3%20Edit%20your%20Sitemesh%20layout"><strong>1.1.3</strong><span>Edit your Sitemesh layout</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:20px"><a href="#1.1.4%20Edit%20your%20GSP%20page%20to%20include%20jQuery"><strong>1.1.4</strong><span>Edit your GSP page to include jQuery</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:20px"><a href="#1.1.5%20View%20the%20page%20source"><strong>1.1.5</strong><span>View the page source</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:20px"><a href="#1.1.6%20Now%20optimize%20your%20application"><strong>1.1.6</strong><span>Now optimize your application</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#2.%20Concepts"><strong>2</strong><span>Concepts</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#3.%20Declaring%20resources"><strong>3</strong><span>Declaring resources</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#3.1%20The%20resource%20DSL"><strong>3.1</strong><span>The resource DSL</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:20px"><a href="#3.1.1%20The%20dependsOn%20method"><strong>3.1.1</strong><span>The dependsOn method</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:20px"><a href="#3.1.2%20The%20resource%20method"><strong>3.1.2</strong><span>The resource method</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:20px"><a href="#3.1.3%20The%20defaultBundle%20method"><strong>3.1.3</strong><span>The defaultBundle method</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#3.2%20Resource%20artefacts"><strong>3.2</strong><span>Resource artefacts</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#3.3%20Config.groovy"><strong>3.3</strong><span>Config.groovy</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#3.4%20Bundling"><strong>3.4</strong><span>Bundling</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#4.%20Using%20resources"><strong>4</strong><span>Using resources</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#4.1%20Linking%20to%20CSS,%20JavaScript%20etc."><strong>4.1</strong><span>Linking to CSS, JavaScript etc.</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#4.2%20Linking%20to%20images"><strong>4.2</strong><span>Linking to images</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#4.3%20Linking%20to%20resources%20explicitly,%20bypassing%20modules"><strong>4.3</strong><span>Linking to resources explicitly, bypassing modules</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#4.4%20Including%20pieces%20of%20JavaScript%20code%20generated%20at%20runtime"><strong>4.4</strong><span>Including pieces of JavaScript code generated at runtime</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#5.%20Overriding%20resources"><strong>5</strong><span>Overriding resources</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#6.%20Creating%20custom%20mappers"><strong>6</strong><span>Creating custom mappers</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#6.1%20Defining%20a%20mapper"><strong>6.1</strong><span>Defining a mapper</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#6.2%20Mapper%20phases%20and%20priority"><strong>6.2</strong><span>Mapper phases and priority</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#6.3%20Operation"><strong>6.3</strong><span>Operation</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#6.4%20Processing%20only%20the%20right%20types%20of%20files"><strong>6.4</strong><span>Processing only the right types of files</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#6.5%20Adding%20response%20headers%20and%20intercepting%20requests"><strong>6.5</strong><span>Adding response headers and intercepting requests</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#7.%20Writing%20plugins%20that%20use%20Resources"><strong>7</strong><span>Writing plugins that use Resources</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#8.%20Debugging"><strong>8</strong><span>Debugging</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#9.%20Configuration"><strong>9</strong><span>Configuration</span></a></div>
+                            
+                            <div style="clear:both" ></div>
+                        </div>
+                        
+                        
+
+<h1 id="1. Overview">1 Overview</h1>
+
 This plugin provides the Resources framework for Grails.<p class="paragraph"/>The issues that the Resources framework tackles are:
 <ul class="star">
 <li>Web application performance tuning is difficult</li>
@@ -37,10 +157,26 @@ This plugin provides the Resources framework for Grails.<p class="paragraph"/>Th
 <li>Preventing inclusion of the same resource multiple times</li>
 <li>The need for identical behaviour in development and production</li>
 </ul><p class="paragraph"/>The Resources plugin achieves these goals by introducing new artefacts and processing the resources using the server's local file system.<p class="paragraph"/>In tandem with Sitemesh layouts and the Grails plugin dependency system, you gain the ability to express dependencies on specific UI libraries, and the ability to specify the resources that a page needs anywhere in the page GSPs or even in rendered GSP templates.<p class="paragraph"/>The Resource framework tags confer a whole new level of abstraction and power to application and plugin developers. It makes possible new patterns for managing resources and smart handling of JavaScript and CSS code.<p class="paragraph"/>It adds artefacts for declaring resources, for declaring "mappers" that can process resources, and a servlet filter to serve processed resources.<p class="paragraph"/>
-<h2><a name="1.1 Quick Start">1.1 Quick Start</a></h2>To demonstrate the power of the framework, here's a quick demonstration of usage with the jQuery, jQuery-Ui and Blueprint plugins which exposes resource modules.<p class="paragraph"/><h2><a name="1.1.1 Make sure jQuery plugin is installed">1.1.1 Make sure jQuery plugin is installed</a></h2>For Grails 1.4, it is installed by default. For older versions:<p class="paragraph"/><div class="code"><pre>grails install&#45;plugin jquery&#42;</pre></div>
-<h2><a name="1.1.2 Install jQuery UI and Blueprint plugins">1.1.2 Install jQuery UI and Blueprint plugins</a></h2>Just run:
+
+
+
+<h2 id="1.1 Quick Start">1.1 Quick Start</h2>
+To demonstrate the power of the framework, here's a quick demonstration of usage with the jQuery, jQuery-Ui and Blueprint plugins which exposes resource modules.<p class="paragraph"/>
+
+
+<h2 id="1.1.1 Make sure jQuery plugin is installed">1.1.1 Make sure jQuery plugin is installed</h2>
+For Grails 1.4, it is installed by default. For older versions:<p class="paragraph"/><div class="code"><pre>grails install&#45;plugin jquery&#42;</pre></div>
+
+
+
+<h2 id="1.1.2 Install jQuery UI and Blueprint plugins">1.1.2 Install jQuery UI and Blueprint plugins</h2>
+Just run:
 <div class="code"><pre>grails install&#45;plugin jquery&#45;ui
-grails install&#45;plugin blueprint</pre></div><p class="paragraph"/><h2><a name="1.1.3 Edit your Sitemesh layout">1.1.3 Edit your Sitemesh layout</a></h2>You need to add the <a href="../ref/Tags/layoutResources.html" class="Tags">layoutResources</a> tag twice to your page, for the &#60;head&#62; resources and end-of-body resources.<p class="paragraph"/>Your grails-app/views/layouts/main.gsp:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
+grails install&#45;plugin blueprint</pre></div><p class="paragraph"/>
+
+
+<h2 id="1.1.3 Edit your Sitemesh layout">1.1.3 Edit your Sitemesh layout</h2>
+You need to add the <a href="../ref/Tags/layoutResources.html" class="Tags">layoutResources</a> tag twice to your page, for the &#60;head&#62; resources and end-of-body resources.<p class="paragraph"/>Your grails-app/views/layouts/main.gsp:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
    <span class="xml&#45;tag">&#60;head&#62;</span>
       <span class="xml&#45;tag">&#60;g:layoutTitle/&#62;</span>
       <span class="xml&#45;tag">&#60;r:layoutResources/&#62;</span>
@@ -49,7 +185,11 @@ grails install&#45;plugin blueprint</pre></div><p class="paragraph"/><h2><a name
       <span class="xml&#45;tag">&#60;g:layoutBody/&#62;</span>
       <span class="xml&#45;tag">&#60;r:layoutResources/&#62;</span>
    <span class="xml&#45;tag">&#60;/body&#62;</span>
-<span class="xml&#45;tag">&#60;/html&#62;</span></pre></div><p class="paragraph"/><h2><a name="1.1.4 Edit your GSP page to include jQuery">1.1.4 Edit your GSP page to include jQuery</a></h2>All you have to do here is add the <a href="../ref/Tags/require.html" class="Tags">require</a> to your GSP page. Anywhere will do, but in &#60;head&#62; makes sense, and add a bit of code:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
+<span class="xml&#45;tag">&#60;/html&#62;</span></pre></div><p class="paragraph"/>
+
+
+<h2 id="1.1.4 Edit your GSP page to include jQuery">1.1.4 Edit your GSP page to include jQuery</h2>
+All you have to do here is add the <a href="../ref/Tags/require.html" class="Tags">require</a> to your GSP page. Anywhere will do, but in &#60;head&#62; makes sense, and add a bit of code:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
    <span class="xml&#45;tag">&#60;head&#62;</span>
       <span class="xml&#45;tag">&#60;meta name=<span class="xml&#45;quote">"layout"</span> content=<span class="xml&#45;quote">"main"</span>/&#62;</span>
       <span class="xml&#45;tag">&#60;r:require modules=<span class="xml&#45;quote">"jquery&#45;ui, blueprint"</span>/&#62;</span><p class="paragraph"/>      <span class="xml&#45;tag">&#60;r:script&#62;</span>
@@ -63,10 +203,30 @@ grails install&#45;plugin blueprint</pre></div><p class="paragraph"/><h2><a name
            Hello World
       <span class="xml&#45;tag">&#60;/div&#62;</span>  
    <span class="xml&#45;tag">&#60;/body&#62;</span>
-<span class="xml&#45;tag">&#60;/html&#62;</span></pre></div><p class="paragraph"/><h2><a name="1.1.5 View the page source">1.1.5 View the page source</a></h2>When you run this and request the GSP page, you should view the source and look at what is happening in the page. Use Safari or Chrome resource inspector to see what files were requested and when.<p class="paragraph"/>You should have a page that is rendered with the Blueprint CSS framework, pulling in both jQuery and jQuery-UI, with jQuery-UI JS deferred to the end of the page, jQuery loaded in the head, and the "document ready" JS code fragment to set up the page is rendered right at the end of the body after jQuery UI has loaded.<p class="paragraph"/>All with almost zero effort!<p class="paragraph"/><h2><a name="1.1.6 Now optimize your application">1.1.6 Now optimize your application</a></h2>Installing the "cached-resources" and "zipped-resources" plugins and running your app again, you will then find that your resources are cached in the browser "eternally" and transferred with zip encoding.<p class="paragraph"/>Simply run these commands:<p class="paragraph"/><div class="code"><pre>grails install&#45;plugin zipped&#45;resources
+<span class="xml&#45;tag">&#60;/html&#62;</span></pre></div><p class="paragraph"/>
+
+
+<h2 id="1.1.5 View the page source">1.1.5 View the page source</h2>
+When you run this and request the GSP page, you should view the source and look at what is happening in the page. Use Safari or Chrome resource inspector to see what files were requested and when.<p class="paragraph"/>You should have a page that is rendered with the Blueprint CSS framework, pulling in both jQuery and jQuery-UI, with jQuery-UI JS deferred to the end of the page, jQuery loaded in the head, and the "document ready" JS code fragment to set up the page is rendered right at the end of the body after jQuery UI has loaded.<p class="paragraph"/>All with almost zero effort!<p class="paragraph"/>
+
+
+<h2 id="1.1.6 Now optimize your application">1.1.6 Now optimize your application</h2>
+Installing the "cached-resources" and "zipped-resources" plugins and running your app again, you will then find that your resources are cached in the browser "eternally" and transferred with zip encoding.<p class="paragraph"/>Simply run these commands:<p class="paragraph"/><div class="code"><pre>grails install&#45;plugin zipped&#45;resources
 grails install&#45;plugin cached&#45;resources</pre></div><p class="paragraph"/>No code changes are necessary for the simple use case.<p class="paragraph"/>For details of these plugins please see the documentation for <a href="http://grails.org/plugin/zipped-resources" target="blank">zipped-resources</a> and <a href="http://grails.org/plugin/cached-resources" target="blank">cached-resources</a>.<p class="paragraph"/>More resources-aware plugins will be released. You can search by tag "resources" on the Grails portal with <a href="http://grails.org/search?q=tag%3Aresources" target="blank">this link</a>.<p class="paragraph"/>
-<h1><a name="2. Concepts">2. Concepts</a></h1>There are several concepts introduced in the Resources framework with which you may not be familiar.<p class="paragraph"/>It may help you to understand the rest of the documentation if you familiarize yourself with these first.<p class="paragraph"/><h2>Resources</h2><p class="paragraph"/>By resources we mean typically static resources that are used to render your application views, or other files served to your users.<p class="paragraph"/>This includes CSS, JavaScript and usually some icons and images.<p class="paragraph"/><h2>Modules</h2><p class="paragraph"/>In the resources framework, you define resource modules that have a name and contain one or more resources. You use GSP tags to indicate which modules your pages need.<p class="paragraph"/><h2>Module dependencies</h2><p class="paragraph"/>Specifying module dependencies means that you don't have to worry about the order of resource inclusion in your pages. By telling the framework which modules require other modules, you allow it to decide the correct order.<p class="paragraph"/>Just like Grails transitive dependencies, this will pull in all the modules required if you require one module that has other dependencies.<p class="paragraph"/><h2>Mappers</h2><p class="paragraph"/>Resource mappers are Grails artefacts that participate in the processing of resources. You start with a copy of the original resource, and after applying all the necessary mappers, you have the - typically mutated - final file to serve to users.<p class="paragraph"/>Mappers can modify and/or move and rename the file.<p class="paragraph"/>The person who declares resources can choose to exclude specific mappers per-resource, to prevent double-processing of resources that have been supplied pre-processed, such as pre-minified JS libraries.<p class="paragraph"/><h2>Mapper phases</h2><p class="paragraph"/>Resource mappers are applied in a specific order, denoted by a series of well-defined phases. This ensures that the right processing happens at the right times.<p class="paragraph"/><h2>Mapper operation</h2><p class="paragraph"/>Resource mappers often have an "operation" grouping, for example Yahoo UI and Google CSS minifier mappers might both have the operation name "minify", but unique mapper names. This allows the user to exclude a whole family of mappers on a per-resource basis.<p class="paragraph"/><h2>Undeclared Resources</h2><p class="paragraph"/>Undeclared resources are those that you link to using the Resources framework tags such as <a href="../ref/Tags/require.html" class="Tags">require</a>, <a href="../ref/Tags/img.html" class="Tags">img</a> and <a href="../ref/Tags/external.html" class="Tags">external</a> (or Grails 1.4 and higher g:resource/g:img and other linking tags that are resources-aware) but you <strong class="bold">did not explicitly declare in any modules</strong>.<p class="paragraph"/><h2>Ad-hoc/Legacy Resources</h2><p class="paragraph"/>Ad-hoc resources are tags that do not use the Resources mechanisms to create their links. Prior to Grails 1.4 this means links created with g:xxx tags instead of the r:xxx tags and hardcoded links to resources. For Grails 1.4 and higher these can only occur for hardcoded links to resources.<p class="paragraph"/><h2>Bundling</h2><p class="paragraph"/>Bundling is the act of aggregating two or more resources of the same type into one file. This reduces the number of requests the browser must make to your site, thus speeding up the page load time.<p class="paragraph"/><h2>CSS Rewriting</h2><p class="paragraph"/>Rewriting CSS is the act of changing any URLs in your CSS files so that they continue to point to the correct resource even if the CSS is bundled into a new file and/or moved to a new location in the filesystem.<p class="paragraph"/>When you bundle files, or move them to reduce link URL size (as the Cached-Resources plugin does), without URL rewriting this would break the links from your bundled file to other resources.<p class="paragraph"/><h2>Disposition</h2><p class="paragraph"/>The disposition of a resource indicates where in the response you would like the link to appear. By default the "head" disposition causes links to be rendered in the &#60;head&#62; section, and "defer" disposition causes links to JavaScript to be rendered at the end of the body.
-<h1><a name="3. Declaring resources">3. Declaring resources</a></h1>You can declare your resources in your Application's Config.groovy or in a Resources artefact in your application or plugins.<p class="paragraph"/>This is done using a simple DSL in both cases. You define the names of the modules you have and the resources within them, and dependencies between modules.<p class="paragraph"/><h2><a name="3.1 The resource DSL">3.1 The resource DSL</a></h2>There are few methods to call in the DSL. At the top level method calls taking a single Closure argument are translated into module names. The code in the nested closure represents the module definition.<p class="paragraph"/>A module definition can call dependsOn, defaultBundle and resource methods:<p class="paragraph"/><div class="code"><pre>modules = &#123;
+
+
+
+<h1 id="2. Concepts">2 Concepts</h1>
+There are several concepts introduced in the Resources framework with which you may not be familiar.<p class="paragraph"/>It may help you to understand the rest of the documentation if you familiarize yourself with these first.<p class="paragraph"/><h2>Resources</h2><p class="paragraph"/>By resources we mean typically static resources that are used to render your application views, or other files served to your users.<p class="paragraph"/>This includes CSS, JavaScript and usually some icons and images.<p class="paragraph"/><h2>Modules</h2><p class="paragraph"/>In the resources framework, you define resource modules that have a name and contain one or more resources. You use GSP tags to indicate which modules your pages need.<p class="paragraph"/><h2>Module dependencies</h2><p class="paragraph"/>Specifying module dependencies means that you don't have to worry about the order of resource inclusion in your pages. By telling the framework which modules require other modules, you allow it to decide the correct order.<p class="paragraph"/>Just like Grails transitive dependencies, this will pull in all the modules required if you require one module that has other dependencies.<p class="paragraph"/><h2>Mappers</h2><p class="paragraph"/>Resource mappers are Grails artefacts that participate in the processing of resources. You start with a copy of the original resource, and after applying all the necessary mappers, you have the - typically mutated - final file to serve to users.<p class="paragraph"/>Mappers can modify and/or move and rename the file.<p class="paragraph"/>The person who declares resources can choose to exclude specific mappers per-resource, to prevent double-processing of resources that have been supplied pre-processed, such as pre-minified JS libraries.<p class="paragraph"/><h2>Mapper phases</h2><p class="paragraph"/>Resource mappers are applied in a specific order, denoted by a series of well-defined phases. This ensures that the right processing happens at the right times.<p class="paragraph"/><h2>Mapper operation</h2><p class="paragraph"/>Resource mappers often have an "operation" grouping, for example Yahoo UI and Google CSS minifier mappers might both have the operation name "minify", but unique mapper names. This allows the user to exclude a whole family of mappers on a per-resource basis.<p class="paragraph"/><h2>Undeclared Resources</h2><p class="paragraph"/>Undeclared resources are those that you link to using the Resources framework tags such as <a href="../ref/Tags/require.html" class="Tags">require</a>, <a href="../ref/Tags/img.html" class="Tags">img</a> and <a href="../ref/Tags/external.html" class="Tags">external</a> (or Grails 1.4 and higher g:resource/g:img and other linking tags that are resources-aware) but you <strong class="bold">did not explicitly declare in any modules</strong>.<p class="paragraph"/><h2>Ad-hoc/Legacy Resources</h2><p class="paragraph"/>Ad-hoc resources are tags that do not use the Resources mechanisms to create their links. Prior to Grails 1.4 this means links created with g:xxx tags instead of the r:xxx tags and hardcoded links to resources. For Grails 1.4 and higher these can only occur for hardcoded links to resources.<p class="paragraph"/><h2>Bundling</h2><p class="paragraph"/>Bundling is the act of aggregating two or more resources of the same type into one file. This reduces the number of requests the browser must make to your site, thus speeding up the page load time.<p class="paragraph"/><h2>CSS Rewriting</h2><p class="paragraph"/>Rewriting CSS is the act of changing any URLs in your CSS files so that they continue to point to the correct resource even if the CSS is bundled into a new file and/or moved to a new location in the filesystem.<p class="paragraph"/>When you bundle files, or move them to reduce link URL size (as the Cached-Resources plugin does), without URL rewriting this would break the links from your bundled file to other resources.<p class="paragraph"/><h2>Disposition</h2><p class="paragraph"/>The disposition of a resource indicates where in the response you would like the link to appear. By default the "head" disposition causes links to be rendered in the &#60;head&#62; section, and "defer" disposition causes links to JavaScript to be rendered at the end of the body.
+
+
+
+<h1 id="3. Declaring resources">3 Declaring resources</h1>
+You can declare your resources in your Application's Config.groovy or in a Resources artefact in your application or plugins.<p class="paragraph"/>This is done using a simple DSL in both cases. You define the names of the modules you have and the resources within them, and dependencies between modules.<p class="paragraph"/>
+
+
+<h2 id="3.1 The resource DSL">3.1 The resource DSL</h2>
+There are few methods to call in the DSL. At the top level method calls taking a single Closure argument are translated into module names. The code in the nested closure represents the module definition.<p class="paragraph"/>A module definition can call dependsOn, defaultBundle and resource methods:<p class="paragraph"/><div class="code"><pre>modules = &#123;
     core &#123;
         dependsOn 'jquery, utils'
         defaultBundle 'ui'<p class="paragraph"/>        resource url:'/js/core.js', disposition: 'head'
@@ -82,14 +242,22 @@ grails install&#45;plugin cached&#45;resources</pre></div><p class="paragraph"/>
         resource url:'/js/forms.js'
     &#125;
 &#125;</pre></div><p class="paragraph"/>The above DSL defines three resource modules; 'core', 'utils' and 'forms'. The resources in these modules will be automatically bundled out of the box according to the module name, resulting in fewer files. You can override this with <strong class="bold">bundle:'someOtherName'</strong> on each resource, or call defaultBundle on the module
-<h2><a name="3.1.1 The dependsOn method">3.1.1 The dependsOn method</a></h2>To declare that a module depends on another, you use dependsOn. It accepts a string or list of names. The string can be comma-delimited to specify multiple dependencies. You can also call dependsOn as many times as you like:<p class="paragraph"/><div class="code"><pre>modules = &#123;
+
+
+
+<h2 id="3.1.1 The dependsOn method">3.1.1 The dependsOn method</h2>
+To declare that a module depends on another, you use dependsOn. It accepts a string or list of names. The string can be comma-delimited to specify multiple dependencies. You can also call dependsOn as many times as you like:<p class="paragraph"/><div class="code"><pre>modules = &#123;
     core &#123;
         dependsOn 'jquery, utils'
         dependsOn 'other'
         dependsOn(&#91;'heavy', 'metal'&#93;)
     &#125;
 &#125;</pre></div>
-<h2><a name="3.1.2 The resource method">3.1.2 The resource method</a></h2>
+
+
+
+<h2 id="3.1.2 The resource method">3.1.2 The resource method</h2>
+
 Declaring a resource is done using the "resource" method. This takes either a single string URI or a map of arguments that define the URL of the resource and any other specific options you require.<p class="paragraph"/>The single-string argument variant is a simple shortcut for resources that are safe to use all defaults:<p class="paragraph"/><div class="code"><pre>modules = &#123;
     ui &#123;
         resource '/css/forms.css'
@@ -102,7 +270,7 @@ Declaring a resource is done using the "resource" method. This takes either a si
 <li>bundle - Optional. The name of the bundle to put the resource into. See "Bundling" for more details</li>
 <li>disposition - Optional. The disposition of the resource. If not specified, it will default to a value appropriate for the type of the resource. For JavaScript this default is "defer". To force code into the &#60;head&#62;, set it to "head".</li>
 <li>attrs - Optional. Map of attribute names and values to pass through to the linking tag when the resource is rendered. e.g. use to pass attrs:media:'print' for print-only CSS, or "type". Note that supplying "attrs" will prevent bundling of the resource. Passing in "type" (which is passed through to <a href="../ref/Tags/external.html" class="Tags">external</a> tag) allows you to tell the framework that the resource is a specific type irrespective of the file extension. For example if you have a file that ends ".less" but you want the framework to treat it like CSS when rendering links, you need to set attrs:&#91;type:"css"&#93;.</li>
-<li>id - Optional. Module-unique id of the resource to be used when <a href="../guide/single.html#5. Overriding resources" class="guide">overriding</a> resource properties. Defaults to the url of the resource if none supplied.</li>
+<li>id - Optional. Module-unique id of the resource to be used when <a href="../guide/single.html#5.%20Overriding%20resources" class="guide">overriding</a> resource properties. Defaults to the url of the resource if none supplied.</li>
 <li>linkOverride - Optional. The URL to use when rendering links for the resource, instead of the processed resource's URL. Allows your external resources to participate in dependency management, and some niche CDN requirements.</li>
 <li>wrapper - Optional. A Closure that will be used to render the resource link. The correct markup for linking will be passed in. Used primarily for MSIE workarounds i.e: wrapper: &#123; s -&#62; "&#60;!--if lt IE 8&#62;$s&#60;!endif--&#62;" &#125;. Note that supplying a wrapper will prevent bundling of that resource.</li>
 </ul><p class="paragraph"/>Examples:<p class="paragraph"/><div class="code"><pre>modules = &#123;
@@ -115,7 +283,11 @@ Declaring a resource is done using the "resource" method. This takes either a si
         resource url:'/js/forms.js'
     &#125;
 &#125;</pre></div>
-<h2><a name="3.1.3 The defaultBundle method">3.1.3 The defaultBundle method</a></h2>By default, modules with more than one resource will be auto-bundled using the module name as a bundle name. You can override this by setting the default bundle name for the module by calling defaultBundle. This name can be the same as bundles used in other modules, to bundle resoures across module boundaries.<p class="paragraph"/>The method takes a String or boolean as parameter. A string sets the default bundle name, and passing in a boolean false will turn off all default bundling for that module.<p class="paragraph"/><div class="code"><pre>modules = &#123;
+
+
+
+<h2 id="3.1.3 The defaultBundle method">3.1.3 The defaultBundle method</h2>
+By default, modules with more than one resource will be auto-bundled using the module name as a bundle name. You can override this by setting the default bundle name for the module by calling defaultBundle. This name can be the same as bundles used in other modules, to bundle resoures across module boundaries.<p class="paragraph"/>The method takes a String or boolean as parameter. A string sets the default bundle name, and passing in a boolean false will turn off all default bundling for that module.<p class="paragraph"/><div class="code"><pre>modules = &#123;
     core &#123;
         defaultBundle 'core&#45;ui'<p class="paragraph"/>        resource url:&#91;dir:'css/blueprint',file:'screen.css'&#93;, attrs:&#91;media:'screen, projection'&#93;
         resource url:&#91;dir:'css/blueprint',file:'ie.css'&#93;, attrs:&#91;media:'screen, projection'&#93;,  
@@ -125,7 +297,11 @@ Declaring a resource is done using the "resource" method. This takes either a si
         resource url:'/js/forms.js'
     &#125;
 &#125;</pre></div><p class="paragraph"/>Here you can see that the fallback bundle for both modules is set to "core-ui" and individual resources can still override this.
-<h2><a name="3.2 Resource artefacts">3.2 Resource artefacts</a></h2>The best place to put these declarations is in a resource artefact. These have a filename ending in Resources.groovy and live in grails-app/conf.<p class="paragraph"/>Note that these are Groovy ConfigSlurper scripts that are therefore environment-aware, so you can declare different resources for e.g. dev, test and production.<p class="paragraph"/>Example grails-app/conf/MyAppResources.groovy:<p class="paragraph"/><div class="code"><pre>modules = &#123;
+
+
+
+<h2 id="3.2 Resource artefacts">3.2 Resource artefacts</h2>
+The best place to put these declarations is in a resource artefact. These have a filename ending in Resources.groovy and live in grails-app/conf.<p class="paragraph"/>Note that these are Groovy ConfigSlurper scripts that are therefore environment-aware, so you can declare different resources for e.g. dev, test and production.<p class="paragraph"/>Example grails-app/conf/MyAppResources.groovy:<p class="paragraph"/><div class="code"><pre>modules = &#123;
     core &#123;
         dependsOn 'jquery, utils'
         defaultBundle 'ui'<p class="paragraph"/>        resource url:'/js/core.js', disposition: 'head'
@@ -138,7 +314,11 @@ Declaring a resource is done using the "resource" method. This takes either a si
         resource url:'/js/forms.js'
     &#125;
 &#125;</pre></div>
-<h2><a name="3.3 Config.groovy">3.3 Config.groovy</a></h2>Applications can also define resources in Config.groovy if they wish. Simply assign the DSL to the <strong class="bold">grails.resources.modules</strong> property.<p class="paragraph"/>Example in grails-app/conf/Config.groovy:<p class="paragraph"/><div class="code"><pre>grails.resources.modules = &#123;
+
+
+
+<h2 id="3.3 Config.groovy">3.3 Config.groovy</h2>
+Applications can also define resources in Config.groovy if they wish. Simply assign the DSL to the <strong class="bold">grails.resources.modules</strong> property.<p class="paragraph"/>Example in grails-app/conf/Config.groovy:<p class="paragraph"/><div class="code"><pre>grails.resources.modules = &#123;
     core &#123;
         dependsOn 'jquery, utils'
         defaultBundle 'ui'<p class="paragraph"/>        resource url:'/js/core.js', disposition: 'head'
@@ -150,16 +330,28 @@ Declaring a resource is done using the "resource" method. This takes either a si
         defaultBundle 'ui'<p class="paragraph"/>        resource url:'/css/forms.css'
         resource url:'/js/forms.js'
     &#125;
-&#125;</pre></div><p class="paragraph"/><h2><a name="3.4 Bundling">3.4 Bundling</a></h2>As mentioned earlier, bundling can be controlled in a number of ways. The logic runs as follows:
+&#125;</pre></div><p class="paragraph"/>
+
+
+<h2 id="3.4 Bundling">3.4 Bundling</h2>
+Bundling files is the process of concatenating multiple files of the same type into one, so that there are fewer requests made to the server. This can significantly improve page load times even when using ETag or Last-Modified caching schemes.<p class="paragraph"/>In a typical application you might bundle most or all of your CSS into one file, and all your common JS into one file, with per-page JS files for page-specific features.<p class="paragraph"/>This works very well in combination with the cached-resources plugin an mapper which hashes your files. It means that your clients will cache the (larger) bundled files "forever" but you needn't worry if your next deployment changes one file within a bundle - the bundle will be rebuilt with a new hash and downloaded to the client, as the URL for the resource will have changed.<p class="paragraph"/>There is of course a trade-off here, in that a change to one JS file in a bundle will trigger a download of the entire JS bundle for all clients.<p class="paragraph"/>It's important to understand that bundling is automatically performed per-module, but you can set it to bundle resources across modules - even those you have not defined yourself. For example using the jquery-ui plugin, you can force it to bundle all the jQuery and jQuery UI JS code into one file, mixed in along with your own code - all in the correct dependency ordering.<p class="paragraph"/>The framework will never bundle files that have different dispositions together - this makes no sense. Bundles are therefore automatically named to include the disposition (you may not see this if another mapper such as cached-resources is renaming the files).<p class="paragraph"/>Bundling can be controlled in a number of ways. The logic runs as follows:
 <ol>
-<li>If a resource has an explicit bundle property set, this is used.</li>
+<li>If a resource declaration has an explicit bundle property set, this is used.</li>
 <li>If there is no explicit bundle property set on the resource, it will use the default for the module</li>
 <li>The default for the module is "bundle_" plus the name of the module unless defaultBundle has been called</li>
 <li>If defaultBundle has been called in the module with a string, that name is used for the resource's bundle</li>
 <li>If defaultBundle has been called in the module with a boolean false, no bundling will occur on the resource, only resources with a bundle specified will be bundled.</li>
 </ol><p class="paragraph"/><strong class="bold">NOTE</strong> If a resource declares "attrs" or "wrapper" it will not be bundled at all. This is because bundling does not make sense in this situation unless all the attrs and wrapper logic match.
-<h1><a name="4. Using resources">4. Using resources</a></h1>Now that you know how to declare resources, you need to use them in your page.<p class="paragraph"/>There are several tags for this purpose, but the primary means is to use the <a href="../ref/Tags/require.html" class="Tags">require</a> tag to indicate which modules you need, and the <a href="../ref/Tags/layoutResources.html" class="Tags">layoutResources</a> tag to perform the rendering of the resources.<p class="paragraph"/>The <a href="../ref/Tags/require.html" class="Tags">require</a> tag causes the framework to look up all the resources required to satisfy your module dependencies. However nothing is rendered at that point.<p class="paragraph"/>The <a href="../ref/Tags/layoutResources.html" class="Tags">layoutResources</a> tag is called to render the resources themselves (and internally it calls into <a href="../ref/Tags/external.html" class="Tags">external</a> tag for each resource). This tag has special behaviour, in that the first time you call it, it automatically renders only resources with disposition "head". The second time you call it, it automatically renders only resources with disposition "defer".
-<h2><a name="4.1 Linking to CSS, JavaScript etc.">4.1 Linking to CSS, JavaScript etc.</a></h2>So you need to add two calls to <a href="../ref/Tags/layoutResources.html" class="Tags">layoutResources</a> tag to your GSP page or sitemesh layout. Normally you will place it in your sitemesh layout:<p class="paragraph"/>Your grails-app/views/layouts/main.gsp:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
+
+
+
+<h1 id="4. Using resources">4 Using resources</h1>
+Now that you know how to declare resources, you need to use them in your page.<p class="paragraph"/>There are several tags for this purpose, but the primary means is to use the <a href="../ref/Tags/require.html" class="Tags">require</a> tag to indicate which modules you need, and the <a href="../ref/Tags/layoutResources.html" class="Tags">layoutResources</a> tag to perform the rendering of the resources.<p class="paragraph"/>The <a href="../ref/Tags/require.html" class="Tags">require</a> tag causes the framework to look up all the resources required to satisfy your module dependencies. However nothing is rendered at that point.<p class="paragraph"/>The <a href="../ref/Tags/layoutResources.html" class="Tags">layoutResources</a> tag is called to render the resources themselves (and internally it calls into <a href="../ref/Tags/external.html" class="Tags">external</a> tag for each resource). This tag has special behaviour, in that the first time you call it, it automatically renders only resources with disposition "head". The second time you call it, it automatically renders only resources with disposition "defer".
+
+
+
+<h2 id="4.1 Linking to CSS, JavaScript etc.">4.1 Linking to CSS, JavaScript etc.</h2>
+So you need to add two calls to <a href="../ref/Tags/layoutResources.html" class="Tags">layoutResources</a> tag to your GSP page or sitemesh layout. Normally you will place it in your sitemesh layout:<p class="paragraph"/>Your grails-app/views/layouts/main.gsp:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
    <span class="xml&#45;tag">&#60;head&#62;</span>
       <span class="xml&#45;tag">&#60;g:layoutTitle/&#62;</span>
       <span class="xml&#45;tag">&#60;r:layoutResources/&#62;</span>
@@ -181,19 +373,31 @@ Declaring a resource is done using the "resource" method. This takes either a si
            Hello World
       <span class="xml&#45;tag">&#60;/div&#62;</span>  
    <span class="xml&#45;tag">&#60;/body&#62;</span>
-<span class="xml&#45;tag">&#60;/html&#62;</span></pre></div><p class="paragraph"/><h2><a name="4.2 Linking to images">4.2 Linking to images</a></h2>When you need to render an &#60;img&#62; tag that you wish to be subject to the Resources processing chain (e.g. to make it eternally cacheable) you should use the &#60;r:img&#62; tag:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;r:img uri=<span class="xml&#45;quote">"images/logo.png"</span> width=<span class="xml&#45;quote">"100"</span> height=<span class="xml&#45;quote">"50"</span>/&#62;</span><p class="paragraph"/><span class="xml&#45;tag">&#60;r:img dir=<span class="xml&#45;quote">"images"</span> file=<span class="xml&#45;quote">"logo.png"</span> width=<span class="xml&#45;quote">"100"</span> height=<span class="xml&#45;quote">"50"</span>/&#62;</span></pre></div><p class="paragraph"/>Usually this will produce a link to an undeclared resource. However you can declare images in modules and specify extra attributes in "attrs" to supply e.g. the width and height:<p class="paragraph"/><div class="code"><pre>modules = &#123;
+<span class="xml&#45;tag">&#60;/html&#62;</span></pre></div><p class="paragraph"/>
+
+
+<h2 id="4.2 Linking to images">4.2 Linking to images</h2>
+When you need to render an &#60;img&#62; tag that you wish to be subject to the Resources processing chain (e.g. to make it eternally cacheable) you should use the &#60;r:img&#62; tag:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;r:img uri=<span class="xml&#45;quote">"images/logo.png"</span> width=<span class="xml&#45;quote">"100"</span> height=<span class="xml&#45;quote">"50"</span>/&#62;</span><p class="paragraph"/><span class="xml&#45;tag">&#60;r:img dir=<span class="xml&#45;quote">"images"</span> file=<span class="xml&#45;quote">"logo.png"</span> width=<span class="xml&#45;quote">"100"</span> height=<span class="xml&#45;quote">"50"</span>/&#62;</span></pre></div><p class="paragraph"/>Usually this will produce a link to an undeclared resource. However you can declare images in modules and specify extra attributes in "attrs" to supply e.g. the width and height:<p class="paragraph"/><div class="code"><pre>modules = &#123;
     images &#123;
         resource url:'images/logo.png', attrs:&#91;width:100, height:50, alt:'Our logo'&#93;, disposition:'inline'
         resource url:'images/icon/add.png', attrs:&#91;width:32, height:32, alt:'Add'&#93;, disposition:'inline'
     &#125;
 &#125;</pre></div><p class="paragraph"/>Once you have done this, using &#60;r:img&#62; to reference them would automatically set the width, height and other attributes.<p class="paragraph"/>The disposition "inline" is optional - as long as you don't have any other modules that "dependOn" the images module and link using r:resource or r:img, you won't need this.
-<h2><a name="4.3 Linking to resources explicitly, bypassing modules">4.3 Linking to resources explicitly, bypassing modules</a></h2>Sometimes you may need to link to a specific resource, or produce a URL pointing to the specific resource without rendering links to all the modules it depends on - or outside of a context where you can call &#60;r:layoutResources/&#62;. You may even wish to link to an undeclared resource, but still want it to be subject to processing on the fly.<p class="paragraph"/>To link to CSS or other resources that are not declared in a module you use &#60;r:external&#62;:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;r:external uri=<span class="xml&#45;quote">"js/custom.js"</span>/&#62;</span>
+
+
+
+<h2 id="4.3 Linking to resources explicitly, bypassing modules">4.3 Linking to resources explicitly, bypassing modules</h2>
+Sometimes you may need to link to a specific resource, or produce a URL pointing to the specific resource without rendering links to all the modules it depends on - or outside of a context where you can call &#60;r:layoutResources/&#62;. You may even wish to link to an undeclared resource, but still want it to be subject to processing on the fly.<p class="paragraph"/>To link to CSS or other resources that are not declared in a module you use &#60;r:external&#62;:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;r:external uri=<span class="xml&#45;quote">"js/custom.js"</span>/&#62;</span>
 <span class="xml&#45;tag">&#60;script type=<span class="xml&#45;quote">"text/javascript"</span>&#62;</span>
     var urlOfCSSToLoadInJSCode = '$&#123;r.external(uri:<span class="xml&#45;quote">"css/custom.css"</span>).encodeAsJavaScript()';
 <span class="xml&#45;tag">&#60;/script&#62;</span>
-<span class="xml&#45;tag">&#60;r:external uri=<span class="xml&#45;quote">"icons/favicon.ico"</span>/&#62;</span></pre></div><p class="paragraph"/>This would output the &#60;script&#62; and &#60;link&#62; tags required to include those resources, without rendering their dependencies first - whether the resource is declared in a module or not. The example shows how you might pass the URL of a resource to some JavaScript code for use later at runtime.<p class="paragraph"/><h2><a name="4.4 Including pieces of JavaScript code generated at runtime">4.4 Including pieces of JavaScript code generated at runtime</a></h2>Often in an application, especially those using custom Grails tags and rich UIs, you will need to render fragments of JavaScript code while the page is being rendered. It is not always possible to know what JS code there will be in the page until the render process is finished.<p class="paragraph"/>The <a href="../ref/Tags/script.html" class="Tags">script</a> tag allows you to specify sections of JavaScript text during page rendering, but if using Sitemesh layouts, you will be able to have these fragments appear either in &#60;head&#62; or deferred to the end of the page, just like other JavaScript resources.<p class="paragraph"/>This integrates with the disposition mechanism, allowing you to throw your JavaScript into a specific location:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;r:script/&#62;</span>
+<span class="xml&#45;tag">&#60;r:external uri=<span class="xml&#45;quote">"icons/favicon.ico"</span>/&#62;</span></pre></div><p class="paragraph"/>This would output the &#60;script&#62; and &#60;link&#62; tags required to include those resources, without rendering their dependencies first - whether the resource is declared in a module or not. The example shows how you might pass the URL of a resource to some JavaScript code for use later at runtime.<p class="paragraph"/>
+
+
+<h2 id="4.4 Including pieces of JavaScript code generated at runtime">4.4 Including pieces of JavaScript code generated at runtime</h2>
+Often in an application, especially those using custom Grails tags and rich UIs, you will need to render fragments of JavaScript code while the page is being rendered. It is not always possible to know what JS code there will be in the page until the render process is finished.<p class="paragraph"/>The <a href="../ref/Tags/script.html" class="Tags">script</a> tag allows you to specify sections of JavaScript text during page rendering, but if using Sitemesh layouts, you will be able to have these fragments appear either in &#60;head&#62; or deferred to the end of the page, just like other JavaScript resources.<p class="paragraph"/>This integrates with the disposition mechanism, allowing you to throw your JavaScript into a specific location:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;r:script&#62;</span>
     window.alert('This is the end of the page!');
-<span class="xml&#45;tag">&#60;/r:script&#62;</span><p class="paragraph"/><span class="xml&#45;tag">&#60;r:script disposition='head'/&#62;</span>
+<span class="xml&#45;tag">&#60;/r:script&#62;</span><p class="paragraph"/><span class="xml&#45;tag">&#60;r:script disposition='head'&#62;</span>
     window.alert('This is the head of the page!');
 <span class="xml&#45;tag">&#60;/r:script&#62;</span></pre></div><p class="paragraph"/>What happens is the &#60;r:script&#62; tag stashes your fragment in the request attributes until &#60;r:layoutResources/&#62; is called - when it is pulled out of the attributes and rendered according to the current disposition being rendered.<p class="paragraph"/>This is ideal for other custom Grails GSP taglibs to use to write out their JS code used to e.g. set up UI elements:<p class="paragraph"/><div class="code"><pre>class MyCustomTagLib &#123;
     def datePicker = &#123;
@@ -201,7 +405,11 @@ Declaring a resource is done using the "resource" method. This takes either a si
             out &#60;&#60; '$("&#35;'+attrs.id.encodeAsJavaScript()+').datePicker();'
         &#125;
     &#125;
-&#125;</pre></div><p class="paragraph"/>The order of code is preserved, and all such fragments are rendered <strong class="bold">after</strong> all the modules required by the page (in that disposition) have been included.<h1><a name="5. Overriding resources">5. Overriding resources</a></h1>When plugins provide resource module declarations, they may not choose the same resource attributes that you would like to use - in particular plugins will often auto-bundle resources by module name, or have dependencies that you'd like to tweak.<p class="paragraph"/>This is easy to achieve with the Resources framework, as your application can override the defaultBundle, dependsOn and resources of any module using the "overrides" clause:<p class="paragraph"/><div class="code"><pre>modules = &#123;
+&#125;</pre></div><p class="paragraph"/>The order of code is preserved, and all such fragments are rendered <strong class="bold">after</strong> all the modules required by the page (in that disposition) have been included.
+
+
+<h1 id="5. Overriding resources">5 Overriding resources</h1>
+When plugins provide resource module declarations, they may not choose the same resource attributes that you would like to use - in particular plugins will often auto-bundle resources by module name, or have dependencies that you'd like to tweak.<p class="paragraph"/>This is easy to achieve with the Resources framework, as your application can override the defaultBundle, dependsOn and resources of any module using the "overrides" clause:<p class="paragraph"/><div class="code"><pre>modules = &#123;
     overrides &#123;
         jquery &#123;
             // We want jquery bundled in with our other code
@@ -211,18 +419,32 @@ Declaring a resource is done using the "resource" method. This takes either a si
         &#125;
     &#125;
 &#125;</pre></div><p class="paragraph"/>All you do is re-define the module inside your "overrides" clause (yes this mean no module can be called "overrides"), and provide new values for defaultBundle, dependsOn and individual resource attributes.<p class="paragraph"/>To override the attributes of resources, the original resource needs to have an id declared on it, or you can use the URI of the original resource if no id was provided.<p class="paragraph"/>Arguments passed to the resource call in "overrides" are merged into those for the original resource, before being processed. Therefor you can change or clear any values previously declared.
-<h1><a name="6. Creating custom mappers">6. Creating custom mappers</a></h1>The resource processing chain uses ResourceMapper artefacts to do the work.<p class="paragraph"/>You can create your own ResourceMapper artefacts inside your application or plugins to perform tasks such as;
+
+
+
+<h1 id="6. Creating custom mappers">6 Creating custom mappers</h1>
+The resource processing chain uses ResourceMapper artefacts to do the work.<p class="paragraph"/>You can create your own ResourceMapper artefacts inside your application or plugins to perform tasks such as;
 <ul class="star">
 <li>Moving and renaming resources</li>
 <li>Changing the contents of resource files (compress, minify, compile etc)</li>
 <li>Set HTTP response headers when requests are processed</li>
 </ul><p class="paragraph"/>Resource mappers only get the chance to map (process) each resource once - the final resource is then stored on disk to serve future requests.
-<h2><a name="6.1 Defining a mapper">6.1 Defining a mapper</a></h2>Defining a resource mapper is easy. You create a file with ResourceMapper.groovy as the file suffix, in the grails-app/resourceMappers folder.<p class="paragraph"/>The name of the mapper is extracted from the filename like any other Grails artefact, for example "TestResourceMapper" yields a mapper with name "test".<p class="paragraph"/>Example grails-app/resourceMappers/TestResourceMapper.groovy:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.MUTATION<p class="paragraph"/>    def map(resource, config) &#123;
+
+
+
+<h2 id="6.1 Defining a mapper">6.1 Defining a mapper</h2>
+Defining a resource mapper is easy. You create a file with ResourceMapper.groovy as the file suffix, in the grails-app/resourceMappers folder.<p class="paragraph"/>The name of the mapper is extracted from the filename like any other Grails artefact, for example "TestResourceMapper" yields a mapper with name "test".<p class="paragraph"/>Example grails-app/resourceMappers/TestResourceMapper.groovy:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.MUTATION<p class="paragraph"/>    def map(resource, config) &#123;
         def file = <span class="java&#45;keyword">new</span> File(resource.processedFile.parentFile, <span class="java&#45;quote">"_$&#123;resource.processedFile.name&#125;"</span>)
         assert resource.processedFile.renameTo(file)
         resource.processedFile = file
         resource.updateActualUrlFromProcessedFile()
-    &#125;<p class="paragraph"/>&#125;</pre></div><p class="paragraph"/>The only method a mapper must implement is <strong class="bold">map(resource, config)</strong> which is passed the <a href="http://github.com/grails-plugins/grails-resources/blob/master/src/groovy/org/grails/plugin/resource/ResourceMeta.groovy" target="blank">ResourceMeta</a> object that represents the resource and the mapper-specific config variables pulled out of grails.resources.&#60;mappername&#62;.<p class="paragraph"/>This method can do whatever it needs to the resource's file, provided it calls the updateActualUrlFromProcessedFile() method if the resource moves, unless you patch ResourceMeta.actualUrl manually.<p class="paragraph"/>You can change other properties of the resource, such as change the content type of the resource, add or modify tagAttributes (which are passed through when rendering the link for the resource).<p class="paragraph"/>That's all you need to do to create a mapper. The best way to learn how they work is to study the source of <a href="http://grails.org/plugin/cached-resources" target="blank">Cached-Resources</a> and <a href="http://grails.org/plugin/zipped-resources" target="blank">Zipped-Resources</a> plugins.<p class="paragraph"/><h2><a name="6.2 Mapper phases and priority">6.2 Mapper phases and priority</a></h2>The example mapper shows the "phase" property being set to MapperPhase.MUTATION. The <a href="http://github.com/grails-plugins/grails-resources/blob/master/src/groovy/org/grails/plugin/resource/mapper/MapperPhase.groovy" target="blank">MapperPhase</a> enumeration provides the possible mapping phases in the order in which they occur during processing of resources:<p class="paragraph"/><div class="code"><pre>enum MapperPhase &#123;
+    &#125;<p class="paragraph"/>&#125;</pre></div><p class="paragraph"/>The only method a mapper must implement is <strong class="bold">map(resource, config)</strong> which is passed the <a href="http://github.com/grails-plugins/grails-resources/blob/master/src/groovy/org/grails/plugin/resource/ResourceMeta.groovy" target="blank">ResourceMeta</a> object that represents the resource and the mapper-specific config variables pulled out of <code>grails.resources.mappers.&#60;mappername&#62;</code>.
+NOTE: The name of the mapper is always in all lower case.<p class="paragraph"/>This method can do whatever it needs to the resource's file, provided it calls the updateActualUrlFromProcessedFile() method if the resource moves, unless you patch ResourceMeta.actualUrl manually.<p class="paragraph"/>You can change other properties of the resource, such as change the content type of the resource, add or modify tagAttributes (which are passed through when rendering the link for the resource).<p class="paragraph"/>That's all you need to do to create a mapper. The best way to learn how they work is to study the source of <a href="http://grails.org/plugin/cached-resources" target="blank">Cached-Resources</a> and <a href="http://grails.org/plugin/zipped-resources" target="blank">Zipped-Resources</a> plugins.
+
+
+
+<h2 id="6.2 Mapper phases and priority">6.2 Mapper phases and priority</h2>
+The example mapper shows the "phase" property being set to MapperPhase.MUTATION. The <a href="http://github.com/grails-plugins/grails-resources/blob/master/src/groovy/org/grails/plugin/resource/mapper/MapperPhase.groovy" target="blank">MapperPhase</a> enumeration provides the possible mapping phases in the order in which they occur during processing of resources:<p class="paragraph"/><div class="code"><pre>enum MapperPhase &#123;
     GENERATION, // create <span class="java&#45;keyword">new</span> assets = compile less files
     MUTATION, // alter/improve assets (may mean creating <span class="java&#45;keyword">new</span>/deleting aggregated resources) = spriting
     COMPRESSION, // reducing the file size but maintaining semantics = minify
@@ -235,9 +457,17 @@ Declaring a resource is done using the "resource" method. This takes either a si
     ABSOLUTISATION, // update inter asset references to their distributed equivalent = css links
     NOTIFICATION // let the world know about the <span class="java&#45;keyword">new</span> resources = cache invalidation
 &#125;</pre></div><p class="paragraph"/>In most cases it will be enough to specify your phase and operation (see next section). However in some cases there may be issues where multiple mappers in the same phase must operate in a specific order. In those cases a "priority" property can be set to specify the priority integer.<p class="paragraph"/>Mappers will be executed in phase order, in order of ascending priority within each phase. The default priority if not specified is equivalent to zero.
-<h2><a name="6.3 Operation">6.3 Operation</a></h2>The optional "operation" property allows you to specify the name of the kind of work performed by the mapper. Users can then prevent any mappers of this operation from executing on their resources.<p class="paragraph"/>The common example is to specify <strong class="bold">exclude:"minify"</strong> in a resource declaration to prevent any kind of minifying mapper from being applied to a resource that is already minified.<p class="paragraph"/>A similar operation called e.g. "compress" could be used to prevent duplicate zipping of resources that may have been pre-compressed (such as images).<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.COMPRESS<p class="paragraph"/>    def operation = <span class="java&#45;quote">"compression"</span><p class="paragraph"/>    def map(resource, config) &#123;
+
+
+
+<h2 id="6.3 Operation">6.3 Operation</h2>
+The optional "operation" property allows you to specify the name of the kind of work performed by the mapper. Users can then prevent any mappers of this operation from executing on their resources.<p class="paragraph"/>The common example is to specify <strong class="bold">exclude:"minify"</strong> in a resource declaration to prevent any kind of minifying mapper from being applied to a resource that is already minified.<p class="paragraph"/>A similar operation called e.g. "compress" could be used to prevent duplicate zipping of resources that may have been pre-compressed (such as images).<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.COMPRESS<p class="paragraph"/>    def operation = <span class="java&#45;quote">"compression"</span><p class="paragraph"/>    def map(resource, config) &#123;
         // Zip the file here
-    &#125;<p class="paragraph"/>&#125;</pre></div><p class="paragraph"/>Note the operations and mapper names occupy the same namespace so that the "exclude" argument on resource declarations can apply to either.<p class="paragraph"/>Resources will fail fast at runtime if an operation is specified on any mapper, where there is also a mapper with a name the same as the operation.<p class="paragraph"/><h2><a name="6.4 Processing only the right types of files">6.4 Processing only the right types of files</a></h2>Often a mapper is only meant to target certain file types or file patterns. Make it easier for your users by operating correctly out of the box by specifying defaultExcludes and/or defaultIncludes for your mapper, which will filter the resources passed to your mapper:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.MUTATION<p class="paragraph"/>    <span class="java&#45;keyword">static</span> defaultExcludes = &#91;
+    &#125;<p class="paragraph"/>&#125;</pre></div><p class="paragraph"/>Note the operations and mapper names occupy the same namespace so that the "exclude" argument on resource declarations can apply to either.<p class="paragraph"/>Resources will fail fast at runtime if an operation is specified on any mapper, where there is also a mapper with a name the same as the operation.<p class="paragraph"/>
+
+
+<h2 id="6.4 Processing only the right types of files">6.4 Processing only the right types of files</h2>
+Often a mapper is only meant to target certain file types or file patterns. Make it easier for your users by operating correctly out of the box by specifying defaultExcludes and/or defaultIncludes for your mapper, which will filter the resources passed to your mapper:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class TestResourceMapper &#123;<p class="paragraph"/>    def phase = MapperPhase.MUTATION<p class="paragraph"/>    <span class="java&#45;keyword">static</span> defaultExcludes = &#91;
         '&#42;&#42;/&#42;.png',
         '&#42;&#42;/&#42;.gif',
         '&#42;&#42;/&#42;.jpg',
@@ -248,7 +478,11 @@ Declaring a resource is done using the "resource" method. This takes either a si
     <span class="java&#45;keyword">static</span> defaultIncludes = &#91; '/images/&#42;&#42;' &#93;<p class="paragraph"/>    def map(resource, config) &#123;
         &#8230;
     &#125;</pre></div><p class="paragraph"/>These defaults can be overidden by the user with the <strong class="bold">grails.resources.&#60;mappername&#62;.includes</strong> and <strong class="bold">grails.resources.&#60;mappername&#62;.excludes</strong> Config variables.
-<h2><a name="6.5 Adding response headers and intercepting requests">6.5 Adding response headers and intercepting requests</a></h2>Resource mappers also have the opportunity to take part in response handling so that they can adjust the response headers if necessary. You may need to adapt the handling of the current request to the request headers supplied.<p class="paragraph"/>Note that this cannot be used to change how the resource is mapped - the mapping is performed once only, but the response headers can be customized  every time the file is requested.<p class="paragraph"/>As an example, the Zipped-Resources plugin uses this mechanism to set the Content-Encoding header:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class ZipResourceMapper &#123;<p class="paragraph"/>    <span class="java&#45;keyword">static</span> phase = MapperPhase.ALTERNATEREPRESENTATION<p class="paragraph"/>    /&#42;&#42;
+
+
+
+<h2 id="6.5 Adding response headers and intercepting requests">6.5 Adding response headers and intercepting requests</h2>
+Resource mappers also have the opportunity to take part in response handling so that they can adjust the response headers if necessary. You may need to adapt the handling of the current request to the request headers supplied.<p class="paragraph"/>Note that this cannot be used to change how the resource is mapped - the mapping is performed once only, but the response headers can be customized  every time the file is requested.<p class="paragraph"/>As an example, the Zipped-Resources plugin uses this mechanism to set the Content-Encoding header:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.grails.plugin.resource.mapper.MapperPhase<p class="paragraph"/>class ZipResourceMapper &#123;<p class="paragraph"/>    <span class="java&#45;keyword">static</span> phase = MapperPhase.ALTERNATEREPRESENTATION<p class="paragraph"/>    /&#42;&#42;
      &#42; Rename the file to a hash of it's contents, and set caching headers 
      &#42;/
     def map(resource, config) &#123;
@@ -258,19 +492,111 @@ Declaring a resource is done using the "resource" method. This takes either a si
             resp.setHeader('Content&#45;Encoding', 'gzip')
         &#125;    
     &#125;
-&#125;</pre></div><p class="paragraph"/>Here the mapper adds a Closure that takes the request and response objects to the resource's requestProcessors list. These will be called in the order they are defined on the resource.<p class="paragraph"/><h1><a name="7. Writing plugins that use Resources">7. Writing plugins that use Resources</a></h1>There are generally two kinds of plugins that provide Resources artefacts; those that expose resources such as JavaScript libraries, and those that supply custom mappers e.g. to minify resources.<p class="paragraph"/><h2>Plugin dependencies</h2><p class="paragraph"/>If your plugin exposes resources, it does not need to depend on the "resources" plugin. In fact if it is intended to interoperate with applications that do <strong class="bold">not</strong> use the Resources framework, you should not depend on the "resources" plugin. Defining XXXXResources.groovy files does not require dependency on the plugin at all.<p class="paragraph"/>If you are exposing a mapper, you will need to have a dependency on the "resources" plugin so that you can reference the MapperPhase enum.<p class="paragraph"/><h2>Versioning</h2><p class="paragraph"/>When exposing resources, it is becoming a convention to ensure that your plugin has a version number that matches the version of the libraries you are exposing - with point releases or other suffixes to denote interim plugin releases where the library is the same but the plugin has changed.<p class="paragraph"/>This is important because it allows other applications that use the library you expose to specify which version of it they require, without having to mentally map the library version to yet another plugin version.<p class="paragraph"/><h2>Avoiding bloat</h2><p class="paragraph"/>It's important to remember that the dependencies introduced by a mapper plugin end up in the user's WAR deployment. Therefore mapper plugins should have minimal dependencies, and where possible focus on a specific niche of mapping - for example avoid creating something like a monolithic "minified-resources" plugin that bundles every known minifier library together.<p class="paragraph"/><h2>Naming conventions for mapper plugins</h2><p class="paragraph"/>It is recommended that developers establish sound naming conventions in the community such that it is easy for users to tell what a mapper plugin will do for them, in a way consistent with other mapper plugins of similar type.<p class="paragraph"/>For example there may be YUI and a Google CSS minifier plugins. These should be clearly named e.g:
+&#125;</pre></div><p class="paragraph"/>Here the mapper adds a Closure that takes the request and response objects to the resource's requestProcessors list. These will be called in the order they are defined on the resource.<p class="paragraph"/>
+
+
+<h1 id="7. Writing plugins that use Resources">7 Writing plugins that use Resources</h1>
+There are generally two kinds of plugins that provide Resources artefacts; those that expose resources such as JavaScript libraries, and those that supply custom mappers e.g. to minify resources.<p class="paragraph"/><h2>Plugin dependencies</h2><p class="paragraph"/>If your plugin exposes resources, it does not need to depend on the "resources" plugin. In fact if it is intended to interoperate with applications that do <strong class="bold">not</strong> use the Resources framework, you should not depend on the "resources" plugin. Defining XXXXResources.groovy files does not require dependency on the plugin at all.<p class="paragraph"/>If you are exposing a mapper, you will need to have a dependency on the "resources" plugin so that you can reference the MapperPhase enum.<p class="paragraph"/><h2>Versioning</h2><p class="paragraph"/>When exposing resources, it is becoming a convention to ensure that your plugin has a version number that matches the version of the libraries you are exposing - with point releases or other suffixes to denote interim plugin releases where the library is the same but the plugin has changed.<p class="paragraph"/>This is important because it allows other applications that use the library you expose to specify which version of it they require, without having to mentally map the library version to yet another plugin version.<p class="paragraph"/><h2>Avoiding bloat</h2><p class="paragraph"/>It's important to remember that the dependencies introduced by a mapper plugin end up in the user's WAR deployment. Therefore mapper plugins should have minimal dependencies, and where possible focus on a specific niche of mapping - for example avoid creating something like a monolithic "minified-resources" plugin that bundles every known minifier library together.<p class="paragraph"/><h2>Naming conventions for mapper plugins</h2><p class="paragraph"/>It is recommended that developers establish sound naming conventions in the community such that it is easy for users to tell what a mapper plugin will do for them, in a way consistent with other mapper plugins of similar type.<p class="paragraph"/>For example there may be YUI and a Google CSS minifier plugins. These should be clearly named e.g:
 <ul class="star">
 <li>yui-css-minified-resources</li>
 <li>google-css-minified-resources</li>
-</ul><p class="paragraph"/>In addition the mappers must be clearly named, i.e. YuiCssMinifyMapper and GoogleCssMinifyMapper. Such that the user can exclude them selectively with code such as <strong class="bold">exclude:'yuicssminify'</strong>.<p class="paragraph"/><h1><a name="8. Debugging">8. Debugging</a></h1>Due to the processing of resources, it can be tricky to diagnose problems when something is not working - your styling may not be coming through correctly, or you are getting weird JS errors.<p class="paragraph"/>Usually these are due to incorrect dependencies in your modules, but you may also have actual bugs in your JS or CSS.<p class="paragraph"/>When you're using mappers that completely rename or aggregate files, it can be hard to tell where the problem lies.<p class="paragraph"/>There are a number of features in Resources that make it easier to debug such issues.<p class="paragraph"/>First: Get familiar with your browser's resource inspector. All modern browsers have a developer mode which lets you inspect the resources loaded by a page - including the request and response headers and the content itself. This is indispensable. For Safari you need to explicitly turn this on. For Firefox you may need to install firebug.<p class="paragraph"/><h2>The custom response header</h2><p class="paragraph"/>Every resource served by the plugin in development mode adds the <strong class="bold">X-Grails-Resources-Original-Src</strong> header to all resources served.<p class="paragraph"/>The value shows you the original filename of the resource. In the case of bundled resources, the first part is the bundle name, and then follow all the names of the resources appended to the file, in the order they appear.<p class="paragraph"/><h2>The quick debug option - turn off processing for the current request</h2><p class="paragraph"/>Any URL in your application can have the query parameter <strong class="bold">_debugResources=y</strong> added to it, and the request will perform no processing. So for example if you are browsing <strong class="bold">http://localhost:8080/myapp/admin</strong> and need to bypass resources, just change the URL in your browser to
-<strong class="bold">http://localhost:8080/myapp/admin?_debugResources=y</strong><p class="paragraph"/>Dependency management will still be in effect (otherwise your app would break) but the resources will not be bundled or have other mappers applied. Resources will be served with a timestamp - this allows you to set breakpoints on resources and yet also force a refresh in your browser if you find that your browser still caches resources even after you have edited them and no caching headers are set. If this occurs, you can force a timestamp refresh by adding <strong class="bold">_refreshResources=y</strong> to the query params.<p class="paragraph"/><h2>The nuclear debug option - turn on resource debugging all the time </h2><p class="paragraph"/>You can turn off resource processing completely with the trivial Config variable, so that it is as if every request you make has _debugResources=y appended to it:<p class="paragraph"/><div class="code"><pre>grails.resources.debug = <span class="java&#45;keyword">true</span></pre></div><p class="paragraph"/>You can specify this value per-environment in your Config.<p class="paragraph"/><h2>Inspecting your dependency data</h2><p class="paragraph"/>A utility function in ResourceService can be used to output the current resource metadata that the plugin has - all the modules and resources and their dependencies.<p class="paragraph"/>Simply add a "println resourceService.dumpResources()" somewhere in your application or GSP and it will come out.<p class="paragraph"/><h2>Turning on debug logging</h2><p class="paragraph"/>There are copious amounts of debug logging output by the plugin that should make it relatively easy to track down problems. This information includes the order of mapper execution that will be used, the dependency order of your resource module definitions, and all the steps of processing each resource.<p class="paragraph"/>To enable debug logging add this to your Config logging section:<p class="paragraph"/><div class="code"><pre>debug <span class="java&#45;quote">"org.grails.plugin.resource"</span></pre></div><h1><a name="9. Configuration">9. Configuration</a></h1>There are various configuration options to control processing of your resources.<p class="paragraph"/>All of these config variables can of course be set per-environment.<p class="paragraph"/><h2>Change the /static/ URI prefix: grails.resources.uri.prefix</h2><p class="paragraph"/>By default the plugin serves the modified static resources from URIs beginning with &#60;appcontext&#62;/static/.<p class="paragraph"/>You can change this by assigning a value to <strong class="bold">grails.resources.uri.prefix</strong><p class="paragraph"/><h2>Debug mode: grails.resources.debug</h2><p class="paragraph"/>Setting <strong class="bold">grails.resources.debug=true</strong> will force debug mode all the time, as if you added _debugResources=y to every request.<p class="paragraph"/><h2>Dependency-only mode: grails.resources.processing.enabled</h2><p class="paragraph"/>You can turn off resource processing completely with the trivial Config variable:<p class="paragraph"/><div class="code"><pre>grails.resources.processing.enabled = <span class="java&#45;keyword">false</span></pre></div><p class="paragraph"/>Like the _debugResources option, this will perform no processing at all. It will also not require a writable file system on the server, but obviously precludes any processing of resources.<p class="paragraph"/>You do however retain the dependency management abilities.<p class="paragraph"/><h2>Controlling the scope of the adhoc filter: grails.resources.adhoc.patterns</h2><p class="paragraph"/>The ad-hoc resource filter is mapped using Servlet SDK filter mappings, which are more restricted that Ant patterns. You can specify folder (xxx/<strong class="bold">) or file type (</strong>.xxx) mappings only.<p class="paragraph"/>You may not want the adhoc filter, which is only used for legacy resources (which are not linked to using resource tags), to intercept everything in your application.<p class="paragraph"/>The default value is:<p class="paragraph"/><div class="code"><pre>grails.resources.adhoc.patterns = &#91;<span class="java&#45;quote">"/images/&#42;"</span>, <span class="java&#45;quote">"&#42;.css"</span>, <span class="java&#45;quote">"&#42;.js"</span>&#93;</pre></div><p class="paragraph"/><h2>Controlling the includes and excludes of the adhoc filter: grails.resources.adhoc.includes/excludes</h2><p class="paragraph"/>While the grails.resources.adhoc.patterns setting gives you coarse control over which legacy URIs are intercepted, you can get full Ant-style include/exclude patterns using the <strong class="bold">grails.resources.adhoc.includes</strong> and <strong class="bold">grails.resources.adhoc.excludes</strong> variables.<p class="paragraph"/>They both accept a list of Ant-style patterns.<p class="paragraph"/><h2>Including specific resource patterns per-mapper: grails.resources.&#60;mappername&#62;.includes</h2><p class="paragraph"/>You can control the list of matching resources on a per-mapper basis. Mappers provide sensible defaults but you may have new content types (for example a new CSS variant such as LESS) that were not known at the time the mapper was written.<p class="paragraph"/>So for example to add .less files to processing by the CSS rewriters (necessary for correct behaviour with bundle mapper):<p class="paragraph"/><div class="code"><pre>grails.resources.cssrewriter.includes = &#91;'&#42;&#42;/&#42;.css', '&#42;&#42;/&#42;.less'&#93;
-grails.resources.csspreprocessor.includes = &#91;'&#42;&#42;/&#42;.css', '&#42;&#42;/&#42;.less'&#93;</pre></div><p class="paragraph"/>You can also use this to ensure that only resources under a specific folder are processed.<p class="paragraph"/>Note that the value you provide <strong class="bold">replaces</strong> the default list supplied by the mapper.<p class="paragraph"/><h2>Excluding specific resource patterns per-mapper:grails.resources.&#60;mappername&#62;.excludes</h2><p class="paragraph"/>There may be times when a mapper is processing too many files - those that may have already been processed or that may become damaged by the mapping (i.e. incompatibilities due to relative code loading by JS code). Simply add the resource names or patterns to that mapper's excludes:<p class="paragraph"/><div class="code"><pre>grails.resources.cssrewriter.excludes = &#91;'unsafe/&#42;&#42;'&#93;
-grails.resources.csspreprocessor.excludes = &#91;'unsafe/&#42;&#42;'&#93;
-grails.resources.bundle.excludes = &#91;'unsafe/&#42;&#42;/&#42;.css'&#93;</pre></div><p class="paragraph"/>Note that the value you provide <strong class="bold">replaces</strong> the default list supplied by the mapper.<p class="paragraph"/><h2>Disabling CSS rewriting: grails.resources.rewrite.css</h2><p class="paragraph"/>It is possible to turn off all CSS rewriting by setting this value to false. This is not recommended as it will usually break bundling unless all your links are relative and you don't have any mappers that move your resources relative to your CSS.
+</ul><p class="paragraph"/>In addition the mappers must be clearly named, i.e. YuiCssMinifyMapper and GoogleCssMinifyMapper. Such that the user can exclude them selectively with code such as <strong class="bold">exclude:'yuicssminify'</strong>.<p class="paragraph"/>
 
-        </div>
+
+<h1 id="8. Debugging">8 Debugging</h1>
+Due to the processing of resources, it can be tricky to diagnose problems when something is not working - your styling may not be coming through correctly, or you are getting weird JS errors.<p class="paragraph"/>Usually these are due to incorrect dependencies in your modules, but you may also have actual bugs in your JS or CSS.<p class="paragraph"/>When you're using mappers that completely rename or aggregate files, it can be hard to tell where the problem lies.<p class="paragraph"/>There are a number of features in Resources that make it easier to debug such issues.<p class="paragraph"/>First: Get familiar with your browser's resource inspector. All modern browsers have a developer mode which lets you inspect the resources loaded by a page - including the request and response headers and the content itself. This is indispensable. For Safari you need to explicitly turn this on. For Firefox you may need to install firebug.<p class="paragraph"/><h2>The custom response header</h2><p class="paragraph"/>Every resource served by the plugin in development mode adds the <strong class="bold">X-Grails-Resources-Original-Src</strong> header to all resources served.<p class="paragraph"/>The value shows you the original filename of the resource. In the case of bundled resources, the first part is the bundle name, and then follow all the names of the resources appended to the file, in the order they appear.<p class="paragraph"/><h2>The quick debug option - turn off processing for the current request</h2><p class="paragraph"/>Any URL in your application can have the query parameter <strong class="bold">_debugResources=y</strong> added to it, and the request will perform no processing. So for example if you are browsing <strong class="bold">http://localhost:8080/myapp/admin</strong> and need to bypass resources, just change the URL in your browser to
+<strong class="bold">http://localhost:8080/myapp/admin?_debugResources=y</strong><p class="paragraph"/>Dependency management will still be in effect (otherwise your app would break) but the resources will not be bundled or have other mappers applied. Resources will be served with a timestamp - this allows you to set breakpoints on resources and yet also force a refresh in your browser if you find that your browser still caches resources even after you have edited them and no caching headers are set. If this occurs, you can force a timestamp refresh by adding <strong class="bold">_refreshResources=y</strong> to the query params.<p class="paragraph"/><h2>The nuclear debug option - turn on resource debugging all the time </h2><p class="paragraph"/>You can turn off resource processing completely with the trivial Config variable, so that it is as if every request you make has _debugResources=y appended to it:<p class="paragraph"/><div class="code"><pre>grails.resources.debug = <span class="java&#45;keyword">true</span></pre></div><p class="paragraph"/>You can specify this value per-environment in your Config.<p class="paragraph"/><h2>Inspecting your dependency data</h2><p class="paragraph"/>A utility function in the grailsResourceProcessor bean can be used to output the current resource metadata that the plugin has - all the modules and resources and their dependencies.<p class="paragraph"/>Simply add a "println grailsResourceProcessor.dumpResources()" somewhere in your application or GSP and it will come out.<p class="paragraph"/><h2>Turning on debug logging</h2><p class="paragraph"/>There are copious amounts of debug logging output by the plugin that should make it relatively easy to track down problems. This information includes the order of mapper execution that will be used, the dependency order of your resource module definitions, and all the steps of processing each resource.<p class="paragraph"/>To enable debug logging add this to your Config logging section:<p class="paragraph"/><div class="code"><pre>debug <span class="java&#45;quote">"org.grails.plugin.resource"</span></pre></div>
+
+
+<h1 id="9. Configuration">9 Configuration</h1>
+There are various configuration options to control processing of your resources.<p class="paragraph"/>All of these config variables can of course be set per-environment.<p class="paragraph"/><h2>Setting the location of processed static resources</h2><p class="paragraph"/>By default the plugin writes processed resources to a temporary directory.<p class="paragraph"/>You can change this to a directory that exists in a reliable location and hence can be used to server resources via e.g. Apache,
+by assigning a full filesystem path value to <strong class="bold">grails.resources.work.dir</strong><p class="paragraph"/><h2>Change the /static/ URI prefix: grails.resources.uri.prefix</h2><p class="paragraph"/>By default the plugin serves the modified static resources from URIs beginning with &#60;appcontext&#62;/static/.<p class="paragraph"/>You can change this by assigning a value to <strong class="bold">grails.resources.uri.prefix</strong><p class="paragraph"/><h2>Debug mode: grails.resources.debug</h2><p class="paragraph"/>Setting <strong class="bold">grails.resources.debug=true</strong> will force debug mode all the time, as if you added _debugResources=y to every request.<p class="paragraph"/><h2>Dependency-only mode: grails.resources.processing.enabled</h2><p class="paragraph"/>You can turn off resource processing completely with the trivial Config variable:<p class="paragraph"/><div class="code"><pre>grails.resources.processing.enabled = <span class="java&#45;keyword">false</span></pre></div><p class="paragraph"/>Like the _debugResources option, this will perform no processing at all. It will also not require a writable file system on the server, but obviously precludes any processing of resources.<p class="paragraph"/>You do however retain the dependency management abilities.<p class="paragraph"/><h2>Controlling the scope of the adhoc filter: grails.resources.adhoc.patterns</h2><p class="paragraph"/>The ad-hoc resource filter is mapped using Servlet SDK filter mappings, which are more restricted that Ant patterns. You can specify folder (xxx/<strong class="bold">) or file type (</strong>.xxx) mappings only.<p class="paragraph"/>You may not want the adhoc filter, which is only used for legacy resources (which are not linked to using resource tags), to intercept everything in your application.<p class="paragraph"/>The default value is:<p class="paragraph"/><div class="code"><pre>grails.resources.adhoc.patterns = &#91;<span class="java&#45;quote">"/images/&#42;"</span>, <span class="java&#45;quote">"&#42;.css"</span>, <span class="java&#45;quote">"&#42;.js"</span>&#93;</pre></div><p class="paragraph"/><h2>Controlling the includes and excludes of the adhoc filter: grails.resources.adhoc.includes/excludes</h2><p class="paragraph"/>While the grails.resources.adhoc.patterns setting gives you coarse control over which legacy URIs are intercepted, you can get full Ant-style include/exclude patterns using the <strong class="bold">grails.resources.adhoc.includes</strong> and <strong class="bold">grails.resources.adhoc.excludes</strong> variables.<p class="paragraph"/>They both accept a list of Ant-style patterns.<p class="paragraph"/><h2>Including specific resource patterns per-mapper: grails.resources.&#60;mappername&#62;.includes</h2><p class="paragraph"/>You can control the list of matching resources on a per-mapper basis. Mappers provide sensible defaults but you may have new content types (for example a new CSS variant such as LESS) that were not known at the time the mapper was written.<p class="paragraph"/>So for example to add .less files to processing by the CSS rewriters (necessary for correct behaviour with bundle mapper):<p class="paragraph"/><div class="code"><pre>grails.resources.mappers.cssrewriter.includes = &#91;'&#42;&#42;/&#42;.css', '&#42;&#42;/&#42;.less'&#93;
+grails.resources.mappers.csspreprocessor.includes = &#91;'&#42;&#42;/&#42;.css', '&#42;&#42;/&#42;.less'&#93;</pre></div><p class="paragraph"/>You can also use this to ensure that only resources under a specific folder are processed.<p class="paragraph"/>Note that the value you provide <strong class="bold">replaces</strong> the default list supplied by the mapper.<p class="paragraph"/><h2>Excluding specific resource patterns per-mapper:grails.resources.&#60;mappername&#62;.excludes</h2><p class="paragraph"/>There may be times when a mapper is processing too many files - those that may have already been processed or that may become damaged by the mapping (i.e. incompatibilities due to relative code loading by JS code). Simply add the resource names or patterns to that mapper's excludes:<p class="paragraph"/><div class="code"><pre>grails.resources.mappers.cssrewriter.excludes = &#91;'unsafe/&#42;&#42;'&#93;
+grails.resources.mappers.csspreprocessor.excludes = &#91;'unsafe/&#42;&#42;'&#93;
+grails.resources.mappers.bundle.excludes = &#91;'unsafe/&#42;&#42;/&#42;.css'&#93;</pre></div><p class="paragraph"/>Note that the value you provide <strong class="bold">replaces</strong> the default list supplied by the mapper.<p class="paragraph"/><h2>Disabling CSS rewriting: grails.resources.rewrite.css</h2><p class="paragraph"/>It is possible to turn off all CSS rewriting by setting this value to false. This is not recommended as it will usually break bundling unless all your links are relative and you don't have any mappers that move your resources relative to your CSS.
+
+
+                    </div>
+                </td>
+                <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Mappers</h1><div class="menu-sub">
+                        
+                        
+                        <div class="menu-item"><a href="../ref/Mappers/bundle.html">bundle</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Mappers/csspreprocessor.html">csspreprocessor</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Mappers/cssrewriter.html">cssrewriter</a>
+                        </div>
+                        
+                        </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Resources</h1><div class="menu-sub">
+                        
+                        
+                        <div class="menu-item"><a href="../ref/Resources/getProperty.html">getProperty</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Resources/invokeMethod.html">invokeMethod</a>
+                        </div>
+                        
+                        </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Tags</h1><div class="menu-sub">
+                        
+                        
+                        <div class="menu-item"><a href="../ref/Tags/external.html">external</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Tags/img.html">img</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Tags/layoutResources.html">layoutResources</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Tags/require.html">require</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Tags/resource.html">resource</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Tags/resourceLink.html">resourceLink</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Tags/script.html">script</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Tags/use.html">use</a>
+                        </div>
+                        
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+            </tr>
+        </table>
+
         <div id="footer">
-             
+            
+            
         </div>
+
+
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
     </body>
 </html>

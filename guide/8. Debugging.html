@@ -1,11 +1,194 @@
-<html>
-    <head>
-        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
-        <title>8. Debugging</title>
-        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
-    </head>
-    <body class="body">
-    <h1><a name="8. Debugging">8. Debugging</a></h1>Due to the processing of resources, it can be tricky to diagnose problems when something is not working - your styling may not be coming through correctly, or you are getting weird JS errors.<p class="paragraph"/>Usually these are due to incorrect dependencies in your modules, but you may also have actual bugs in your JS or CSS.<p class="paragraph"/>When you're using mappers that completely rename or aggregate files, it can be hard to tell where the problem lies.<p class="paragraph"/>There are a number of features in Resources that make it easier to debug such issues.<p class="paragraph"/>First: Get familiar with your browser's resource inspector. All modern browsers have a developer mode which lets you inspect the resources loaded by a page - including the request and response headers and the content itself. This is indispensable. For Safari you need to explicitly turn this on. For Firefox you may need to install firebug.<p class="paragraph"/><h2>The custom response header</h2><p class="paragraph"/>Every resource served by the plugin in development mode adds the <strong class="bold">X-Grails-Resources-Original-Src</strong> header to all resources served.<p class="paragraph"/>The value shows you the original filename of the resource. In the case of bundled resources, the first part is the bundle name, and then follow all the names of the resources appended to the file, in the order they appear.<p class="paragraph"/><h2>The quick debug option - turn off processing for the current request</h2><p class="paragraph"/>Any URL in your application can have the query parameter <strong class="bold">_debugResources=y</strong> added to it, and the request will perform no processing. So for example if you are browsing <strong class="bold">http://localhost:8080/myapp/admin</strong> and need to bypass resources, just change the URL in your browser to
-<strong class="bold">http://localhost:8080/myapp/admin?_debugResources=y</strong><p class="paragraph"/>Dependency management will still be in effect (otherwise your app would break) but the resources will not be bundled or have other mappers applied. Resources will be served with a timestamp - this allows you to set breakpoints on resources and yet also force a refresh in your browser if you find that your browser still caches resources even after you have edited them and no caching headers are set. If this occurs, you can force a timestamp refresh by adding <strong class="bold">_refreshResources=y</strong> to the query params.<p class="paragraph"/><h2>The nuclear debug option - turn on resource debugging all the time </h2><p class="paragraph"/>You can turn off resource processing completely with the trivial Config variable, so that it is as if every request you make has _debugResources=y appended to it:<p class="paragraph"/><div class="code"><pre>grails.resources.debug = <span class="java&#45;keyword">true</span></pre></div><p class="paragraph"/>You can specify this value per-environment in your Config.<p class="paragraph"/><h2>Inspecting your dependency data</h2><p class="paragraph"/>A utility function in ResourceService can be used to output the current resource metadata that the plugin has - all the modules and resources and their dependencies.<p class="paragraph"/>Simply add a "println resourceService.dumpResources()" somewhere in your application or GSP and it will come out.<p class="paragraph"/><h2>Turning on debug logging</h2><p class="paragraph"/>There are copious amounts of debug logging output by the plugin that should make it relatively easy to track down problems. This information includes the order of mapper execution that will be used, the dependency order of your resource module definitions, and all the steps of processing each resource.<p class="paragraph"/>To enable debug logging add this to your Config logging section:<p class="paragraph"/><div class="code"><pre>debug <span class="java&#45;quote">"org.grails.plugin.resource"</span></pre></div>
-    </body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>8 Debugging 1.1.5</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/1.%20Overview.html"><strong>1</strong><span>Overview</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/2.%20Concepts.html"><strong>2</strong><span>Concepts</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/3.%20Declaring%20resources.html"><strong>3</strong><span>Declaring resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/4.%20Using%20resources.html"><strong>4</strong><span>Using resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/5.%20Overriding%20resources.html"><strong>5</strong><span>Overriding resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/6.%20Creating%20custom%20mappers.html"><strong>6</strong><span>Creating custom mappers</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/7.%20Writing%20plugins%20that%20use%20Resources.html"><strong>7</strong><span>Writing plugins that use Resources</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/8.%20Debugging.html"><strong>8</strong><span>Debugging</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/9.%20Configuration.html"><strong>9</strong><span>Configuration</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>HTML resource management enhancements to replace g.resource etc.</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/7.%20Writing%20plugins%20that%20use%20Resources.html">&lt;&lt; <strong>7</strong><span>Writing plugins that use Resources</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/9.%20Configuration.html"><strong>9</strong><span>Configuration</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>8 Debugging - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Marc Palmer (marc@grailsrocks.com)</p>
+
+                    <p><strong>Version:</strong> 1.1.5</p>
+
+                    
+                </div>
+
+                
+
+                
+
+<h1 id="8. Debugging">8 Debugging</h1>
+Due to the processing of resources, it can be tricky to diagnose problems when something is not working - your styling may not be coming through correctly, or you are getting weird JS errors.<p class="paragraph"/>Usually these are due to incorrect dependencies in your modules, but you may also have actual bugs in your JS or CSS.<p class="paragraph"/>When you're using mappers that completely rename or aggregate files, it can be hard to tell where the problem lies.<p class="paragraph"/>There are a number of features in Resources that make it easier to debug such issues.<p class="paragraph"/>First: Get familiar with your browser's resource inspector. All modern browsers have a developer mode which lets you inspect the resources loaded by a page - including the request and response headers and the content itself. This is indispensable. For Safari you need to explicitly turn this on. For Firefox you may need to install firebug.<p class="paragraph"/><h2>The custom response header</h2><p class="paragraph"/>Every resource served by the plugin in development mode adds the <strong class="bold">X-Grails-Resources-Original-Src</strong> header to all resources served.<p class="paragraph"/>The value shows you the original filename of the resource. In the case of bundled resources, the first part is the bundle name, and then follow all the names of the resources appended to the file, in the order they appear.<p class="paragraph"/><h2>The quick debug option - turn off processing for the current request</h2><p class="paragraph"/>Any URL in your application can have the query parameter <strong class="bold">_debugResources=y</strong> added to it, and the request will perform no processing. So for example if you are browsing <strong class="bold">http://localhost:8080/myapp/admin</strong> and need to bypass resources, just change the URL in your browser to
+<strong class="bold">http://localhost:8080/myapp/admin?_debugResources=y</strong><p class="paragraph"/>Dependency management will still be in effect (otherwise your app would break) but the resources will not be bundled or have other mappers applied. Resources will be served with a timestamp - this allows you to set breakpoints on resources and yet also force a refresh in your browser if you find that your browser still caches resources even after you have edited them and no caching headers are set. If this occurs, you can force a timestamp refresh by adding <strong class="bold">_refreshResources=y</strong> to the query params.<p class="paragraph"/><h2>The nuclear debug option - turn on resource debugging all the time </h2><p class="paragraph"/>You can turn off resource processing completely with the trivial Config variable, so that it is as if every request you make has _debugResources=y appended to it:<p class="paragraph"/><div class="code"><pre>grails.resources.debug = <span class="java&#45;keyword">true</span></pre></div><p class="paragraph"/>You can specify this value per-environment in your Config.<p class="paragraph"/><h2>Inspecting your dependency data</h2><p class="paragraph"/>A utility function in the grailsResourceProcessor bean can be used to output the current resource metadata that the plugin has - all the modules and resources and their dependencies.<p class="paragraph"/>Simply add a "println grailsResourceProcessor.dumpResources()" somewhere in your application or GSP and it will come out.<p class="paragraph"/><h2>Turning on debug logging</h2><p class="paragraph"/>There are copious amounts of debug logging output by the plugin that should make it relatively easy to track down problems. This information includes the order of mapper execution that will be used, the dependency order of your resource module definitions, and all the steps of processing each resource.<p class="paragraph"/>To enable debug logging add this to your Config logging section:<p class="paragraph"/><div class="code"><pre>debug <span class="java&#45;quote">"org.grails.plugin.resource"</span></pre></div>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/7.%20Writing%20plugins%20that%20use%20Resources.html">&lt;&lt; <strong>7</strong><span>Writing plugins that use Resources</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/9.%20Configuration.html"><strong>9</strong><span>Configuration</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Mappers</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Mappers/bundle.html">bundle</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Mappers/csspreprocessor.html">csspreprocessor</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Mappers/cssrewriter.html">cssrewriter</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Resources</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Resources/getProperty.html">getProperty</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Resources/invokeMethod.html">invokeMethod</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Tags</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Tags/external.html">external</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/img.html">img</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/layoutResources.html">layoutResources</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/require.html">require</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/resource.html">resource</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/resourceLink.html">resourceLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/script.html">script</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/use.html">use</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
 </html>

@@ -1,5 +1,7 @@
 DefaultPackage
 org.grails.plugin.resource
 org.grails.plugin.resource.mapper
+org.grails.plugin.resource.module
+org.grails.plugin.resource.test
 org.grails.plugin.resource.util
 org.grails.plugin.resources.artefacts

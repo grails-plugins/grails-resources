@@ -83,25 +83,6 @@ Package DefaultPackage
 
 
 
-<TABLE BORDER="1" WIDTH="100%" CELLPADDING="3" CELLSPACING="0" SUMMARY="">
-    <TR BGCOLOR="#90DDF7" CLASS="TableHeadingColor">
-    <TH ALIGN="left" COLSPAN="2"><FONT SIZE="+2">
-    <B>Interface Summary</B></FONT></TH>
-    </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourcesClass.html" title="class in DefaultPackage">ResourcesClass</A></B></TD>
-        <TD>@author Luke Daley (ld@ldaley.com)</TD>
-        </TR>
-
-</TABLE>
-&nbsp;
-<P>
-<DL>
-</DL>
-<hr>
-    
-
 
 <TABLE BORDER="1" WIDTH="100%" CELLPADDING="3" CELLSPACING="0" SUMMARY="">
     <TR BGCOLOR="#90DDF7" CLASS="TableHeadingColor">
@@ -110,260 +91,22 @@ Package DefaultPackage
     </TR>
 
         <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="AbstractResourcesArtefactHandler.html" title="class in DefaultPackage">AbstractResourcesArtefactHandler</A></B></TD>
-        <TD>@author Luke Daley (ld@ldaley.com)</TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="AggregatedResourceMeta.html" title="class in DefaultPackage">AggregatedResourceMeta</A></B></TD>
-        <TD>Holder for info about a resource that is made up of other resources</TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="AggregatedResourceMetaTests.html" title="class in DefaultPackage">AggregatedResourceMetaTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="BundleResourceMapper.html" title="class in DefaultPackage">BundleResourceMapper</A></B></TD>
-        <TD>This mapper creates synthetic AggregatedResourceMeta instances for any bundle
- names found in the resource declarations, and gathers up info about those resources
- so that when the bundle itself is requested, the aggregated file is created and returned.</TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="CSSLinkProcessor.html" title="class in DefaultPackage">CSSLinkProcessor</A></B></TD>
-        <TD>This class is used to parse out and replace CSS links</TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="CSSLinkProcessorTests.html" title="class in DefaultPackage">CSSLinkProcessorTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="CSSPreprocessorResourceMapper.html" title="class in DefaultPackage">CSSPreprocessorResourceMapper</A></B></TD>
-        <TD>This mapper is the first phase of CSS rewriting.</TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="CSSPreprocessorResourceMapperTests.html" title="class in DefaultPackage">CSSPreprocessorResourceMapperTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="CSSRewriterResourceMapperTests.html" title="class in DefaultPackage">CSSRewriterResourceMapperTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="DefaultResourcesClass.html" title="class in DefaultPackage">DefaultResourcesClass</A></B></TD>
-        <TD>@author Luke Daley (ld@ldaley.com)</TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="DummyMapper.html" title="class in DefaultPackage">DummyMapper</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
         <TD WIDTH="15%"><B><A HREF="FeedsController.html" title="class in DefaultPackage">FeedsController</A></B></TD>
         <TD></TD>
         </TR>
 
         <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="InitialisationSmokeTests.html" title="class in DefaultPackage">InitialisationSmokeTests</A></B></TD>
-        <TD></TD>
+        <TD WIDTH="15%"><B><A HREF="ResourcesBootStrap.html" title="class in DefaultPackage">ResourcesBootStrap</A></B></TD>
+        <TD>Bootstraps the plugin by loading the app resources from config</TD>
         </TR>
 
         <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ModuleBuilder.html" title="class in DefaultPackage">ModuleBuilder</A></B></TD>
-        <TD>Implements the DSL for a resource as part of a module.</TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ModuleDeclarationsFactory.html" title="class in DefaultPackage">ModuleDeclarationsFactory</A></B></TD>
-        <TD>This factory collects up all the application and plugin resource module declarations</TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ModulesBuilder.html" title="class in DefaultPackage">ModulesBuilder</A></B></TD>
-        <TD>Implements the resource modules DSL.</TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ProcessingFilter.html" title="class in DefaultPackage">ProcessingFilter</A></B></TD>
-        <TD>This is the servlet filter that handles all static resource requests and delegates to the service
- to return them.</TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceMapper.html" title="class in DefaultPackage">ResourceMapper</A></B></TD>
-        <TD>The artefact facade used by the service to communicate with resource mapper artefacts.</TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceMapperArtefactHandler.html" title="class in DefaultPackage">ResourceMapperArtefactHandler</A></B></TD>
-        <TD>@author Luke Daley (ld@ldaley.com)</TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceMapperTests.html" title="class in DefaultPackage">ResourceMapperTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceMeta.html" title="class in DefaultPackage">ResourceMeta</A></B></TD>
-        <TD>Holder for info about a resource declaration at runtime</TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceMetaStoreTests.html" title="class in DefaultPackage">ResourceMetaStoreTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceService.html" title="class in DefaultPackage">ResourceService</A></B></TD>
-        <TD>This is where it all happens.</TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceTagLib.html" title="class in DefaultPackage">ResourceTagLib</A></B></TD>
-        <TD>This taglib handles creation of all the links to resources, including the smart de-duping of them.</TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="TestResourceMapper.html" title="class in DefaultPackage">TestResourceMapper</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="URLUtils.html" title="class in DefaultPackage">URLUtils</A></B></TD>
+        <TD WIDTH="15%"><B><A HREF="ResourcesGrailsPlugin.html" title="class in DefaultPackage">ResourcesGrailsPlugin</A></B></TD>
         <TD>@author Marc Palmer (marc@grailsrocks.com)</TD>
         </TR>
 
         <TR BGCOLOR="white" CLASS="TableRowColor">
         <TD WIDTH="15%"><B><A HREF="UrlMappings.html" title="class in DefaultPackage">UrlMappings</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="AggregatedResourceMeta.html" title="class in DefaultPackage">AggregatedResourceMeta</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="AggregatedResourceMetaTests.html" title="class in DefaultPackage">AggregatedResourceMetaTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="BundleResourceMapper.html" title="class in DefaultPackage">BundleResourceMapper</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="CSSLinkProcessor.html" title="class in DefaultPackage">CSSLinkProcessor</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="CSSLinkProcessorTests.html" title="class in DefaultPackage">CSSLinkProcessorTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="CSSPreprocessorResourceMapper.html" title="class in DefaultPackage">CSSPreprocessorResourceMapper</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="CSSPreprocessorResourceMapperTests.html" title="class in DefaultPackage">CSSPreprocessorResourceMapperTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="CSSRewriterResourceMapperTests.html" title="class in DefaultPackage">CSSRewriterResourceMapperTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ProcessingFilter.html" title="class in DefaultPackage">ProcessingFilter</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceMapperTests.html" title="class in DefaultPackage">ResourceMapperTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceMeta.html" title="class in DefaultPackage">ResourceMeta</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceMetaStoreTests.html" title="class in DefaultPackage">ResourceMetaStoreTests</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceService.html" title="class in DefaultPackage">ResourceService</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceTagLib.html" title="class in DefaultPackage">ResourceTagLib</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="URLUtils.html" title="class in DefaultPackage">URLUtils</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceMapper.html" title="class in DefaultPackage">ResourceMapper</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ModuleBuilder.html" title="class in DefaultPackage">ModuleBuilder</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ModuleDeclarationsFactory.html" title="class in DefaultPackage">ModuleDeclarationsFactory</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ModulesBuilder.html" title="class in DefaultPackage">ModulesBuilder</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="TestResourceMapper.html" title="class in DefaultPackage">TestResourceMapper</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="AbstractResourcesArtefactHandler.html" title="class in DefaultPackage">AbstractResourcesArtefactHandler</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="DefaultResourcesClass.html" title="class in DefaultPackage">DefaultResourcesClass</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourceMapperArtefactHandler.html" title="class in DefaultPackage">ResourceMapperArtefactHandler</A></B></TD>
-        <TD></TD>
-        </TR>
-
-        <TR BGCOLOR="white" CLASS="TableRowColor">
-        <TD WIDTH="15%"><B><A HREF="ResourcesClass.html" title="class in DefaultPackage">ResourcesClass</A></B></TD>
         <TD></TD>
         </TR>
 
