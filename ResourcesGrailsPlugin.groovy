@@ -22,7 +22,7 @@ class ResourcesGrailsPlugin {
     static DEFAULT_URI_PREFIX = 'static'
     static DEFAULT_ADHOC_PATTERNS = ["/images/*", "*.css", "*.js"].asImmutable()
 
-    def version = "1.1.5.BUILD-SNAPSHOT"
+    def version = "1.1.5"
     def grailsVersion = "1.3 > *"
 
     def loadAfter = ['logging'] // retained to ensure correct loading under Grails < 2.0
@@ -51,7 +51,7 @@ class ResourcesGrailsPlugin {
     def authorEmail = "marc@grailsrocks.com, ld@ldaley.com"
     def title = "Resources"
     def description = 'HTML resource management enhancements to replace g.resource etc.'
-    def documentation = "http://grails.org/plugin/resources"
+    def documentation = "http://grails-plugins.github.com/grails-resources"
 
     def license = "APACHE"
     def organization = [ name: "Grails Community", url: "http://grails.org/" ]
