@@ -490,7 +490,7 @@ class ResourceTagLib {
      * Get the uri to use for linking, and - if relevant - the resource instance
      * NOTE: The URI handling mechanics in here are pretty evil and nuanced (i.e. 
      * ad-hoc vs declared, ad-hoc and not found, ad-hoc and excluded etc).
-     * There is reasonable test coverage, but be careful.
+     * There is reasonable test coverage, but only fools rush in.
      * @return Map with uri/url property and *maybe* a resource property
      */
     def resolveResourceAndURI(attrs) {
@@ -509,6 +509,7 @@ class ResourceTagLib {
                 // via g.resource
                 attrs.contextPath = ctxPath
                 uri = grailsLinkGenerator.resource(attrs)
+                abs = uri.contains('://') 
             }
         }
         
@@ -544,16 +545,20 @@ class ResourceTagLib {
         if (!abs) {
             uri = forcePrefixedWithSlash(uri)
         }
+        
         // Chop off context path
         def reluri = ResourceProcessor.removeQueryParams(abs ? uri : uri[ctxPath.size()..-1])
         
         // Get or create ResourceMeta
-        def res = grailsResourceProcessor.getResourceMetaForURI(reluri, true, null, { res ->
-            // If this is an ad hoc resource, we need to store if it can be deferred or not
-            if (disposition != null) {
-                res.disposition = disposition
-            }
-        })
+        def res
+        if (!abs) {
+            res = grailsResourceProcessor.getResourceMetaForURI(reluri, true, null, { r ->
+                // If this is an ad hoc resource, we need to store if it can be deferred or not
+                if (disposition != null) {
+                    r.disposition = disposition
+                }
+            })
+        }
         
         // We need to handle a) absolute links here for CDN, and b) base url
         def linkUrl = res ? res.linkUrl : reluri

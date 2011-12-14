@@ -84,6 +84,29 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         assertEquals "/CTX/static/images/favicon.ico", res.uri
     }
     
+    void testAbsoluteDirFileLinkResolution() {
+        tagLib.grailsResourceProcessor = [
+            isDebugMode: { r -> false },
+            getResourceMetaForURI: { uri, adhoc, declRes,  postProc -> 
+                assertEquals "/images/default-avatar.png", uri
+                def r = new ResourceMeta()
+                r.with {
+                    sourceUrl = uri
+                    actualUrl = uri
+                }
+                return r
+            },
+            staticUrlPrefix: '/static'
+        ]
+
+        // We're just testing what happens if the link generator gave us back something absolute
+        tagLib.request.contextPath = "/CTX"
+
+        tagLib.grailsLinkGenerator = [resource: { args -> "http://myserver.com/CTX/static/"+args.dir+'/'+args.file } ]
+        def res = tagLib.resolveResourceAndURI(absolute:true, dir:'images', file:'default-avatar.png')
+        assertEquals "http://myserver.com/CTX/static/images/default-avatar.png", res.uri
+    }
+    
     void testResourceLinkWithRelOverride() {
         def testMeta = new ResourceMeta()
         testMeta.sourceUrl = '/css/test.less'
