@@ -108,7 +108,8 @@ class ResourcesGrailsPlugin {
         def declaredResFilter = [   
                 name:'DeclaredResourcesPluginFilter', 
                 filterClass:"org.grails.plugin.resource.ProcessingFilter",
-                urlPatterns:["/${getUriPrefix(application)}/*"]
+                urlPatterns:["/${getUriPrefix(application)}/*"],
+                dispatchers:['REQUEST', 'FORWARD']
         ]
         def adHocFilter = [   
             name:'AdHocResourcesPluginFilter', 
