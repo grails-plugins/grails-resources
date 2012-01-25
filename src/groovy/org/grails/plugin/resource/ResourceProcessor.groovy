@@ -1146,11 +1146,11 @@ class ResourceProcessor implements InitializingBean {
     /**
      * Add a disposition to the current request's set of them
      */
-    void addDispositionToRequest(request, String disposition) {
+    void addDispositionToRequest(request, String disposition, String moduleName) {
         if (haveAlreadyDoneDispositionResources(request, disposition)) {
-            throw new IllegalArgumentException("""Cannot add resource with disposition [$disposition] to this request - 
+            throw new IllegalArgumentException("""Cannot add module [$moduleName] which requires disposition [$disposition] to this request - 
 that disposition has already been rendered. Check that your r:layoutResources tag comes after all
-other Resource tags that add content to that disposition.""")
+Resource tags that add content to that disposition.""")
         }
         def dispositions = request[REQ_ATTR_DISPOSITIONS_REMAINING] 
         if (dispositions != null) {
@@ -1170,7 +1170,7 @@ other Resource tags that add content to that disposition.""")
                 log.debug "Adding module's dispositions to request: ${module.requiredDispositions}"
             } 
             for (d in module.requiredDispositions) {
-                addDispositionToRequest(request, d)
+                addDispositionToRequest(request, d, moduleName)
             }
         }
     }

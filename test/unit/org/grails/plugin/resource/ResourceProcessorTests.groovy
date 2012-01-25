@@ -128,17 +128,17 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
         def request = [:]
         assertTrue svc.getRequestDispositionsRemaining(request).empty
 
-        svc.addDispositionToRequest(request, 'head')
+        svc.addDispositionToRequest(request, 'head', 'dummy')
         assertTrue((['head'] as Set) == svc.getRequestDispositionsRemaining(request))
 
         // Let's just make sure its a set
-        svc.addDispositionToRequest(request, 'head')
+        svc.addDispositionToRequest(request, 'head', 'dummy')
         assertTrue((['head'] as Set) == svc.getRequestDispositionsRemaining(request))
 
-        svc.addDispositionToRequest(request, 'defer')
+        svc.addDispositionToRequest(request, 'defer', 'dummy')
         assertTrue((['head', 'defer'] as Set) == svc.getRequestDispositionsRemaining(request))
 
-        svc.addDispositionToRequest(request, 'image')
+        svc.addDispositionToRequest(request, 'image', 'dummy')
         assertTrue((['head', 'image', 'defer'] as Set) == svc.getRequestDispositionsRemaining(request))
     }
 
