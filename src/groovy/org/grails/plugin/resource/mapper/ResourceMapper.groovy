@@ -95,7 +95,7 @@ class ResourceMapper {
     ResourceMapper(artefact, mappersConfig) {
         this.artefact = artefact
         this.config = mappersConfig[getName()]
-        
+
         // @todo why are we doing this, why isn't logging plugin doing it?
         // Even though we load after logging, it seems to not apply it to our artefacts
         log = LoggerFactory.getLogger('org.grails.plugin.resource.mapper.' + getName())
