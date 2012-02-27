@@ -302,7 +302,7 @@ class ResourceTagLib {
         needsResourceLayout()
         
         def trkName = ResourceTagLib.makePageFragmentKey(type, disposition)
-        grailsResourceProcessor.addDispositionToRequest(request, disposition)
+        grailsResourceProcessor.addDispositionToRequest(request, disposition, "r:script")
 
         def trk = request[trkName]
         if (!trk) {
