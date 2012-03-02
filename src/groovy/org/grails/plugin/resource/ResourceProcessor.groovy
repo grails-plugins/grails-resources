@@ -1003,6 +1003,7 @@ class ResourceProcessor implements InitializingBean {
             loadResources(reloadBatch)
             
             dumpStats()
+            log.info("Finished resource mapper reload")
         } finally {
             reloading = false
         }
