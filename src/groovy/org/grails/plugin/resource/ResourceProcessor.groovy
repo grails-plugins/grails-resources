@@ -1021,6 +1021,7 @@ class ResourceProcessor implements InitializingBean {
             loadModules(reloadBatch)
             
             dumpStats()
+            log.info("Finished module definition reload")
         } finally {
             reloading = false
         }
@@ -1038,6 +1039,7 @@ class ResourceProcessor implements InitializingBean {
             loadResources(reloadBatch)
             
             dumpStats()
+            log.info("Finished changed file reload")
         } finally {
             reloading = false
         }
@@ -1057,6 +1059,7 @@ class ResourceProcessor implements InitializingBean {
             loadModules(reloadBatch)
             
             dumpStats()
+            log.info("Finished full reload")
         } finally {
             reloading = false
         }
