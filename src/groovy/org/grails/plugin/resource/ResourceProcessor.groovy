@@ -921,6 +921,8 @@ class ResourceProcessor implements InitializingBean {
         }
         updateDependencyOrder()
         def s4 = "Dependency load order: ${modulesInDependencyOrder}\n"
+
+        def s5 = "Mapper application order: ${resourceMappers*.name}\n"
         
         if (toLog) {
             log.debug '-'*50
@@ -935,8 +937,10 @@ class ResourceProcessor implements InitializingBean {
             log.debug '-'*50
             log.debug(s4)
             log.debug '-'*50
+            log.debug(s5)
+            log.debug '-'*50
         } 
-        return s1.toString() + s2.toString() + s4.toString()
+        return s1.toString() + s2.toString() + s4.toString() + s5.toString()
     }
     
     /**

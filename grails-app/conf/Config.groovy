@@ -21,6 +21,8 @@ grails.doc.license = 'Apache License 2.0'
 grails.doc.title = 'Resources Plugin'
 
 //grails.resources.processing.enabled = false
+//grails.resources.mappers.baseurl.enabled = true
+//grails.resources.mappers.baseurl.default = 'http://bullshit.google.com/'
 
 environments {
     development {
