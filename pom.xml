@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>nz.ac.auckland.grails.plugins</groupId>
+	<artifactId>resources</artifactId>
+	<!--
+	<packaging>grails-plugin</packaging>
+	-->
+	<version>1.4</version>
+	<name>Reflects grails-resources plugin</name>
+	<description>Grails resources plugin but with Maven bundling</description>
+	<url>http://grails.org/plugin/resources</url>
+	<developers>
+		<developer>
+			<name>Marc Palmer</name>
+		</developer>
+	</developers>
+	
+	<!-- without the plugin, it doesn't know how to cope with the grails-plugin artifact -->
+	<!-- if we do this in >1 of these composites, we need to pull this into a new parent (grails-composite-parent) -->
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.grails</groupId>
+				<artifactId>grails-maven-composite-plugin</artifactId>
+				<version>1.1</version>
+				<extensions>true</extensions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

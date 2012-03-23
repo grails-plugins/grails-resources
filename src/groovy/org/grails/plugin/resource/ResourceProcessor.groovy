@@ -241,12 +241,21 @@ class ResourceProcessor implements InitializingBean {
     void redirectToActualUrl(ResourceMeta res, request, response) {
         // Now redirect the client to the processed url
         // NOTE: only works for local resources
-        def u = request.contextPath+staticUrlPrefix+res.linkUrl
-        if (log.debugEnabled) {
-            log.debug "Redirecting ad-hoc resource ${request.requestURI} to $u which makes it UNCACHEABLE - declare this resource "+
-                "and use resourceLink/module tags to avoid redirects and enable client-side caching"
+        def u = staticUrlPrefix+res.linkUrl
+        if (config.adhoc?.forward) {
+            if (log.debugEnabled) {
+                log.debug "Forwarding ad-hoc resource ${request.requestURI} to $u - declare this resource "+
+                    "and use resourceLink/module tags to avoid spurious client-side caching"
+            }
+            request.getRequestDispatcher(u).forward(request, response)
+        } else {
+            u = request.contextPath + u
+            if (log.debugEnabled) {
+                log.debug "Redirecting ad-hoc resource ${request.requestURI} to $u which makes it UNCACHEABLE - declare this resource "+
+                    "and use resourceLink/module tags to avoid redirects and enable client-side caching"
+            }
+            response.sendRedirect(u)
         }
-        response.sendRedirect(u)
     }
     
     /**
@@ -382,13 +391,6 @@ class ResourceProcessor implements InitializingBean {
         // Declared resources will already exist, but ad-hoc or synthetic may need to be created
         def res = resourceInfo.getOrCreateAdHocResource(uri) { -> 
 
-            if (!createAdHocResourceIfNeeded) {
-                if (log.warnEnabled) {
-                    log.warn("We can't create resources on the fly unless they are 'ad-hoc', we're going to 404. Resource URI: $uri")
-                }
-                return null
-            }
-            
             if (!canProcessLegacyResource(uri)) {
                 if (log.debugEnabled) {
                     log.debug("Skipping ad-hoc resource $uri as it is excluded")

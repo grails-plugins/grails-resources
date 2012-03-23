@@ -79,3 +79,7 @@ Note that the value you provide *replaces* the default list supplied by the mapp
 h2. Disabling CSS rewriting: grails.resources.rewrite.css
 
 It is possible to turn off all CSS rewriting by setting this value to false. This is not recommended as it will usually break bundling unless all your links are relative and you don't have any mappers that move your resources relative to your CSS.
+
+h2. Using forward instead of redirect for adhoc filter: grails.resources.adhoc.forward
+
+The default behavior for ad-hoc filter is to use a 302 redirect to the requested resource. Enabling this flag will opt to use a server-side forward instead.

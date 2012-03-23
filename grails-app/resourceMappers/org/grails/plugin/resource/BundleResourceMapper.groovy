@@ -21,6 +21,7 @@ class BundleResourceMapper {
     static MIMETYPE_TO_RESOURCE_META_CLASS = [
         'text/css': CSSBundleResourceMeta,
         'text/javascript': JavaScriptBundleResourceMeta,
+        'application/x-javascript': JavaScriptBundleResourceMeta, // Jetty default .js mapping
         'application/javascript': JavaScriptBundleResourceMeta
     ]
     
