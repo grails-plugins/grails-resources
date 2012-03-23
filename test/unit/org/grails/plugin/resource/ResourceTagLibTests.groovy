@@ -3,6 +3,7 @@ package org.grails.plugin.resource
 import grails.test.*
 
 import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
+import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
 
 class ResourceTagLibTests extends TagLibUnitTestCase {
     protected void setUp() {
@@ -293,5 +294,30 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         assertEquals false, tracker.thingTwo
         assertTrue tracker.containsKey(ResourceProcessor.IMPLICIT_MODULE)
         assertEquals false, tracker[ResourceProcessor.IMPLICIT_MODULE]
+    }
+
+    def testExternalTagCanWorkWithUrlUriOrDir() {
+
+        try {
+            tagLib.external(uri: '/fake/url')
+            tagLib.external(url: '/fake/url')
+            tagLib.external(file: 'myfile.js')
+        } catch (GrailsTagException e) {
+            fail 'We should allow the tag to be used with any of the above attributes present'
+        } catch (Exception e) {
+            // We expect this because the rest of the tag isn't mocked.
+        }
+        
+    }
+
+    def testExternalTagRequiresUrlUriOrDir() {
+
+        try {
+            tagLib.external([:])
+            fail 'Should have thrown an exception due to missing required attributes'
+        } catch (Exception e) {
+            assert e.message == 'For the &lt;r:external /&gt; tag, one of the attributes [uri, url, file] must be present'
+        }
+
     }
 }

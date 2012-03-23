@@ -21,7 +21,8 @@ class BundleResourceMapper {
     static MIMETYPE_TO_RESOURCE_META_CLASS = [
         'text/css': CSSBundleResourceMeta,
         'text/javascript': JavaScriptBundleResourceMeta,
-        'application/javascript': JavaScriptBundleResourceMeta
+        'application/javascript': JavaScriptBundleResourceMeta,
+        'application/x-javascript': JavaScriptBundleResourceMeta
     ]
     
     /**
@@ -47,7 +48,7 @@ class BundleResourceMapper {
             // Find/create bundle for this extension type
             def bundlename = "bundle-$bundleId.${resource.sourceUrlExtension}"
             def bundleURI = "/${bundlename}"
-            
+
             def bundleResource = grailsResourceProcessor.findSyntheticResourceById(bundlename)
             if (!bundleResource) {
                 // Creates a new resource and empty file
