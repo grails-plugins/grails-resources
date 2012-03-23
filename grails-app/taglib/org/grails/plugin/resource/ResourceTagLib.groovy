@@ -6,6 +6,7 @@ import grails.util.GrailsUtil
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.apache.commons.io.FilenameUtils
 import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
+import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
 
 /**
  * This taglib handles creation of all the links to resources, including the smart de-duping of them.
@@ -182,28 +183,18 @@ class ResourceTagLib {
         if (log.debugEnabled) {
             log.debug "external with $attrs"
         }
+
+        if (!attrs.url && !attrs.uri && !attrs.file) {
+            throw new GrailsTagException('For the &lt;r:external /&gt; tag, one of the attributes [uri, url, file] must be present')
+        }
         
         def url = attrs.remove('url')
         def disposition = attrs.remove('disposition')
 
         def info 
-        
-        def resolveArgs = [:]
-        def type = attrs.remove('type')
-        
-        if (url == null) {
-            if (attrs.uri) {
-                // Might be app-relative resource URI 
-                resolveArgs.uri = attrs.remove('uri')
-            } else {
-                resolveArgs.plugin = attrs.remove('plugin')
-                resolveArgs.dir = attrs.remove('dir')
-                resolveArgs.file = attrs.remove('file')
-            }
-        } else if (url instanceof Map) {
-            resolveArgs.putAll(url)
-        }
 
+        def type = attrs.remove('type')
+        def resolveArgs = determineResourceResolutionArguments(url, attrs)
 
         // If a disposition specificed, we may be ad hoc so use that, else rever to default for type
         if (disposition == null) {
@@ -218,7 +209,7 @@ class ResourceTagLib {
         if (info.resource && info.resource.tagAttributes) {
             attrs.putAll(info.resource.tagAttributes)
         }
-        
+
         // If we found a resource (i.e. not debug mode) and disposition is not what we're rendering, skip
         if (info.resource && (disposition != info.resource.disposition)) {
             // Just get out, we've called r.resource which has created the implicit resource and added it to implicit module
@@ -227,8 +218,7 @@ class ResourceTagLib {
         }
         
         // Don't do resource check if this isn't a defer/head resource
-        if (!(disposition in ['defer', 'head']) || 
-                notAlreadyIncludedResource(info.resource?.linkUrl ?: info.uri)) {
+        if (!(disposition in ['defer', 'head']) || notAlreadyIncludedResource(info.resource?.linkUrl ?: info.uri)) {
             attrs.type = type
             if (info.debug) {
                 attrs.uri = info.resource?.linkUrl
@@ -248,7 +238,25 @@ class ResourceTagLib {
             }
         }
     }
-    
+
+    private determineResourceResolutionArguments(url, Map attrs) {
+
+        def resolveArgs = [:]
+        if (url == null) {
+            if (attrs.uri) {
+                // Might be app-relative resource URI
+                resolveArgs.uri = attrs.remove('uri')
+            } else {
+                resolveArgs.plugin = attrs.remove('plugin')
+                resolveArgs.dir = attrs.remove('dir')
+                resolveArgs.file = attrs.remove('file')
+            }
+        } else if (url instanceof Map) {
+            resolveArgs.putAll(url)
+        }
+        return resolveArgs
+    }
+
     def use = { attrs ->
         GrailsUtil.deprecated "Tag [r:use] is deprecated please use [r:require] instead"
         out << r.require(attrs)
