@@ -834,6 +834,12 @@ class ResourceProcessor implements InitializingBean {
 /* @todo add this later when we understand what less-css-resources needs
         // Now do the derived synthetic resources as we know any changed components
         // have now been reset
+        
+        // LESS mapper would make synthetic resources too, and these might also delegate
+        // to a bundled resource, but all need processing in the correct order
+        // and LESS would need to compile the stuff to a file in beginPrepare
+        // before the bundle aggregates the output. 
+        // Question is, what is the correct ordering here?
         collectResourcesThatNeedProcessing(modulesByName[SYNTHETIC_MODULE], resBatch)
     */
         resourcesChanged(resBatch)
