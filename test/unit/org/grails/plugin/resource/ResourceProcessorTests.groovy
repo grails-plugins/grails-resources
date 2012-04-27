@@ -190,5 +190,37 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
 
         assertTrue pos('f') > pos('d')
     }
+    
+    void testWillNot404OnAdhocResourceWhenAccessedDirectlyFromStaticUrl() {
+		svc.adHocIncludes = ['/**/*.xml']
+		svc.staticUrlPrefix = '/static'
+        def request = [contextPath:'resources', requestURI: 'resources/static/somehack.xml']
+        
+        def out = new ByteArrayOutputStream();
+        def redirectUri = null
+        
+        def response = [
+            sendError: { code, msg = null -> },
+            sendRedirect: { uri -> redirectUri = uri },
+            setContentLength: { l -> },
+            setDateHeader: { d, l -> },
+            outputStream: out
+	    ]
+	    
+    
+    	svc.processModernResource(request, response);
+    	
+    	// the response was written
+    	assertTrue(out.size() > 0)
+    	assertNull(redirectUri);
+    	
+    	// the legacy resource should now redirect
+   	    svc.processLegacyResource(
+   	      	[contextPath:'resources', 
+   	    	requestURI: 'resources/somehack.xml'], 
+   	    	response);
+   	    	
+    	assertNotNull(redirectUri);   	    	
+    }
 }
 
