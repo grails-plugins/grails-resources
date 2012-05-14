@@ -26,14 +26,11 @@ class BundleResourceMapper {
     ]
     
     /**
-     * Find resources that belong in bundles, and create the bundles, and make the resource delegate to the bundle
-     * Create a new aggregated resource for the bundle and shove all the resourceMetas into it.
+     * Find resources that belong in bundles, and create the bundles, and make the resource delegate to the bundle.
+     * Creates a new aggregated resource for the bundle and shoves all the resourceMetas into it.
      * We rely on the smart linking stuff to avoid writing out the same bundle multiple times, so you still have
      * dependencies to the individual resources but these delegate to the aggregated resource, and hence all such
      * resources will return the same link url, and not be included more than once.
-     *
-     * I'm not sure this is the best way, but it means we don't need to mess with existing module and resource definitions
-     * which would undoubtedly cause us all kinds of pain.
      */
     def map(resource, config) {
         def bundleId = resource.bundle
