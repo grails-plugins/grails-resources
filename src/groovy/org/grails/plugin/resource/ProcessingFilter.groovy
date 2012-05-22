@@ -32,14 +32,14 @@ class ProcessingFilter implements Filter {
         if (debugging) {
             request.setAttribute('resources.debug', debugging)
         }
-        if (!debugging) {
+//        if (!debugging) {
             if (adhoc) {
                 grailsResourceProcessor.processLegacyResource(request, response)
             } else {
                 grailsResourceProcessor.processModernResource(request, response)
             }
-        }
-
+//        }
+//
         if (!response.committed) {
             chain.doFilter(request, response)
         }

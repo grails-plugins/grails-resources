@@ -23,6 +23,8 @@ import org.grails.plugin.resource.util.ResourceMetaStore
 import org.grails.plugin.resource.AggregatedResourceMeta
 
 import org.apache.commons.logging.LogFactory
+import javax.servlet.http.HttpServletResponse
+import org.springframework.core.io.Resource
 
 /**
  * This is where it all happens.
@@ -199,12 +201,40 @@ class ResourceProcessor implements InitializingBean {
      * This involves looking it up by source uri. Therefore the same resource may have multiple mappings in the 
      * resourceInfo map but they should not be conflicting.
      */
-    boolean processLegacyResource(request, response) {
+    boolean processLegacyResource(request, HttpServletResponse response) {
         if (log.debugEnabled) {
             log.debug "Handling Legacy resource ${request.requestURI}"
         }
         def uri = ResourceProcessor.removeQueryParams(extractURI(request, true))
-        
+
+        if (request['resources.debug']) {
+          Resource inf = grailsResourceLocator.findResourceForURI(uri)
+
+          if (!inf) return false
+
+          File f = inf.file
+          InputStream data = f.newInputStream()
+          try {
+            // Now set up the response
+            if (inf.filename.endsWith(".css"))
+              response.contentType = "text/css"
+            else if (inf.filename.endsWith(".js"))
+              response.contentType = "application/javascript"
+
+
+            response.setContentLength((int)inf.contentLength())
+
+            response.setDateHeader('Last-Modified', f.lastModified())
+
+            // @todo Could we do something faster here? Feels wrong, buffer size is tiny in Groovy
+            response.outputStream << data
+          } finally {
+            data?.close()
+          }
+
+          return true
+        }
+
         // Only handle it if it should be included in processing
         if (canProcessLegacyResource(uri)) {
             if (log.debugEnabled) {
