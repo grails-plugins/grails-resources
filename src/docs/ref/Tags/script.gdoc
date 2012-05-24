@@ -16,11 +16,11 @@ Assuming a Sitemesh layout that calls <r:layoutResources/> at the correct times,
       <r:require module="single-module"/>
    </head>
    <body>
-       <r:script/>
+       <r:script>
            window.alert('This is the end of the page!');
        </r:script>
 
-       <r:script disposition='head'/>
+       <r:script disposition='head'>
            window.alert('This is the head of the page!');
        </r:script>
    </body>
