@@ -18,8 +18,6 @@ class BaseUrlResourceMapper {
         if (config.enabled) {
 			def url
 
-            println "baseurl Config: $config"
-            
 			if (resource.module?.name && config.modules[resource.module.name]) {
 				url = config.modules[resource.module.name]
 			}

@@ -261,11 +261,9 @@ class ResourceProcessor implements InitializingBean {
         def uri = ResourceProcessor.removeQueryParams(extractURI(request, false))
         def inf
         try {
-
-        	// if the request is coming to the statically prefixed URL, it may be direct access to an ad-hoc resource which we haven't encountered yet
-        	def createAdHocResourceIfNeeded = request.requestURI.startsWith(request.contextPath+staticUrlPrefix);
-        	
-            inf = getResourceMetaForURI(uri, createAdHocResourceIfNeeded)
+            // Allow ad hoc creation of these resources too, incase they are requested directly 
+            // across multiple nodes, even if this node has not yet created a link to that resource
+            inf = getResourceMetaForURI(uri, true)
         } catch (FileNotFoundException fnfe) {
             response.sendError(404, fnfe.message)
             return

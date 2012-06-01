@@ -10,9 +10,8 @@ grails.project.dependency.resolution = {
     }
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     repositories {        
-        grailsPlugins()
-        grailsHome()
         grailsCentral()
+        grailsRepo "http://grails.org/plugins"
 
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
@@ -31,7 +30,7 @@ grails.project.dependency.resolution = {
         build(":tomcat:$grailsVersion") {
             export = false
         }
-        build(":release:1.0.1") {
+        build(":release:2.0.2") {
             export = false
         }
         test(":spock:0.6"){
