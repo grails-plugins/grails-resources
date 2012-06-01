@@ -2,19 +2,23 @@ package org.grails.plugin.resource
 
 import grails.test.*
 
+import org.junit.Before
+
 import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
 import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
 
-class ResourceTagLibTests extends TagLibUnitTestCase {
-    protected void setUp() {
-        super.setUp()
+@TestFor(ResourceTagLib)
+class ResourceTagLibTests {
+	
+	ResourceTagLib tagLib
+	
+	@Before
+    void setUp() {
+        tagLib = applicationContext.getBean(ResourceTagLib)
         
         Object.metaClass.encodeAsHTML = { -> delegate.toString() }
     }
 
-    protected void tearDown() {
-        super.tearDown()
-    }
 
     void testLinkResolutionForGrails2() {
         tagLib.grailsLinkGenerator = [
@@ -240,7 +244,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         assertFalse output.contains('dir=')
     }
 
-    def testDebugModeResourceLinkWithAbsoluteCDNURL() {
+    void testDebugModeResourceLinkWithAbsoluteCDNURL() {
 
         def url = 'https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js'
         def testMeta = new ResourceMeta()
@@ -260,7 +264,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         assertTrue output.contains('src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js?_debugResources')
     }
     
-    def testRequireUpdatesRequestAttributes() {
+    void testRequireUpdatesRequestAttributes() {
         tagLib.grailsResourceProcessor = [
             addModuleDispositionsToRequest: { req, module -> }
         ]
@@ -278,7 +282,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         assertEquals false, tracker[ResourceProcessor.IMPLICIT_MODULE]
     }
     
-    def testRequireIndicatesModuleNotMandatory() {
+    void testRequireIndicatesModuleNotMandatory() {
         tagLib.grailsResourceProcessor = [
             addModuleDispositionsToRequest: { req, module -> }
         ]
@@ -296,7 +300,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         assertEquals false, tracker[ResourceProcessor.IMPLICIT_MODULE]
     }
 
-    def testExternalTagCanWorkWithUrlUriOrDir() {
+    void testExternalTagCanWorkWithUrlUriOrDir() {
 
         try {
             tagLib.external(uri: '/fake/url')
@@ -310,7 +314,7 @@ class ResourceTagLibTests extends TagLibUnitTestCase {
         
     }
 
-    def testExternalTagRequiresUrlUriOrDir() {
+    void testExternalTagRequiresUrlUriOrDir() {
 
         try {
             tagLib.external([:])
