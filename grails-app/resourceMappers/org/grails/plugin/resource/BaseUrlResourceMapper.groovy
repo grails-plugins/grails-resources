@@ -1,4 +1,4 @@
-package org.grails.plugin.resource.mapper
+package org.grails.plugin.resource
 
 import org.grails.plugin.resource.mapper.MapperPhase
 
