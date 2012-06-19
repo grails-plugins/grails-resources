@@ -182,8 +182,7 @@ class ResourcesGrailsPlugin {
     
     boolean isResourceWeShouldProcess(File file) {
         // Make windows filenams safe for matching
-        def baseDir = new File('.', 'web-app').canonicalPath+'/'
-        def fileName = file.canonicalPath.replaceAll('\\\\', '/').substring(baseDir.size())
+        def fileName = file.canonicalPath.replaceAll('\\\\', '/').replaceAll('^.*?/web-app/', '')
         boolean shouldProcess = !(RELOADABLE_RESOURCE_EXCLUDES.any { PATH_MATCHER.match(it, fileName ) })
         return shouldProcess
     }
