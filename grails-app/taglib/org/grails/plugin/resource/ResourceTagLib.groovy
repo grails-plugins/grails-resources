@@ -22,6 +22,25 @@ class ResourceTagLib {
     static REQ_ATTR_PREFIX_PAGE_FRAGMENTS = 'resources.plugin.page.fragments'
     static REQ_ATTR_PREFIX_AUTO_DISPOSITION = 'resources.plugin.auto.disposition'
     
+    static stashWriters = [
+        'script': { out, stash ->
+            out << "<script type=\"text/javascript\">"
+            for (s in stash) {
+                out << s
+            }
+            out << "</script>"
+
+        },
+        'style': { out, stash ->
+            out << "<style type=\"text/css\">"
+            for (s in stash) {
+                out << s
+            }
+            out << "</style>"
+
+        }
+    ]
+    
     static writeAttrs( attrs, output) {
         // Output any remaining user-specified attributes
         attrs.each { k, v ->
@@ -302,7 +321,7 @@ class ResourceTagLib {
         }
     }
     
-    private storePageFragment(String type, String disposition, def fragment) {
+    private stashPageFragment(String type, String disposition, def fragment) {
         if (log.debugEnabled) {
             log.debug "stashing request script for disposition [${disposition}]: ${ fragment}"
         }
@@ -399,7 +418,7 @@ class ResourceTagLib {
             log.debug "Rendering page fragments for disposition: ${dispositionToRender}"
         }
 
-        layoutPageScripts(dispositionToRender)
+        layoutPageStash(dispositionToRender)
 
         if (log.debugEnabled) {
             log.debug "Removing outstanding request disposition: ${dispositionToRender}"
@@ -408,14 +427,13 @@ class ResourceTagLib {
         grailsResourceProcessor.doneDispositionResources(request, dispositionToRender)
     }
 
-    private layoutPageScripts(String disposition) {
-        def pageScripts = consumePageFragments('script', disposition)
-        if (pageScripts) {
-            out << "<script type=\"text/javascript\">"
-            for (s in pageScripts) {
-                out << s
+    private layoutPageStash(String disposition) {
+        def fragmentTypes = ['script', 'style']
+        for (t in fragmentTypes) {
+            def stash = consumePageFragments(t, disposition)
+            if (stash) {
+                stashWriters[t](out, stash)
             }
-            out << "</script>"
         }
     }
 
@@ -425,9 +443,13 @@ class ResourceTagLib {
      */
     def script = { attrs, body ->
         def dispos = attrs.remove('disposition') ?: 'defer'
-        storePageFragment('script', dispos, body())
+        stashPageFragment('script', dispos, body())
     }
 
+    def stash = { attrs, body ->
+        stashPageFragment(attrs.type, attrs.disposition, body())
+    }
+    
     protected getModuleByName(name) {
         def module = grailsResourceProcessor.getModule(name)
         if (!module) {
@@ -516,7 +538,9 @@ class ResourceTagLib {
                 // use the link generator to avoid stack overflow calling back into us
                 // via g.resource
                 attrs.contextPath = ctxPath
+                println "Making URI for [$attrs]"
                 uri = grailsLinkGenerator.resource(attrs)
+                println "Got URI for [$attrs]: ${uri}"
                 abs = uri.contains('://') 
             }
         }
@@ -555,6 +579,8 @@ class ResourceTagLib {
         }
         
         // Chop off context path
+        println "Getting context-relative URI for [$uri] (context is $ctxPath)"
+
         def reluri = ResourceProcessor.removeQueryParams(abs ? uri : uri[ctxPath.size()..-1])
         
         // Get or create ResourceMeta
