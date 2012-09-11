@@ -264,6 +264,26 @@ class ResourceTagLibTests {
         assertTrue output.contains('src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js?_debugResources')
     }
     
+    void testLinkToAbsoluteResourceWithQueryParams() {
+
+        def url = 'https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js?x=y#nasty'
+        def testMeta = new ResourceMeta()
+        testMeta.sourceUrl = url
+        testMeta.actualUrl = url
+        testMeta.disposition = 'head'
+        
+        tagLib.request.contextPath = "/resourcestests"
+        
+        tagLib.grailsResourceProcessor = [
+            isDebugMode: { r -> false },
+            getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
+            staticUrlPrefix: '/static'
+        ]
+        def output = tagLib.external(uri:url, type:"js").toString()
+        println "Output was: $output"
+        assertTrue output.contains('src="'+url+'"')
+    }
+    
     void testRequireUpdatesRequestAttributes() {
         tagLib.grailsResourceProcessor = [
             addModuleDispositionsToRequest: { req, module -> }

@@ -337,7 +337,11 @@ class ResourceMeta {
     }
     
     String getWorkDirRelativePath() {
-        processedFile.path - workDir.path
+        if (processedFile) {
+            return processedFile.path - workDir.path
+        } else {
+            return null
+        }
     }
     
     String getActualUrlParent() {
@@ -416,9 +420,13 @@ class ResourceMeta {
     }
     
     void updateActualUrlFromProcessedFile() {
-        def p = workDirRelativePath.replace('\\', '/')
-        // have to call the setter method
-        setActualUrl(p)
+        def p = workDirRelativePath?.replace('\\', '/')
+        if (p != null) {
+            // have to call the setter method
+            setActualUrl(p)
+        } else {
+            setActualUrl(sourceUrl)
+        }
     }
     
     boolean excludesMapperOrOperation(String mapperName, String operationName) {

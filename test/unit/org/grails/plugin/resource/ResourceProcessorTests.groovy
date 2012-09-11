@@ -44,6 +44,16 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
         assertEquals '/somehack.xml#whatever', meta.linkUrl
     }
 
+    void testPrepareAbsoluteURLWithQueryParams() {
+        def r = new ResourceMeta()
+        r.sourceUrl = 'http://crackhouse.ck/css/somehack.css?x=y#whatever'
+        
+        def meta = svc.prepareResource(r, true)
+        assertNotNull meta
+        assertEquals 'http://crackhouse.ck/css/somehack.css', meta.actualUrl
+        assertEquals 'http://crackhouse.ck/css/somehack.css?x=y#whatever', meta.linkUrl
+    }
+
     void testBuildResourceURIForGrails1_4() {
         def r = new ResourceMeta()
         r.sourceUrl = '/somehack.xml#whatever'

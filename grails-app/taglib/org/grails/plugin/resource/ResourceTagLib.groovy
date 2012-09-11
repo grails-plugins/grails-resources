@@ -581,7 +581,8 @@ class ResourceTagLib {
         // Chop off context path
         println "Getting context-relative URI for [$uri] (context is $ctxPath)"
 
-        def reluri = ResourceProcessor.removeQueryParams(abs ? uri : uri[ctxPath.size()..-1])
+        def contextRelUri = abs ? uri : uri[ctxPath.size()..-1]
+        def reluri = ResourceProcessor.removeQueryParams(contextRelUri)
         
         // Get or create ResourceMeta
         def res
@@ -593,9 +594,10 @@ class ResourceTagLib {
                 }
             })
         }
-        
-        // We need to handle a) absolute links here for CDN, and b) base url
-        def linkUrl = res ? res.linkUrl : reluri
+
+        // If the link has to support linkUrl for override, or fall back to the full requested url
+        // we resolve without query params, but must keep them for linking        
+        def linkUrl = res ? res.linkUrl : contextRelUri
 
         if (linkUrl.contains('://')) {
             // @todo do we need to toggle http/https here based on current request protocol?
