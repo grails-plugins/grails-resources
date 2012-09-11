@@ -107,7 +107,7 @@ class ResourceProcessor implements InitializingBean {
      */
     void updateDependencyOrder() {
         def modules = (modulesByName.collect { it.value }).findAll { !isInternalModule(it) }
-        def noIncomingEdges = modules.findAll { l -> !modules.any { l in it.dependsOn }  }
+        def noIncomingEdges = modules.findAll { l -> !modules.any { l.name in it.dependsOn }  }
         def ordered = []
         Set visited = new HashSet()
         
@@ -115,7 +115,10 @@ class ResourceProcessor implements InitializingBean {
         visit = { n -> 
             if (!(n.name in visited)) {
                 visited << n.name
-                def incomingEdges = modules.findAll { mod -> mod.name in n.dependsOn }
+                def incomingEdges = []
+                n.dependsOn?.each {d ->
+                    incomingEdges << modules.find { mod -> mod.name == d }
+                }
                 for (m in incomingEdges) {
                     visit(m)
                 }
