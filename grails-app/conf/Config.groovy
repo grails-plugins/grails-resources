@@ -16,13 +16,13 @@ log4j = {
     
 }
 
-grails.doc.authors = 'Marc Palmer (marc@grailsrocks.com)'
+grails.doc.authors = 'Marc Palmer (marc@grailsrocks.com), Luke Daley (ld@ldaley.com)'
 grails.doc.license = 'Apache License 2.0'
 grails.doc.title = 'Resources Plugin'
 
 //grails.resources.processing.enabled = false
 //grails.resources.mappers.baseurl.enabled = true
-//grails.resources.mappers.baseurl.default = 'http://bullshit.google.com/'
+//grails.resources.mappers.baseurl.default = 'http://whatever.google.com/'
 
 environments {
     development {
