@@ -154,7 +154,7 @@ class ResourceModule {
                 resattrs[k] = v
             }
         }
-        r.tagAttributes = attrs?.clone()
+        r.tagAttributes = resattrs
         r.attributes.putAll(args)
         return r        
     }
