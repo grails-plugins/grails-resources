@@ -293,13 +293,15 @@ class ResourceTagLibTests {
         
         def tracker = tagLib.request.resourceModuleTracker
         assertNotNull tracker
-        assertEquals 3, tracker?.size()
+        assertEquals 2, tracker?.size()
         assertTrue tracker.containsKey('thingOne')
         assertEquals true, tracker.thingOne
         assertTrue tracker.containsKey('thingTwo')
         assertEquals true, tracker.thingOne
-        assertTrue tracker.containsKey(ResourceProcessor.IMPLICIT_MODULE)
-        assertEquals false, tracker[ResourceProcessor.IMPLICIT_MODULE]
+
+        // We must never include the ADHOC or SYNTHETIC modules!
+        assertFalse tracker.containsKey(ResourceProcessor.ADHOC_MODULE)
+        assertFalse tracker.containsKey(ResourceProcessor.SYNTHETIC_MODULE)
     }
     
     void testRequireIndicatesModuleNotMandatory() {
@@ -311,13 +313,15 @@ class ResourceTagLibTests {
         
         def tracker = tagLib.request.resourceModuleTracker
         assertNotNull tracker
-        assertEquals 3, tracker?.size()
+        assertEquals 2, tracker?.size()
         assertTrue tracker.containsKey('thingOne')
         assertEquals false, tracker.thingOne
         assertTrue tracker.containsKey('thingTwo')
         assertEquals false, tracker.thingTwo
-        assertTrue tracker.containsKey(ResourceProcessor.IMPLICIT_MODULE)
-        assertEquals false, tracker[ResourceProcessor.IMPLICIT_MODULE]
+
+        // We must never include the ADHOC or SYNTHETIC modules!
+        assertFalse tracker.containsKey(ResourceProcessor.ADHOC_MODULE)
+        assertFalse tracker.containsKey(ResourceProcessor.SYNTHETIC_MODULE)
     }
 
     void testExternalTagCanWorkWithUrlUriOrDir() {

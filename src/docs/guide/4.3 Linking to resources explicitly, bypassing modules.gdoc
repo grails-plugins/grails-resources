@@ -5,7 +5,7 @@ To link to CSS or other resources that are not declared in a module you use <r:e
 {code:xml}
 <r:external uri="js/custom.js"/>
 <script type="text/javascript">
-    var urlOfCSSToLoadInJSCode = '${r.external(uri:"css/custom.css").encodeAsJavaScript()';
+    var urlOfCSSToLoadInJSCode = '${r.external(uri:"css/custom.css").encodeAsJavaScript()}';
 </script>
 <r:external uri="icons/favicon.ico"/>
 {code}

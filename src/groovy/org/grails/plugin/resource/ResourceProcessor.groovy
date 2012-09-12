@@ -42,8 +42,9 @@ class ResourceProcessor implements InitializingBean {
     def log = LogFactory.getLog(ResourceProcessor)
 
     static final PATH_MATCHER = new AntPathMatcher()
-    static IMPLICIT_MODULE = "__@adhoc-files@__"
-    static SYNTHETIC_MODULE = "__@synthetic-files@__"
+    static ADHOC_MODULE = "__@adhoc-files@__"        // The placeholder for all undeclared resources that are linked to
+    static SYNTHETIC_MODULE = "__@synthetic-files@__"   // The placeholder for all the generated (i.e. aggregate) resources
+    
     static REQ_ATTR_DEBUGGING = 'resources.debug'
     static REQ_ATTR_DISPOSITIONS_REMAINING = 'resources.dispositions.remaining'
     static REQ_ATTR_DISPOSITIONS_DONE = "resources.dispositions.done"
@@ -97,7 +98,7 @@ class ResourceProcessor implements InitializingBean {
     
     boolean isInternalModule(def moduleOrName) {
         def n = moduleOrName instanceof ResourceModule ? moduleOrName.name : moduleOrName
-        return n in [IMPLICIT_MODULE, SYNTHETIC_MODULE]        
+        return n in [ADHOC_MODULE, SYNTHETIC_MODULE]        
     }
     
     /**
@@ -130,7 +131,7 @@ class ResourceProcessor implements InitializingBean {
             visit(module)
         }
         
-        ordered << IMPLICIT_MODULE
+        ordered << ADHOC_MODULE
         ordered << SYNTHETIC_MODULE 
         
         modulesInDependencyOrder = ordered
@@ -357,7 +358,7 @@ class ResourceProcessor implements InitializingBean {
     
     ResourceModule getOrCreateSyntheticOrImplicitModule(boolean synthetic) {
         def mod
-        def moduleName = synthetic ? SYNTHETIC_MODULE : IMPLICIT_MODULE
+        def moduleName = synthetic ? SYNTHETIC_MODULE : ADHOC_MODULE
         // We often get multiple simultaneous requests at startup and this causes
         // multiple creates and loss of concurrently processed resources
         synchronized (moduleName) {
@@ -709,7 +710,7 @@ class ResourceProcessor implements InitializingBean {
 
         // These are bi-products of resource processing so need to go
         modulesByName.remove(SYNTHETIC_MODULE)
-        modulesByName.remove(IMPLICIT_MODULE)
+        modulesByName.remove(ADHOC_MODULE)
 
         // This is cached data
         allResourcesByOriginalSourceURI.clear()
@@ -1127,7 +1128,7 @@ class ResourceProcessor implements InitializingBean {
                     }
                 }
                 result << m.key
-            } else if (m.value && m.key != ResourceProcessor.IMPLICIT_MODULE) {
+            } else if (m.value && m.key != ResourceProcessor.ADHOC_MODULE) {
                 throw new IllegalArgumentException("No module found with name [${m.key}]")
             }
         }

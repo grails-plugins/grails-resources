@@ -293,9 +293,6 @@ class ResourceTagLib {
         needsResourceLayout()
         
         def trk = request.resourceModuleTracker
-        if (!trk) {
-            declareModuleRequiredByPage(ResourceProcessor.IMPLICIT_MODULE, false)
-        }
         
         def mandatory = attrs.strict == null ? true : attrs.strict.toString() != 'false'
         def moduleNames
@@ -453,7 +450,7 @@ class ResourceTagLib {
     protected getModuleByName(name) {
         def module = grailsResourceProcessor.getModule(name)
         if (!module) {
-            if (name != ResourceProcessor.IMPLICIT_MODULE) {
+            if (name != ResourceProcessor.ADHOC_MODULE) {
                 throw new IllegalArgumentException("No module found with name [$name]")
             }
         }
