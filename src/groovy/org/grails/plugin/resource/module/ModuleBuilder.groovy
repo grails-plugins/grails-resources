@@ -46,6 +46,6 @@ class ModuleBuilder {
     }
     
     def missingMethod(String name, args) {
-        throw new RuntimeException("Sorry - flavours are not yet supported by the builder!")
+        throw new RuntimeException("Method calls such as ${name}($args) not yet supported by the builder!")
     }
 }

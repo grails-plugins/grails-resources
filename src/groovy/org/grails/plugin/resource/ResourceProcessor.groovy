@@ -1075,6 +1075,8 @@ class ResourceProcessor implements InitializingBean {
             
             dumpStats()
             log.info("Finished full reload")
+        } catch (Throwable t) {
+            log.error "Unable to load resources", t
         } finally {
             reloading = false
         }

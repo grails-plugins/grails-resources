@@ -538,9 +538,7 @@ class ResourceTagLib {
                 // use the link generator to avoid stack overflow calling back into us
                 // via g.resource
                 attrs.contextPath = ctxPath
-                println "Making URI for [$attrs]"
                 uri = grailsLinkGenerator.resource(attrs)
-                println "Got URI for [$attrs]: ${uri}"
                 abs = uri.contains('://') 
             }
         }
@@ -578,9 +576,6 @@ class ResourceTagLib {
             uri = forcePrefixedWithSlash(uri)
         }
         
-        // Chop off context path
-        println "Getting context-relative URI for [$uri] (context is $ctxPath)"
-
         def contextRelUri = abs ? uri : uri[ctxPath.size()..-1]
         def reluri = ResourceProcessor.removeQueryParams(contextRelUri)
         

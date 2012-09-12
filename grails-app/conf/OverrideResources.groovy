@@ -2,6 +2,8 @@ modules = {
     overrides {
         'blueprint' {
             defaultBundle 'monolith'
+            // Make sure we report bad dependsOn syntax
+            dependsOn ['a', 'b', 'c']
         }
         'jquery' {
             resource id:'jquery-js', bundle: 'monolith'

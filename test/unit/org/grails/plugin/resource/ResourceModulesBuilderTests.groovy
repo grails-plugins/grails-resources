@@ -56,6 +56,35 @@ class ResourceModulesBuilderTests extends GrailsUnitTestCase {
         assert ['smutils', 'jquery'] == bld._moduleOverrides[0].dependencies
     }
 
+    void testModuleDependsOnSyntaxes() {
+        def modules = []
+        def bld = new ModulesBuilder(modules)
+        
+        bld.'moduleA' {
+            dependsOn(['jquery', 'jquery-ui'])
+        }
+        
+        bld.'moduleB' {
+            dependsOn 'jquery, jquery-ui'
+        }
+
+        bld.'moduleC' {
+            dependsOn(['jquery', 'jquery-ui'] as String[])
+        }
+
+        shouldFail {
+            bld.'moduleD' {
+                // This is bad groovy syntaxt, parens are needed, translates to getProperty('dependsOn')
+                dependsOn ['jquery', 'jquery-ui']
+            }
+        }
+
+        assert 3 == modules.size()
+        assert ['jquery', 'jquery-ui'] == modules.find({it.name == 'moduleA'}).dependencies
+        assert ['jquery', 'jquery-ui'] == modules.find({it.name == 'moduleB'}).dependencies
+        assert ['jquery', 'jquery-ui'] == modules.find({it.name == 'moduleC'}).dependencies
+    }
+
     void testDefaultBundleFalse() {
         def modules = []
         def bld = new ModulesBuilder(modules)
