@@ -138,6 +138,10 @@ class ResourceMeta {
         sourceUrl.indexOf(':/') > 0
     }
     
+    boolean isActualAbsolute() {
+        actualUrl.indexOf(':/') > 0
+    }
+    
     boolean isDirty() {
         !originalResource || 
         (originalResource.lastModified() != originalLastMod)
@@ -389,6 +393,9 @@ class ResourceMeta {
      * All resource URLs must be app-relative with no ../ or ./
      */
     String relativeTo(ResourceMeta base) {
+        if (actualAbsolute) {
+            return actualUrl
+        }
         def baseDirStr = base.actualUrlParent
         def thisDirStr = this.actualUrlParent
         boolean isChild = thisDirStr.startsWith(baseDirStr+'/')

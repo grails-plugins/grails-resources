@@ -214,5 +214,51 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
         assertEquals expected, outcome
     }
 
+    void testCSSRewritingWithAbsoluteLinkOverride() {
+
+        def svc = [
+            getResourceMetaForURI : {  uri, adHoc, declRes, postProc = null ->
+                def r = new ResourceMeta()
+                r.sourceUrl = uri
+                r.actualUrl = "http://mycdn.somewhere.com/myresources/x.jpg"
+                return r
+            },
+            config : [ rewrite: [css: true] ],
+            getResource: { uri -> 
+                new URL('file:./test/test-files'+uri) 
+            },
+            getMimeType: { uri -> "test/nothing" }
+        ]
+        
+
+        def base = new File('./test-tmp/')
+
+        def r = new ResourceMeta(sourceUrl:'/css/main.css')
+        r.workDir = base
+        r.actualUrl = r.sourceUrl
+        r.contentType = 'text/css'
+        r.processedFile = new File(base, 'css/main.css')
+        r.processedFile.parentFile.mkdirs()
+        r.processedFile.delete()
+
+        def css = """
+.bg1 { background: url(resource:/image.png) }
+"""
+        r.processedFile << new ByteArrayInputStream(css.bytes)
+
+        CSSRewriterResourceMapper.newInstance().with {
+            grailsResourceProcessor = svc
+            map(r, new ConfigObject())
+        }
+
+        def outcome = r.processedFile.text
+        
+        println "Output: $outcome"
+        def expected = """
+.bg1 { background: url(http://mycdn.somewhere.com/myresources/x.jpg) }
+"""
+
+        assertEquals expected, outcome
+    }
 
 }

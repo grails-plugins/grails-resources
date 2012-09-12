@@ -46,7 +46,7 @@ class CSSRewriterResourceMapper {
                 def linkedToResource = grailsResourceProcessor.getResourceMetaForURI(uri, true, resURI) { res ->
                     // If there's no decl for the resource, create it with image disposition
                     // otherwise we may pop out as a favicon...
-                    res.disposition = 'image'
+                    res.disposition = 'cssresource'
                 }
 
                 if (linkedToResource) {
