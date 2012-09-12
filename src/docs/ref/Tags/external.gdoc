@@ -1,6 +1,6 @@
 h1. r:external Tag
 
-This tag renders the right kind of links to external resources, based on their type, never including the same resource multiple times.
+This tag renders the right kind of links to external resources, based on their type, never including the same resource multiple times. Resources, which are already included in a bundle are not to be rendered with this tag, but [require|Tags] and <r:layoutResources/> should be used instead.
 
 For example CSS files are rendered with:
 
@@ -10,7 +10,7 @@ For example CSS files are rendered with:
 
 or JS files are rendered with <script> tags. Images are rendered as favicons.
 
-This is used internally by <r:layoutResources/>, and is rarely used on its own unless you must render links to resources without using the dependency mechanism and [require|Tags].
+This is used internally by <r:layoutResources/>, and is rarely used on its own unless you must render links to resources without using the dependency mechanism and [require|Tags]. Resources that are included in a bundle, and have a disposition set to "defer", cannot be rendered directly with this tag.
 
 h2. Attributes
 
