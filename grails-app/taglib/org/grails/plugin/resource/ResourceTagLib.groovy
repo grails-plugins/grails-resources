@@ -293,7 +293,6 @@ class ResourceTagLib {
         needsResourceLayout()
         
         def trk = request.resourceModuleTracker
-        
         def mandatory = attrs.strict == null ? true : attrs.strict.toString() != 'false'
         def moduleNames
         if (attrs.module) {
