@@ -493,8 +493,12 @@ class ResourceTagLib {
             }
             if (r.disposition == renderingDisposition) {
                 def args = [:]
-                // args.uri needs to be the source uri used to identify the resource locally
-                args.uri = debugMode ? r.originalUrl : "${r.actualUrl}"
+                // args.uri needs to be the source uri used to identify the resource locally (unless it is remote)
+                if (debugMode || r.actualUrl.contains('://')) {
+                    args.uri = r.originalUrl
+                } else {
+                    args.uri = "${r.actualUrl}"
+                }
                 args.wrapper = r.prePostWrapper
                 args.disposition = r.disposition
                 
