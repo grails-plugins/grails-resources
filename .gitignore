@@ -6,3 +6,5 @@ target
 /test-tmp/
 /src/docs/ref/Resources/
 grails-app/i18n/
+*.iml
+.idea

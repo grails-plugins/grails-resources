@@ -24,6 +24,9 @@ class ModuleDeclarationsFactory {
     static Map<String,Closure> getModuleDeclarations(grailsApplication, String environment = Environment.current.name) {
         
         def slurper = new ConfigSlurper(environment)
+
+        // give module DSL closures access to grailsApplication
+        slurper.setBinding([grailsApplication: grailsApplication])
         
         // order so we are guaranteed of consistency
         def orderedResourceClasses = grailsApplication.resourcesClasses.sort { it.name }
