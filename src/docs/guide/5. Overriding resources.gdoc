@@ -21,6 +21,65 @@ modules = {
 
 All you do is re-define the module inside your "overrides" clause (yes this mean no module can be called "overrides"), and provide new values for defaultBundle, dependsOn and individual resource attributes.
 
-To override the attributes of resources, the original resource needs to have an id declared on it, or you can use the URI of the original resource if no id was provided.
+Arguments passed to the resource call in "overrides" are merged into those for the original resource, before being processed. Therefore you can change or clear any values previously declared.
 
-Arguments passed to the resource call in "overrides" are merged into those for the original resource, before being processed. Therefor you can change or clear any values previously declared.
+{note}
+To override the attributes of resources, the original resource needs to have an id declared on it, or you can use the URI of the original resource if no id was provided.
+{note}
+
+{warning}
+There are a few caveats whilst using overrides, namely:
+
+* To remove an existing resource, override it and point to an empty file.
+* You can't add a new resource to a bundle which didn't exist in the original module, you can only replace existing ones, but
+* If you want to add a completely new resource, create a new module and dependOn it in your overrides.
+{warning}
+
+For example, if you wanted to override an external library in the test environment:
+
+MyResources.groovy
+{code:java}
+modules = {
+    rockpool {
+        dependsOn 'core'
+        resource id: 'rockpool-js', url: '/js/rockpool.js', bundle: 'rockpoolBundle'
+    }
+}
+{code}
+
+Then you could override it in another resources file to remove it (probably using environment support to make it specific to the test environment):
+
+MyOverrideResources.groovy
+{code:java}
+modules = {
+    overrides {
+        rockpool {
+            dependsOn 'core'
+            resource id: 'rockpool-js', url: '/js/blank.js'
+        }
+    }
+}
+{code}
+
+{note}
+Note we don't need to include the bundle attribute, it is inherited from MyResources.groovy.
+{note}
+
+Perhaps you want to add a completely new file to the above bundle which never existed in the old module. It's a bit more tricky:
+
+MyOverrideResources.groovy
+{code:java}
+modules = {
+    overrides {
+        rockpool {
+            dependsOn 'core', 'mockpool'
+            resource id: 'rockpool-js', url: '/js/blank.js'
+        }
+    }
+    mockpool {
+        resource url: '/js/mockpool.js'
+    }
+}
+{code}
+
+Here, we depend on the new 'mockpool' module to include the brand new resource.
