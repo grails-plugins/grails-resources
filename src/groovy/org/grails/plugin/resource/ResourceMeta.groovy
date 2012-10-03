@@ -141,7 +141,7 @@ class ResourceMeta {
     boolean isActualAbsolute() {
         actualUrl.indexOf(':/') > 0
     }
-    
+
     boolean isDirty() {
         !originalResource || 
         (originalResource.lastModified() != originalLastMod)
@@ -212,7 +212,7 @@ class ResourceMeta {
     // Hook for when preparation is starting
     void beginPrepare(grailsResourceProcessor) {
         def uri = this.sourceUrl
-        if (!uri.contains('://')) {
+        if (!URLUtils.isGlobalAbsolute(uri)) {
             
             // Delete whatever file may already be there
             processedFile?.delete()
@@ -347,7 +347,7 @@ class ResourceMeta {
             return null
         }
     }
-    
+
     String getActualUrlParent() {
         def lastSlash = actualUrl.lastIndexOf('/')
         if (lastSlash >= 0) {

@@ -40,7 +40,7 @@ class ResourceTagLib {
 
         }
     ]
-    
+
     static writeAttrs( attrs, output) {
         // Output any remaining user-specified attributes
         attrs.each { k, v ->
@@ -445,7 +445,7 @@ class ResourceTagLib {
     def stash = { attrs, body ->
         stashPageFragment(attrs.type, attrs.disposition, body())
     }
-    
+
     protected getModuleByName(name) {
         def module = grailsResourceProcessor.getModule(name)
         if (!module) {
@@ -485,7 +485,7 @@ class ResourceTagLib {
         def debugMode = grailsResourceProcessor.isDebugMode(request)
         
         for (r in module.resources) { 
-            if (!r.exists() && !r.actualUrl?.contains('://')) {
+            if (!r.exists() && !URLUtils.isGlobalAbsolute(r.actualUrl)) {
                 throw new IllegalArgumentException("Module [$name] depends on resource [${r.sourceUrl}] but the file cannot be found")
             }
             if (log.debugEnabled) {
@@ -525,7 +525,7 @@ class ResourceTagLib {
         }
         def ctxPath = request.contextPath
         def uri = attrs.remove('uri')
-        def abs = uri?.indexOf('://') >= 0
+        def abs = URLUtils.isGlobalAbsolute(uri)
 
         if (!uri || !abs) {
             if (uri) {
@@ -535,7 +535,7 @@ class ResourceTagLib {
                 // via g.resource
                 attrs.contextPath = ctxPath
                 uri = grailsLinkGenerator.resource(attrs)
-                abs = uri.contains('://') 
+                abs = URLUtils.isGlobalAbsolute(uri)
             }
         }
         
@@ -587,12 +587,13 @@ class ResourceTagLib {
         }
 
         // If the link has to support linkUrl for override, or fall back to the full requested url
-        // we resolve without query params, but must keep them for linking        
-        def linkUrl = res ? res.linkUrl : contextRelUri
+        // we resolve without query params, but must keep them for linking
+        def linkUrl = res ? res.linkUrl : reluri
 
-        if (linkUrl.contains('://')) {
+        def baseUrl = '' // @todo get from config
+        if (URLUtils.isGlobalAbsolute(linkUrl) || baseUrl) {
             // @todo do we need to toggle http/https here based on current request protocol?
-            return [uri:linkUrl, resource:res]
+            return [uri:baseUrl ? baseUrl+linkUrl : linkUrl, resource:res]
         } else {
             // Only apply static prefix if the resource actually has ResourceMeta created for it
             uri = res ? ctxPath+grailsResourceProcessor.staticUrlPrefix+linkUrl : ctxPath+linkUrl
@@ -635,7 +636,7 @@ class ResourceTagLib {
         def o = new StringBuilder()
         o << "<img src=\"${info.uri.encodeAsHTML()}\" "
         def attribs = res?.tagAttributes ? res.tagAttributes.clone() : [:]
-		def excludes = ['dir', 'uri', 'file', 'plugin']
+        def excludes = ['dir', 'uri', 'file', 'plugin']
         attribs += attrs.findAll { !(it.key in excludes) }
         attrs = attribs
 

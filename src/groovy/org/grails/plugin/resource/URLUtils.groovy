@@ -30,4 +30,13 @@ class URLUtils {
         !url.startsWith('#') && 
         !(url.indexOf('://') >= 0)
     }
+
+    /**
+     * Works out if url is globally absolute, as in it begins with a protocol
+     * like http:// or just //
+     */
+    static Boolean isGlobalAbsolute(url) {
+        url?.indexOf('://') >= 0 ||
+        url?.startsWith('//')
+    }
 }
