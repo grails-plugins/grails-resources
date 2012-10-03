@@ -94,7 +94,7 @@ class ResourceModule {
     ResourceMeta newResourceFromArgs(Map args, svc, boolean singleResourceModule) {
         def url = args.remove('url')
         if (url) {
-            if (!url.contains('://') && !url.startsWith('/')) {
+            if (!URLUtils.isGlobalAbsolute(url) && !url.startsWith('/')) {
                 url = '/'+url
             }
         }
