@@ -524,18 +524,23 @@ class ResourceTagLib {
             log.debug "resolveResourceAndURI: ${attrs}"
         }
         def ctxPath = request.contextPath
+
+        println "resolveResourceandURI: ${attrs}"
+
         def uri = attrs.remove('uri')
         def abs = uri?.indexOf('://') >= 0
 
-        if (!uri || !abs) {
-            if (uri) {
+        if (!uri) {
+            // use the link generator to avoid stack overflow calling back into us
+            // via g.resource
+            println "No URI, getting with $attrs"
+            attrs.contextPath = ctxPath
+            uri = grailsLinkGenerator.resource(attrs)
+            println "Linked URI is [$uri], checking abs"
+            abs = uri.contains('://') 
+        } else {
+            if (!abs) {
                 uri = ctxPath + uri
-            } else {
-                // use the link generator to avoid stack overflow calling back into us
-                // via g.resource
-                attrs.contextPath = ctxPath
-                uri = grailsLinkGenerator.resource(attrs)
-                abs = uri.contains('://') 
             }
         }
         
@@ -572,6 +577,12 @@ class ResourceTagLib {
             uri = forcePrefixedWithSlash(uri)
         }
         
+        println "About to unmunge app local url. Abs: $abs and URI: $uri - ctxpath is [$ctxPath]"
+        // If its a bad or empty URI, get out of here. It must at least contain the context path if it is relative
+        if (!abs && (uri.size() <= ctxPath.size())) {
+            return [uri:uri]
+        }
+
         def contextRelUri = abs ? uri : uri[ctxPath.size()..-1]
         def reluri = ResourceProcessor.removeQueryParams(contextRelUri)
         
