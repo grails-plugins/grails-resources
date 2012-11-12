@@ -31,6 +31,15 @@ Like the _debugResources option, this will perform no processing at all. It will
 
 You do however retain the dependency management abilities.
 
+h2. Disabling specific resource mappers in different environments
+
+You can disable any mapper using the standard environment-specific configuration of Grails:
+
+{code:java}
+grails.resources.mappers.bundle.enabled = false
+grails.resources.mappers.hashandcache.enabled = false
+{code}
+
 h2. Controlling the scope of the adhoc filter: grails.resources.adhoc.patterns
 
 The ad-hoc resource filter is mapped using Servlet SDK filter mappings, which are more restricted that Ant patterns. You can specify folder (xxx/*) or file type (*.xxx) mappings only. 
