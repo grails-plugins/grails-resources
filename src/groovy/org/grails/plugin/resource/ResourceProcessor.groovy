@@ -44,7 +44,7 @@ class ResourceProcessor implements InitializingBean {
     static final PATH_MATCHER = new AntPathMatcher()
     static ADHOC_MODULE = "__@adhoc-files@__"        // The placeholder for all undeclared resources that are linked to
     static SYNTHETIC_MODULE = "__@synthetic-files@__"   // The placeholder for all the generated (i.e. aggregate) resources
-    
+
     static REQ_ATTR_DEBUGGING = 'resources.debug'
     static REQ_ATTR_DISPOSITIONS_REMAINING = 'resources.dispositions.remaining'
     static REQ_ATTR_DISPOSITIONS_DONE = "resources.dispositions.done"
@@ -1168,9 +1168,9 @@ class ResourceProcessor implements InitializingBean {
     /**
      * Add a disposition to the current request's set of them
      */
-    void addDispositionToRequest(request, String disposition, String moduleName) {
+    void addDispositionToRequest(request, String disposition, String reason) {
         if (haveAlreadyDoneDispositionResources(request, disposition)) {
-            throw new IllegalArgumentException("""Cannot add module [$moduleName] which requires disposition [$disposition] to this request - 
+            throw new IllegalArgumentException("""Cannot disposition [$disposition] to this request (required for [$reason]) - 
 that disposition has already been rendered. Check that your r:layoutResources tag comes after all
 Resource tags that add content to that disposition.""")
         }
