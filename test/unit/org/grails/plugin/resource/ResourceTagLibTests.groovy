@@ -1,11 +1,10 @@
 package org.grails.plugin.resource
 
-import grails.test.*
-
 import org.junit.Before
 
 import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
 import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
+import grails.test.mixin.TestFor
 
 @TestFor(ResourceTagLib)
 class ResourceTagLibTests {

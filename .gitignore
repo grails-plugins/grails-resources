@@ -2,7 +2,14 @@ plugin.xml
 *.zip
 dependencies.groovy
 target
+out
 /stacktrace.log
 /test-tmp/
 /src/docs/ref/Resources/
 grails-app/i18n/
+.idea
+.classpath
+.settings
+*.iml
+*.iws
+*.ipr
