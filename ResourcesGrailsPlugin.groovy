@@ -230,13 +230,15 @@ class ResourcesGrailsPlugin {
             def oldClass = application.getArtefact(type, event.source.name)
             application.addArtefact(type, event.source)
             // Reload subclasses
-            application.getArtefacts(type).each {
-                if (it.clazz != event.source && oldClass.clazz.isAssignableFrom(it.clazz)) {
-                    def newClass = application.classLoader.reloadClass(it.clazz.name)
-                    application.addArtefact(type, newClass)
+            if (oldClass) {
+                application.getArtefacts(type).each {
+                    if (it.clazz != event.source && oldClass.clazz.isAssignableFrom(it.clazz)) {
+                        def newClass = application.classLoader.reloadClass(it.clazz.name)
+                        application.addArtefact(type, newClass)
+                    }
                 }
             }
-            
+                        
             true
         } else {
             false
