@@ -1,5 +1,0 @@
-class FeedsController {
-    def news = {
-        
-    }
-}

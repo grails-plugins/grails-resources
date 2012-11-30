@@ -118,7 +118,12 @@ class ResourceProcessor implements InitializingBean {
                 visited << n.name
                 def incomingEdges = []
                 n.dependsOn?.each {d ->
-                    incomingEdges << modules.find { mod -> mod.name == d }
+                    def m = modules.find { mod -> mod.name == d }
+                    if (!m) {
+                        log.warn "There is a dependency on module [${d}] by module [${n.name}] but no such module has been defined"
+                    } else {
+                        incomingEdges << m
+                    }
                 }
                 for (m in incomingEdges) {
                     visit(m)
