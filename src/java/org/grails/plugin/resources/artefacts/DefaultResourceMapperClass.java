@@ -1,7 +1,6 @@
 package org.grails.plugin.resources.artefacts;
 
 import org.codehaus.groovy.grails.commons.*;
-import groovy.lang.Closure;
 
 /**
  * @author Luke Daley (ld@ldaley.com)

@@ -1,7 +1,5 @@
 package org.grails.plugin.resources.artefacts;
 
-import org.codehaus.groovy.grails.commons.*;
-
 /**
  * @author Luke Daley (ld@ldaley.com)
  */
