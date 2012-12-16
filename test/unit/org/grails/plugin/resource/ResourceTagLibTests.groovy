@@ -1,6 +1,6 @@
 package org.grails.plugin.resource
 
-import grails.test.*
+import grails.test.mixin.*
 
 import org.junit.Before
 
