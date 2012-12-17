@@ -38,3 +38,7 @@ All of these filters are inserted in the servlet filter chain defined in web.xml
 h1. ResourceProcessor.
 
 This is the main class which processes resources for both the [ProcessingFilter|api:org.grails.plugin.resource] and [ResourceTagLib|api:org.grails.plugin.resource]. It is a Spring bean which is instantiated in the ApplicationContext in the doWithSpring closure of the ResourcesGrailsPlugin.groovy descriptor. 
+
+h1. Module Declarations.
+
+A [ModuleBuilder|api:org.grails.plugin.resource.module] implements the DSL for resources inside a module by accumulating the attributes which are defined for a particular resource.  By contrast, a [ModulesBuilder|api:org.grails.plugin.resource.module] 
