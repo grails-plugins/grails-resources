@@ -3,7 +3,6 @@ package org.grails.plugin.resource
 import grails.test.*
 
 import org.grails.plugin.resource.module.*
-import org.grails.plugin.resource.*
 
 class ResourceModulesBuilderTests extends GrailsUnitTestCase {
     def svc
