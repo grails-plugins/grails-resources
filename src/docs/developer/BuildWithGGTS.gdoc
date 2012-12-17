@@ -1,0 +1,17 @@
+Clone the repository.
+
+It may be easiest to work in an isolated GGTS workspace, given the adjustments in grails and compiler levels which may be needed. To create a new workspace, choose Switch Workspace->Other and choose a new folder.
+
+In the workspace, perform Import...->Grails->Grails Project. Choose the matching grails installation as that required by the plugin.
+  This may import a number of dependencies into the workspace.
+
+At this point, there may be a number of errors, as the build in GGTS can expose a number of errors that may have been ignored in the releases.
+
+For example, with resources version 1.2.RC3, at commit f21346d, in GGTS 3.1.0.RELEASE, there are two errors. One is due to an improper reference to the BaseUrlResourceMapper being in the mapper package near the top of the BaseUrlResourceMapperSpec file. This is easily corrected. The other error is caused by GGTS not using grails-app/resourceMappers as a source folder. Right-click it to add it as a source file. This then builds appropriately with a groovy 1.8 compiler and grails 2.0.4 and all tests pass.
+
+
+
+
+
+
+
