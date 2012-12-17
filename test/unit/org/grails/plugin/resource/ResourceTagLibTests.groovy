@@ -283,6 +283,25 @@ class ResourceTagLibTests {
         println "Output was: $output"
         assertTrue output.contains('src="'+url+'"')
     }
+	
+	void testLinkToGoogleFontCssWithComplexQuery() {
+		def url = 'http://fonts.googleapis.com/css?family=PT+Sans:400,700&subset=latin,cyrillic'
+		def testMeta = new ResourceMeta()
+		testMeta.sourceUrl = url
+		testMeta.actualUrl = url
+		testMeta.disposition = 'head'
+		
+		tagLib.request.contextPath = "/resourcestests"
+		
+		tagLib.grailsResourceProcessor = [
+			isDebugMode: { r -> false },
+			getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
+			staticUrlPrefix: '/static'
+		]
+		def output = tagLib.external(uri:url, type:"css").toString()
+		println "Output was: $output"
+		assertTrue output.contains('href="'+url+'"')
+	}
     
     void testRequireUpdatesRequestAttributes() {
         tagLib.grailsResourceProcessor = [
