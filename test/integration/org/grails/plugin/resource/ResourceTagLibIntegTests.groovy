@@ -16,37 +16,46 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
 
     def testExternalWithAbsoluteURI() {
         def result = applyTemplate('<r:external uri="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"/>', [:])
-        println "Result: ${result}"
         assertTrue result.indexOf('"https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js') != -1
     }
 
     def testExternalWithAdhocResourceURIThatIsExcluded() {
         def result = applyTemplate('<r:external uri="js/core.js"/>', [:])
-        println "Result: ${result}"
         assertTrue result.indexOf('/js/core.js') != -1
     }
 
     def testExternalWithAdhocResourceDirAndFileThatIsExcluded() {
         def result = applyTemplate('<r:external dir="js" file="core.js"/>', [:])
-        println "Result: ${result}"
         assertTrue result.indexOf('/js/core.js') != -1
     }
 
     def testExternalWithAdhocResourceURI() {
         def result = applyTemplate('<r:external uri="js/adhoc.js"/>', [:])
-        println "Result: ${result}"
         assertTrue result.indexOf('/static/js/_adhoc.js') != -1
     }
 
     def testExternalWithAdhocResourceURIWithSlash() {
         def result = applyTemplate('<r:external uri="/js/adhoc.js"/>', [:])
-        println "Result: ${result}"
         assertTrue result.indexOf('/static/js/_adhoc.js') != -1
     }
 
     def testExternalWithAdhocResourceDirAndFile() {
         def result = applyTemplate('<r:external dir="js" file="adhoc.js"/>', [:])
-        println "Result: ${result}"
         assertTrue result.indexOf('/static/js/_adhoc.js') != -1
     }
+	
+	def testGoogleFontsWithQueriesInModule() {
+		def template = '''<html>
+							<head>
+							  <r:require modules="testurl"/>
+							  <r:layoutResources/>
+							</head>
+							<body>
+							  <h1>Hi</h1>
+							</body>
+						  </html>'''
+		def result = applyTemplate(template, [:])
+		def expectedLink = '<link href="http://fonts.googleapis.com/css?family=PT+Sans:400,700&subset=latin,cyrillic"'
+		assertTrue result.contains(expectedLink)
+	}
 }
