@@ -53,6 +53,7 @@ class ResourceTagLib {
         }
     }
 
+	// Closures to write links of different types
     static LINK_WRITERS = [
         js: { url, constants, attrs ->
             def o = new StringBuilder()
@@ -94,6 +95,12 @@ class ResourceTagLib {
     
     def grailsLinkGenerator
     
+	/**
+	 * Check if a url has already been rendered.
+	 * 
+	 * @param url
+	 * @return true if not already rendered
+	 */
     boolean notAlreadyIncludedResource(url) {
         url = url.toString()
         if (log.debugEnabled) {
@@ -147,9 +154,11 @@ class ResourceTagLib {
     }
     
     /**
-     * Render a link
-     * @attr uri
-     * @attr type
+     * Render a link for a resource.
+     * 
+     * @attr uri to be written as the actual reference
+     * @attr type of link to produce, must be one of SUPPORTED_TYPES
+     * @attr ... other attributes which will override constant attributes for the link type
      */
     def doResourceLink = { attrs ->
         def uri = attrs.remove('uri')
@@ -215,7 +224,7 @@ class ResourceTagLib {
         def type = attrs.remove('type')
         def resolveArgs = determineResourceResolutionArguments(url, attrs)
 
-        // If a disposition specificed, we may be ad hoc so use that, else rever to default for type
+        // If a disposition specified, we may be ad-hoc so use that, else revert to default for type
         if (disposition == null) {
             // Get default disposition for this type
             disposition = 'head'
@@ -236,7 +245,7 @@ class ResourceTagLib {
             return
         }
         
-        // Don't do resource check if this isn't a defer/head resource
+        // Output link if not in defer or head disposition, or if not included when in defer or head disposition
         if (!(disposition in ['defer', 'head']) || notAlreadyIncludedResource(info.resource?.linkUrl ?: info.uri)) {
             attrs.type = type
             if (info.debug) {
@@ -258,6 +267,13 @@ class ResourceTagLib {
         }
     }
 
+	/**
+	 * Produce standard map of arguments to use in resolving resource.
+	 * 
+	 * @param url
+	 * @param attrs
+	 * @return 
+	 */
     private determineResourceResolutionArguments(url, Map attrs) {
 
         def resolveArgs = [:]
@@ -513,10 +529,15 @@ class ResourceTagLib {
     }
 
     /**
-     * Get the uri to use for linking, and - if relevant - the resource instance
+     * Get the uri to use for linking, and - if relevant - the resource instance.
+     * 
      * NOTE: The URI handling mechanics in here are pretty evil and nuanced (i.e. 
      * ad-hoc vs declared, ad-hoc and not found, ad-hoc and excluded etc).
      * There is reasonable test coverage, but only fools rush in.
+     * 
+     * @attr uri - to be resolved, i.e. id of the ResourceMeta
+     * @attr disposition - of the resource
+     * 
      * @return Map with uri/url property and *maybe* a resource property
      */
     def resolveResourceAndURI(attrs) {
