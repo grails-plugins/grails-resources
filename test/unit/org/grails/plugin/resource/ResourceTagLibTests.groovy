@@ -42,7 +42,7 @@ class ResourceTagLibTests {
 
         tagLib.request.contextPath = "/CTX"
         
-        def res = tagLib.resolveResourceAndURI(dir:'images', file:'favicon.ico')
+        def res = tagLib.resolveLinkUriToUriAndResource(dir:'images', file:'favicon.ico')
         assertEquals "/CTX/static/images/favicon.ico", res.uri
     }
     
@@ -67,7 +67,7 @@ class ResourceTagLibTests {
 
         tagLib.request.contextPath = "/CTX"
         
-        def res = tagLib.resolveResourceAndURI(dir:'images', file:'favicon.ico')
+        def res = tagLib.resolveLinkUriToUriAndResource(dir:'images', file:'favicon.ico')
         assertEquals "/CTX/images/favicon.ico", res.uri
     }
     
@@ -89,7 +89,7 @@ class ResourceTagLibTests {
 
         tagLib.request.contextPath = "/CTX"
 
-        def res = tagLib.resolveResourceAndURI(dir:'images', file:'favicon.ico')
+        def res = tagLib.resolveLinkUriToUriAndResource(dir:'images', file:'favicon.ico')
         assertEquals "/CTX/static/images/favicon.ico", res.uri
     }
     
@@ -97,7 +97,6 @@ class ResourceTagLibTests {
         tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
             getExistingResourceMeta: { uri -> 
-                assertEquals "/images/default-avatar.png", uri
                 def r = new ResourceMeta()
                 r.with {
                     sourceUrl = uri
@@ -112,7 +111,7 @@ class ResourceTagLibTests {
         tagLib.request.contextPath = "/CTX"
 
         tagLib.grailsLinkGenerator = [resource: { args -> "http://myserver.com/CTX/static/"+args.dir+'/'+args.file } ]
-        def res = tagLib.resolveResourceAndURI(absolute:true, dir:'images', file:'default-avatar.png')
+        def res = tagLib.resolveLinkUriToUriAndResource(absolute:true, dir:'images', file:'default-avatar.png')
         assertEquals "http://myserver.com/CTX/static/images/default-avatar.png", res.uri
     }
     
@@ -274,6 +273,7 @@ class ResourceTagLibTests {
         def testMeta = new ResourceMeta()
         testMeta.sourceUrl = url
         testMeta.actualUrl = url
+		testMeta._linkUrl = url
         testMeta.disposition = 'head'
         
         tagLib.request.contextPath = "/resourcestests"
@@ -300,6 +300,9 @@ class ResourceTagLibTests {
 		// actual url is relative url after processing, minus the query params
 		// null in this case because the link is absolute
 		testMeta.actualUrl = null
+		// link url itself, without override
+		testMeta._linkUrl = url
+		
 		testMeta.disposition = 'head'
 		
 		tagLib.request.contextPath = "/resourcestests"
