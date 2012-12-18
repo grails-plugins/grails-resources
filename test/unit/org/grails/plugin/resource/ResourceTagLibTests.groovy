@@ -28,7 +28,7 @@ class ResourceTagLibTests {
         ]
         tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
-            getResourceMetaForURI: { uri, adhoc, declRes,  postProc -> 
+            getExistingResourceMeta: { uri -> 
                 assertEquals "/images/favicon.ico", uri
                 def r = new ResourceMeta()
                 r.with {
@@ -54,10 +54,14 @@ class ResourceTagLibTests {
         ]
         tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
-            getResourceMetaForURI: { uri, adhoc, declRes,  postProc -> 
+            getExistingResourceMeta: { uri -> 
                 assertEquals "/images/favicon.ico", uri
                 return null // Excluded
             },
+			getResourceMetaForURI: {uri,createAdHoc,declRes,postProc ->
+				assertEquals "/images/favicon.ico", uri
+				return null // Excluded
+			},
             staticUrlPrefix: '/static'
         ]
 
@@ -71,7 +75,7 @@ class ResourceTagLibTests {
         tagLib.grailsLinkGenerator = new HalfBakedLegacyLinkGenerator()
         tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
-            getResourceMetaForURI: { uri, adhoc, declRes,  postProc -> 
+            getExistingResourceMeta: { uri -> 
                 assertEquals "/images/favicon.ico", uri
                 def r = new ResourceMeta()
                 r.with {
@@ -92,7 +96,7 @@ class ResourceTagLibTests {
     void testAbsoluteDirFileLinkResolution() {
         tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
-            getResourceMetaForURI: { uri, adhoc, declRes,  postProc -> 
+            getExistingResourceMeta: { uri -> 
                 assertEquals "/images/default-avatar.png", uri
                 def r = new ResourceMeta()
                 r.with {
@@ -120,7 +124,7 @@ class ResourceTagLibTests {
         
         tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
-            getResourceMetaForURI: { uri, adhoc, declRes,  postProc -> testMeta },
+            getExistingResourceMeta: { uri -> testMeta },
             staticUrlPrefix: '/static'
         ]
         def output = tagLib.external(uri:'/css/test.less', rel:'stylesheet/less', type:'css').toString()
@@ -139,7 +143,7 @@ class ResourceTagLibTests {
 
         tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
-            getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
+            getExistingResourceMeta: { uri -> testMeta },
             staticUrlPrefix: '/static'
         ]
         def output = tagLib.external(uri:'/css/test.less', type:'css').toString()
@@ -158,7 +162,7 @@ class ResourceTagLibTests {
 
         tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
-            getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
+            getExistingResourceMeta: { uri -> testMeta },
             staticUrlPrefix: '/static'
         ]
         def output = tagLib.external(uri:'/css/ie.less', type:'css', wrapper: { s -> "WRAPPED${s}WRAPPED" }).toString()
@@ -182,7 +186,7 @@ class ResourceTagLibTests {
         
         tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
-            getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
+            getExistingResourceMeta: { uri -> testMeta },
             staticUrlPrefix: '/static',
             getModule : { name -> testMod }
         ]
@@ -202,7 +206,7 @@ class ResourceTagLibTests {
         
         tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
-            getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
+            getExistingResourceMeta: { uri -> testMeta },
             staticUrlPrefix: '/static'
         ]
         def output = tagLib.img(uri:'/images/test.png').toString()
@@ -224,7 +228,7 @@ class ResourceTagLibTests {
 
         tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
-            getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
+            getExistingResourceMeta: { uri -> testMeta },
             staticUrlPrefix: '/static'
         ]
         tagLib.grailsLinkGenerator = [
@@ -256,7 +260,7 @@ class ResourceTagLibTests {
         
         tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> true },
-            getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
+            getExistingResourceMeta: { uri -> testMeta },
             staticUrlPrefix: '/static'
         ]
         def output = tagLib.external(uri:url, type:"js").toString()
@@ -276,7 +280,7 @@ class ResourceTagLibTests {
         
         tagLib.grailsResourceProcessor = [
             isDebugMode: { r -> false },
-            getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
+            getExistingResourceMeta: { uri -> testMeta },
             staticUrlPrefix: '/static'
         ]
         def output = tagLib.external(uri:url, type:"js").toString()
@@ -286,18 +290,26 @@ class ResourceTagLibTests {
 	
 	void testLinkToGoogleFontCssWithComplexQuery() {
 		def url = 'http://fonts.googleapis.com/css?family=PT+Sans:400,700&subset=latin,cyrillic'
+		
+		// setup ResourceMeta which will always be processed
 		def testMeta = new ResourceMeta()
-		testMeta.sourceUrl = url
-		testMeta.actualUrl = url
+		// original url, verbatim
+		testMeta.originalUrl = url
+		// source is app relative url of source, minus the query params
+		testMeta.sourceUrl = 'http://fonts.googleapis.com/css'
+		// actual url is relative url after processing, minus the query params
+		// null in this case because the link is absolute
+		testMeta.actualUrl = null
 		testMeta.disposition = 'head'
 		
 		tagLib.request.contextPath = "/resourcestests"
 		
 		tagLib.grailsResourceProcessor = [
 			isDebugMode: { r -> false },
-			getResourceMetaForURI: { uri, adhoc, declRes, postProc -> testMeta },
+			getExistingResourceMeta: { uri -> testMeta },
 			staticUrlPrefix: '/static'
 		]
+		
 		def output = tagLib.external(uri:url, type:"css").toString()
 		println "Output was: $output"
 		assertTrue output.contains('href="'+url+'"')
