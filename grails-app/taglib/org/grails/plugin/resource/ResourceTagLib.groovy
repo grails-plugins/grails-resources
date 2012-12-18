@@ -233,7 +233,7 @@ class ResourceTagLib {
         }
         resolveArgs.disposition = disposition
 
-        info = resolveResourceAndURI(resolveArgs)
+        info = resolveLinkUriToUriAndResource(resolveArgs)
 
         // Copy in the tag attributes from the resource's declaration
         if (info.resource && info.resource.tagAttributes) {
@@ -542,7 +542,7 @@ class ResourceTagLib {
      * 
      * @return Map with uri/url property and *maybe* a resource property
      */
-    def resolveResourceAndURI(attrs) {
+    def resolveLinkUriToUriAndResource(attrs) {
         if (log.debugEnabled) {
             log.debug "resolveResourceAndURI: ${attrs}"
         }
@@ -634,7 +634,7 @@ class ResourceTagLib {
      * @todo this currently won't work for absolute="true" invocations, it should just passthrough these
      */
     def resource = { attrs ->
-        def info = resolveResourceAndURI(attrs)
+        def info = resolveLinkUriToUriAndResource(attrs)
         if (info.resource) {
             // We know we located the resource
             out << info.uri
@@ -657,7 +657,7 @@ class ResourceTagLib {
         def args = attrs.clone()
         args.disposition = "image"
         
-        def info = resolveResourceAndURI(args)
+        def info = resolveLinkUriToUriAndResource(args)
         def res = info.resource
 
         attrs.remove('uri')
