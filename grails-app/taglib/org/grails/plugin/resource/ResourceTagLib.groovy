@@ -8,6 +8,7 @@ import org.apache.commons.io.FilenameUtils
 import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
 import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
 
+
 /**
  * This taglib handles creation of all the links to resources, including the smart de-duping of them.
  *
@@ -17,6 +18,7 @@ import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
  * @author Luke Daley (ld@ldaley.com)
  */
 class ResourceTagLib {
+	
     static namespace = "r"
     
     static REQ_ATTR_PREFIX_PAGE_FRAGMENTS = 'resources.plugin.page.fragments'
@@ -602,9 +604,9 @@ class ResourceTagLib {
         def contextRelUri = abs ? uri : uri[ctxPath.size()..-1]
         def reluri = ResourceProcessor.removeQueryParams(contextRelUri)
         
-        // Get or create ResourceMeta
-        def res
-        if (!abs) {
+        // Get ResourceMeta or create one if uri is not absolute
+        def res = grailsResourceProcessor.getExistingResourceMeta(reluri)
+        if (!res && !abs) {
             res = grailsResourceProcessor.getResourceMetaForURI(reluri, true, null, { r ->
                 // If this is an ad hoc resource, we need to store if it can be deferred or not
                 if (disposition != null) {
