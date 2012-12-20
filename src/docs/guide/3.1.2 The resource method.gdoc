@@ -1,4 +1,3 @@
-
 Declaring a resource is done using the "resource" method. This takes either a single string URI or a map of arguments that define the URL of the resource and any other specific options you require.
 
 The single-string argument variant is a simple shortcut for resources that are safe to use all defaults:
@@ -22,6 +21,7 @@ The more powerful map argument form accepts the following arguments:
 * id - Optional. Module-unique id of the resource to be used when [overriding|guide:5. Overriding resources] resource properties. Defaults to the url of the resource if none supplied.
 * linkOverride - Optional. The URL to use when rendering links for the resource, instead of the processed resource's URL. Allows your external resources to participate in dependency management, and some niche CDN requirements.
 * wrapper - Optional. A Closure that will be used to render the resource link. The correct markup for linking will be passed in. Used primarily for MSIE workarounds i.e: wrapper: \{ s -> "<!--[if lt IE 8]>$s<![endif]-->" \}. Note that supplying a wrapper will prevent bundling of that resource.
+* plugin - Optional. If applicable, the name of the plugin a resource is being defined in. 
 
 Examples:
 
@@ -40,6 +40,14 @@ modules = {
     ui {
         resource url:'/css/forms.css', bundle:'core-ui'
         resource url:'/js/forms.js'
+    }
+}
+{code}
+
+{code:java}
+modules = {
+    'font-awesome' {
+        resource url: plugin: 'font-awesome-resources', dir: 'css', file: 'font-awesome.css'
     }
 }
 {code}
