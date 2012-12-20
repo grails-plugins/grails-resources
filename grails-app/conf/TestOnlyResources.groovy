@@ -9,6 +9,10 @@ environments {
 				          disposition: 'head', 
 						  attrs: [type: 'css']
 			}
+			'google-maps' {
+				resource url: 'http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false', attrs: [type: 'js']
+			}
+			  
         }
     }
 }
