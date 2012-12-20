@@ -8,6 +8,7 @@ import org.apache.commons.io.FilenameUtils
 import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
 import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
 
+
 /**
  * This taglib handles creation of all the links to resources, including the smart de-duping of them.
  *
@@ -17,6 +18,7 @@ import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
  * @author Luke Daley (ld@ldaley.com)
  */
 class ResourceTagLib {
+	
     static namespace = "r"
     
     static REQ_ATTR_PREFIX_PAGE_FRAGMENTS = 'resources.plugin.page.fragments'
@@ -53,6 +55,7 @@ class ResourceTagLib {
         }
     }
 
+	// Closures to write links of different types
     static LINK_WRITERS = [
         js: { url, constants, attrs ->
             def o = new StringBuilder()
@@ -94,6 +97,12 @@ class ResourceTagLib {
     
     def grailsLinkGenerator
     
+	/**
+	 * Check if a url has already been rendered.
+	 * 
+	 * @param url
+	 * @return true if not already rendered
+	 */
     boolean notAlreadyIncludedResource(url) {
         url = url.toString()
         if (log.debugEnabled) {
@@ -147,9 +156,11 @@ class ResourceTagLib {
     }
     
     /**
-     * Render a link
-     * @attr uri
-     * @attr type
+     * Render a link for a resource.
+     * 
+     * @attr uri to be written as the actual reference
+     * @attr type of link to produce, must be one of SUPPORTED_TYPES
+     * @attr ... other attributes which will override constant attributes for the link type
      */
     def doResourceLink = { attrs ->
         def uri = attrs.remove('uri')
@@ -215,14 +226,14 @@ class ResourceTagLib {
         def type = attrs.remove('type')
         def resolveArgs = determineResourceResolutionArguments(url, attrs)
 
-        // If a disposition specificed, we may be ad hoc so use that, else rever to default for type
+        // If a disposition specified, we may be ad-hoc so use that, else revert to default for type
         if (disposition == null) {
             // Get default disposition for this type
             disposition = 'head'
         }
         resolveArgs.disposition = disposition
 
-        info = resolveResourceAndURI(resolveArgs)
+        info = resolveLinkUriToUriAndResource(resolveArgs)
 
         // Copy in the tag attributes from the resource's declaration
         if (info.resource && info.resource.tagAttributes) {
@@ -236,7 +247,7 @@ class ResourceTagLib {
             return
         }
         
-        // Don't do resource check if this isn't a defer/head resource
+        // Output link if not in defer or head disposition, or if not included when in defer or head disposition
         if (!(disposition in ['defer', 'head']) || notAlreadyIncludedResource(info.resource?.linkUrl ?: info.uri)) {
             attrs.type = type
             if (info.debug) {
@@ -258,6 +269,13 @@ class ResourceTagLib {
         }
     }
 
+	/**
+	 * Produce standard map of arguments to use in resolving resource.
+	 * 
+	 * @param url
+	 * @param attrs
+	 * @return 
+	 */
     private determineResourceResolutionArguments(url, Map attrs) {
 
         def resolveArgs = [:]
@@ -513,13 +531,18 @@ class ResourceTagLib {
     }
 
     /**
-     * Get the uri to use for linking, and - if relevant - the resource instance
+     * Get the uri to use for linking, and - if relevant - the resource instance.
+     * 
      * NOTE: The URI handling mechanics in here are pretty evil and nuanced (i.e. 
      * ad-hoc vs declared, ad-hoc and not found, ad-hoc and excluded etc).
      * There is reasonable test coverage, but only fools rush in.
+     * 
+     * @attr uri - to be resolved, i.e. id of the ResourceMeta
+     * @attr disposition - of the resource
+     * 
      * @return Map with uri/url property and *maybe* a resource property
      */
-    def resolveResourceAndURI(attrs) {
+    def resolveLinkUriToUriAndResource(attrs) {
         if (log.debugEnabled) {
             log.debug "resolveResourceAndURI: ${attrs}"
         }
@@ -581,9 +604,9 @@ class ResourceTagLib {
         def contextRelUri = abs ? uri : uri[ctxPath.size()..-1]
         def reluri = ResourceProcessor.removeQueryParams(contextRelUri)
         
-        // Get or create ResourceMeta
-        def res
-        if (!abs) {
+        // Get ResourceMeta or create one if uri is not absolute
+        def res = grailsResourceProcessor.getExistingResourceMeta(reluri)
+        if (!res && !abs) {
             res = grailsResourceProcessor.getResourceMetaForURI(reluri, true, null, { r ->
                 // If this is an ad hoc resource, we need to store if it can be deferred or not
                 if (disposition != null) {
@@ -611,7 +634,7 @@ class ResourceTagLib {
      * @todo this currently won't work for absolute="true" invocations, it should just passthrough these
      */
     def resource = { attrs ->
-        def info = resolveResourceAndURI(attrs)
+        def info = resolveLinkUriToUriAndResource(attrs)
         if (info.resource) {
             // We know we located the resource
             out << info.uri
@@ -634,7 +657,7 @@ class ResourceTagLib {
         def args = attrs.clone()
         args.disposition = "image"
         
-        def info = resolveResourceAndURI(args)
+        def info = resolveLinkUriToUriAndResource(args)
         def res = info.resource
 
         attrs.remove('uri')
