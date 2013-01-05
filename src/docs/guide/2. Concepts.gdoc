@@ -22,7 +22,7 @@ h2. Processing of Resources Prior to Serving Them
 
 Another important function of the Resources plugin is to process resources prior to serving them to clients. For example, CSS files can be minified and combined to improve server performance.
 
-This processing is performed by [Mappers|Mappers], which can generally perform any type of modification of the resources, including renaming and combining files. An example is combination of css files, which can also include re-writing links to the css files so combined. The specific mappers applied to a resource can be specified based on the type of resource, type of mapper, or on a per resource basis.
+This processing is performed by Mappers, which can generally perform any type of modification of the resources, including renaming and combining files. An example is combination of css files, which can also include re-writing links to the css files so combined. The specific mappers applied to a resource can be specified based on the type of resource, type of mapper, or on a per resource basis.
 
 Another form of resource processing provided by the Resources plugin is the aggregation of pieces of Javascript. Segments of script can be embedded within a GSP using the [script|Tags] tag. These will then be rendered into the head or end of the page when the [layoutResources|Tags] tag is invoked. The location (head or end of the page) of both javascript fragments and other resources is controlled by defining their @disposition@ attribute.
 
