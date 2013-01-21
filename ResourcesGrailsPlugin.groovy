@@ -1,6 +1,7 @@
 import grails.util.Environment
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean
 import org.springframework.core.io.FileSystemResource
@@ -21,6 +22,13 @@ class ResourcesGrailsPlugin {
 
     static DEFAULT_URI_PREFIX = 'static'
     static DEFAULT_ADHOC_PATTERNS = ["/images/*", "*.css", "*.js"].asImmutable()
+    static DEFAULT_WATCHED_RESOURCES = [
+        "file:./grails-app/resourceMappers/**/*.groovy",
+        "file:./plugins/*/grails-app/resourceMappers/**/*.groovy",
+        "file:./grails-app/conf/*Resources.groovy",
+        "file:./plugins/*/grails-app/conf/*Resources.groovy",
+        "file:./web-app/**/*.*" // Watch for resource changes, we need excludes here for WEB-INF+META-INF when grails impls this
+    ].asImmutable()
 
     def version = "1.2.RC3"
     def grailsVersion = "1.3 > *"
@@ -39,13 +47,6 @@ class ResourcesGrailsPlugin {
     ]
 
     def artefacts = [getResourceMapperArtefactHandler(), getResourcesArtefactHandler()]
-    def watchedResources = [
-        "file:./grails-app/resourceMappers/**/*.groovy",
-        "file:./plugins/*/grails-app/resourceMappers/**/*.groovy",
-        "file:./grails-app/conf/*Resources.groovy",
-        "file:./plugins/*/grails-app/conf/*Resources.groovy",
-        "file:./web-app/**/*.*" // Watch for resource changes, we need excludes here for WEB-INF+META-INF when grails impls this
-    ]
 
     def author = "Marc Palmer, Luke Daley"
     def authorEmail = "marc@grailsrocks.com, ld@ldaley.com"
@@ -62,6 +63,11 @@ class ResourcesGrailsPlugin {
     def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPRESOURCES" ]
     def scm = [ url: "https://github.com/grails-plugins/grails-resources" ]
     
+    def getWatchedResources() {
+        def watchedResources = getResourcesConfig(ApplicationHolder.application).watchedResources
+        watchedResources ? watchedResources : DEFAULT_WATCHED_RESOURCES
+    }
+
     def getWebXmlFilterOrder() {
         def FilterManager = getClass().getClassLoader().loadClass('grails.plugin.webxml.FilterManager')
         [   DeclaredResourcesPluginFilter: FilterManager.DEFAULT_POSITION - 300,
