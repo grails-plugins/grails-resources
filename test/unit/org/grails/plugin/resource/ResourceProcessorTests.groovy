@@ -4,9 +4,6 @@ import grails.test.GrailsUnitTestCase
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 
-import grails.test.GrailsUnitTestCase
-import org.apache.commons.io.FileUtils
-
 class ResourceProcessorTests extends GrailsUnitTestCase {
     @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder()
     File temporarySubfolder
