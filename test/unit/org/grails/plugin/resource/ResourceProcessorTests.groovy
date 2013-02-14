@@ -1,7 +1,11 @@
 package org.grails.plugin.resource
+
 import grails.test.GrailsUnitTestCase
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+
+import grails.test.GrailsUnitTestCase
+import org.apache.commons.io.FileUtils
 
 class ResourceProcessorTests extends GrailsUnitTestCase {
     @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder()
@@ -49,6 +53,21 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
         assertNotNull meta
         assertEquals 'http://crackhouse.ck/css/somehack.css', meta.actualUrl
         assertEquals 'http://crackhouse.ck/css/somehack.css?x=y#whatever', meta.linkUrl
+    }
+
+    // GRESOURCES-116
+    void testPrepareAbsoluteURLWithMissingExtension() {
+        def r = new ResourceMeta()
+        r.workDir = new File('/tmp/test')
+        r.sourceUrl = 'http://maps.google.com/maps/api/js?v=3.5&sensor=false'
+        r.disposition = 'head'
+        r.tagAttributes = [type: 'js']
+
+        ResourceMeta meta = svc.prepareResource(r, true)
+        assertNotNull meta
+        assertEquals 'http://maps.google.com/maps/api/js', meta.actualUrl
+        assertEquals 'http://maps.google.com/maps/api/js?v=3.5&sensor=false', meta.linkUrl
+        assertEquals([type: 'js'], meta.tagAttributes)
     }
 
     void testBuildResourceURIForGrails1_4() {
