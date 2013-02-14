@@ -1,25 +1,22 @@
 package org.grails.plugin.resource
-
-import org.apache.commons.io.FileUtils
-
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.springframework.mock.web.MockServletContext
-import groovy.util.ConfigObject
-
-import grails.test.*
+import grails.test.GrailsUnitTestCase
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 
 class ResourceProcessorTests extends GrailsUnitTestCase {
+    @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder()
+    File temporarySubfolder
     def svc
     
     protected void setUp() {
         super.setUp()
         mockLogging(ResourceProcessor, true)
-        FileUtils.cleanDirectory(new File('./test-tmp/'));
+        temporarySubfolder = temporaryFolder.newFolder('test-tmp')
 
         svc = new ResourceProcessor()
         
         svc.grailsApplication = [
-            config : [grails:[resources:[work:[dir:'./test-tmp']]]],
+            config : [grails:[resources:[work:[dir:temporarySubfolder.getAbsolutePath()]]]],
             mainContext : [servletContext:[
                 getResource: { uri -> 
                     assertTrue uri.indexOf('#') < 0

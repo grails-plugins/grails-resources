@@ -1,21 +1,17 @@
 package org.grails.plugin.resource
 
-import org.apache.commons.io.FileUtils
-
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.springframework.mock.web.MockServletContext
-import groovy.util.ConfigObject
-
-import grails.test.*
+import grails.test.GrailsUnitTestCase
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 
 class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
-    
+    @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder()
+    File temporarySubfolder
 
     void setUp() {
         super.setUp()
-        mockLogging(CSSPreprocessorResourceMapper)
-        FileUtils.cleanDirectory(new File('./test-tmp/'));
-        
+        temporarySubfolder = temporaryFolder.newFolder('test-tmp')
+        mockLogging(org.grails.plugin.resource.CSSPreprocessorResourceMapper)
     }
     /**
      * This simulates a test where the image resources are moved to a new flat dir
@@ -26,12 +22,11 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
         def svc = [
             config : [ rewrite: [css: true] ]
         ]
-        def base = new File('./test-tmp/')
         def r = new ResourceMeta(sourceUrl:'/css/main.css')
-        r.workDir = base
+        r.workDir = temporarySubfolder
         r.actualUrl = r.sourceUrl
         r.contentType = "text/css"
-        r.processedFile = new File(base, 'css/main.css')
+        r.processedFile = new File(temporarySubfolder, 'css/main.css')
         r.processedFile.parentFile.mkdirs()
         r.processedFile.delete()
 
@@ -44,7 +39,7 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
         
-        new CSSPreprocessorResourceMapper().with {
+        new org.grails.plugin.resource.CSSPreprocessorResourceMapper().with {
             grailsResourceProcessor = svc
             map(r, new ConfigObject())
         }
@@ -73,13 +68,11 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
             config : [ rewrite: [css: true] ]
         ]
 
-        def base = new File('./test-tmp/')
-
         def r = new ResourceMeta(sourceUrl:'/css/main.css')
-        r.workDir = base
+        r.workDir = temporarySubfolder
         r.actualUrl = r.sourceUrl
         r.contentType = 'text/css'
-        r.processedFile = new File(base, 'css/main.css')
+        r.processedFile = new File(temporarySubfolder, 'css/main.css')
         r.processedFile.parentFile.mkdirs()
         r.processedFile.delete()
 
@@ -89,7 +82,7 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
 
-        new CSSPreprocessorResourceMapper().with {
+        new org.grails.plugin.resource.CSSPreprocessorResourceMapper().with {
             grailsResourceProcessor = svc
             map(r, new ConfigObject())
         }
@@ -115,13 +108,11 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
             config : [ rewrite: [css: true] ]
         ]
 
-        def base = new File('./test-tmp/')
-
         def r = new ResourceMeta(sourceUrl:'/css/main.css')
-        r.workDir = base
+        r.workDir = temporarySubfolder
         r.actualUrl = r.sourceUrl
         r.contentType = 'text/css'
-        r.processedFile = new File(base, 'css/main.css')
+        r.processedFile = new File(temporarySubfolder, 'css/main.css')
         r.processedFile.parentFile.mkdirs()
         r.processedFile.delete()
 
@@ -133,7 +124,7 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
 
-        new CSSPreprocessorResourceMapper().with {
+        new org.grails.plugin.resource.CSSPreprocessorResourceMapper().with {
             grailsResourceProcessor = svc
             map(r, new ConfigObject())
         }

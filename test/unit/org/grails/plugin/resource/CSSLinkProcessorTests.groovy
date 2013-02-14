@@ -1,35 +1,27 @@
 package org.grails.plugin.resource
-
-import org.apache.commons.io.FileUtils
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.springframework.mock.web.MockServletContext
-import groovy.util.ConfigObject
-
-import grails.test.*
+import grails.test.GrailsUnitTestCase
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 
 class CSSLinkProcessorTests extends GrailsUnitTestCase {
-    
+    @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder()
+    File temporarySubfolder
     def mockResSvc
     
     void setUp() {
         super.setUp()
-
-        FileUtils.cleanDirectory(new File('./test-tmp/'));
-
+        temporarySubfolder = temporaryFolder.newFolder('test-tmp')
         mockResSvc = [
             config : [ rewrite: [css: true] ]
         ]
-        
     }
 
     protected ResourceMeta makeRes(String reluri, String contents) {
-        def base = new File('./test-tmp/')
-
         def r = new ResourceMeta(sourceUrl:'/'+reluri)
-        r.workDir = base
+        r.workDir = temporarySubfolder
         r.actualUrl = r.sourceUrl
         r.contentType = "text/css"
-        r.processedFile = new File(base, reluri)
+        r.processedFile = new File(temporarySubfolder, reluri)
         r.processedFile.parentFile.mkdirs()
         r.processedFile.delete()
 
