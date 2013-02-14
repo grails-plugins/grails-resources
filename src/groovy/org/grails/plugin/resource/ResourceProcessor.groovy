@@ -740,6 +740,7 @@ class ResourceProcessor implements InitializingBean {
             
             dsl.delegate = builder
             dsl.resolveStrategy = Closure.DELEGATE_FIRST
+            dsl.owner.class.metaClass.static.main = { builder.main(it) } // GPRESOURCES-50: hack to allow module name 'main'
             dsl()
         }
 
