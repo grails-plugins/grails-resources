@@ -12,8 +12,8 @@ class CSSLinkProcessor {
     
     def log = LogFactory.getLog(CSSLinkProcessor)
     
-    // We need to successfully match any kind of url(), mappers are responsible for checking type
-    static CSS_URL_PATTERN = ~/(url\s*\(['"]?\s*['"]?)(.+?)(\s*['"]?\s*['"]?\))/
+    // We need to successfully match any kind of url() and @import, mappers are responsible for checking type
+    static CSS_URL_PATTERN = ~/((?:url|@import)\s*(?:(?:\(['"]?)|['"])\s*)(.+?)(\s*(?:['"]?\)|(?:['"]\s*;)))/
     
     boolean isCSSRewriteCandidate(resource, grailsResourceProcessor) {
         def enabled = grailsResourceProcessor.config.rewrite.css instanceof Boolean ? grailsResourceProcessor.config.rewrite.css : true
