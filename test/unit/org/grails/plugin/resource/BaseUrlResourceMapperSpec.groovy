@@ -1,7 +1,6 @@
 package org.grails.plugin.resource
 
 import grails.plugin.spock.UnitSpec
-import org.grails.plugin.resource.BaseUrlResourceMapper
 
 class BaseUrlResourceMapperSpec extends UnitSpec{
 
@@ -49,6 +48,41 @@ class BaseUrlResourceMapperSpec extends UnitSpec{
             mapper.map( resource, config )
         then:
             resource.linkOverride == 'http://www.google.com/images.jpg'
+    }
+
+    //GPRESOURCES-184
+    def "mapper uses delegate-resource's name for aggreagated resources"() {
+        setup:
+        def resourceBundle = [getLinkUrl: { '/bundle.js' }] as AggregatedResourceMeta
+        resourceBundle.resources = [bundledResource('uno')]
+        def config = [ enabled: true, default:'http://www.google.com/', modules : [ uno: 'http://uno.com/' ] ]
+
+        when:
+        mapper.map(resourceBundle, config)
+
+        then:
+        resourceBundle.linkOverride == 'http://uno.com/bundle.js'
+    }
+
+    //GPRESOURCES-184
+    def "mapper throws an exception when configured to map modules bundled together to different urls"() {
+        setup:
+        def resourceBundle = [getLinkUrl: { '/bundle.js' }] as AggregatedResourceMeta
+        resourceBundle.resources = [bundledResource('uno'), bundledResource('dos')]
+        def config = [ enabled: true, default:'http://www.google.com/', modules : [ uno: 'http://uno.com/' ] ]
+
+        when:
+        mapper.map(resourceBundle, config)
+
+        then:
+        def exception = thrown(IllegalArgumentException)
+        exception.message.contains('All modules bundled together must have the same baseUrl override')
+        exception.message.contains(resourceBundle.resources.first().bundle)
+    }
+
+    private ResourceMeta bundledResource(String moduleName) {
+        def module = [name: moduleName] as ResourceModule
+        [module: module, bundle: 'bundle_head'] as ResourceMeta
     }
 
 }
