@@ -1,7 +1,7 @@
 package org.grails.plugin.resource
 
 import grails.test.*
-
+import grails.test.mixin.TestFor
 import org.junit.Before
 
 import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator

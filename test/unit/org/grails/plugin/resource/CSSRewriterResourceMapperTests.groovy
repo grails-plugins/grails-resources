@@ -1,19 +1,16 @@
 package org.grails.plugin.resource
-
-import org.apache.commons.io.FileUtils
-
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.springframework.mock.web.MockServletContext
-import groovy.util.ConfigObject
-
-import grails.test.*
+import grails.test.GrailsUnitTestCase
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 
 class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
-    
+    @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder()
+    File temporarySubfolder
+
     void setUp() {
         super.setUp()
-        mockLogging(CSSRewriterResourceMapper)
-        FileUtils.cleanDirectory(new File('./test-tmp/'));
+        temporarySubfolder = temporaryFolder.newFolder('test-tmp')
+        mockLogging(org.grails.plugin.resource.CSSRewriterResourceMapper)
     }
 
     /**
@@ -38,11 +35,10 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
             config : [ rewrite: [css: true] ]
         ]
 
-        def base = new File('./test-tmp/')
-        r.workDir = base
+        r.workDir = temporarySubfolder
         r.actualUrl = r.sourceUrl
         r.contentType = "text/css"
-        r.processedFile = new File(base, 'css/main.css')
+        r.processedFile = new File(temporarySubfolder, 'css/main.css')
         r.processedFile.parentFile.mkdirs()
         r.processedFile.delete()
 
@@ -54,7 +50,7 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
 
-        CSSRewriterResourceMapper.newInstance().with {
+        org.grails.plugin.resource.CSSRewriterResourceMapper.newInstance().with {
             grailsResourceProcessor = svc
             map(r, new ConfigObject())
         }
@@ -83,13 +79,11 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
             config : [ rewrite: [css: true] ]
         ]
         
-        def base = new File('./test-tmp/')
-
         def r = new ResourceMeta(sourceUrl:'/css/main.css')
-        r.workDir = base
+        r.workDir = temporarySubfolder
         r.actualUrl = r.sourceUrl
         r.contentType = 'text/css'
-        r.processedFile = new File(base, 'css/main.css')
+        r.processedFile = new File(temporarySubfolder, 'css/main.css')
         r.processedFile.parentFile.mkdirs()
         r.processedFile.delete()
 
@@ -101,7 +95,7 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
         
-        CSSRewriterResourceMapper.newInstance().with {
+        org.grails.plugin.resource.CSSRewriterResourceMapper.newInstance().with {
             grailsResourceProcessor = svc
             map(r, new ConfigObject())
         }
@@ -130,13 +124,11 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
             config : [ rewrite: [css: true] ]
         ]
 
-        def base = new File('./test-tmp/')
-
         def r = new ResourceMeta(sourceUrl:'/css/main.css')
-        r.workDir = base
+        r.workDir = temporarySubfolder
         r.actualUrl = r.sourceUrl
         r.contentType = 'text/css'
-        r.processedFile = new File(base, 'css/main.css')
+        r.processedFile = new File(temporarySubfolder, 'css/main.css')
         r.processedFile.parentFile.mkdirs()
         r.processedFile.delete()
 
@@ -146,7 +138,7 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
     
-        CSSRewriterResourceMapper.newInstance().with {
+        org.grails.plugin.resource.CSSRewriterResourceMapper.newInstance().with {
             grailsResourceProcessor = svc
             map(r, new ConfigObject())
         }
@@ -181,14 +173,11 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
             getMimeType: { uri -> "test/nothing" }
         ]
         
-
-        def base = new File('./test-tmp/')
-
         def r = new ResourceMeta(sourceUrl:'/css/main.css')
-        r.workDir = base
+        r.workDir = temporarySubfolder
         r.actualUrl = r.sourceUrl
         r.contentType = 'text/css'
-        r.processedFile = new File(base, 'css/main.css')
+        r.processedFile = new File(temporarySubfolder, 'css/main.css')
         r.processedFile.parentFile.mkdirs()
         r.processedFile.delete()
 
@@ -198,7 +187,7 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
 
-        CSSRewriterResourceMapper.newInstance().with {
+        org.grails.plugin.resource.CSSRewriterResourceMapper.newInstance().with {
             grailsResourceProcessor = svc
             map(r, new ConfigObject())
         }
@@ -230,14 +219,11 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
             getMimeType: { uri -> "test/nothing" }
         ]
         
-
-        def base = new File('./test-tmp/')
-
         def r = new ResourceMeta(sourceUrl:'/css/main.css')
-        r.workDir = base
+        r.workDir = temporarySubfolder
         r.actualUrl = r.sourceUrl
         r.contentType = 'text/css'
-        r.processedFile = new File(base, 'css/main.css')
+        r.processedFile = new File(temporarySubfolder, 'css/main.css')
         r.processedFile.parentFile.mkdirs()
         r.processedFile.delete()
 
@@ -246,7 +232,7 @@ class CSSRewriterResourceMapperTests extends GrailsUnitTestCase {
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
 
-        CSSRewriterResourceMapper.newInstance().with {
+        org.grails.plugin.resource.CSSRewriterResourceMapper.newInstance().with {
             grailsResourceProcessor = svc
             map(r, new ConfigObject())
         }

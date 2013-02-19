@@ -1,26 +1,19 @@
 package org.grails.plugin.resource
-
-import org.apache.commons.io.FileUtils
-
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
-
-import org.springframework.mock.web.MockServletContext
-
-import groovy.util.ConfigObject
-import grails.test.*
+import grails.test.GrailsUnitTestCase
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 
 class AggregatedResourceMetaTests extends GrailsUnitTestCase {
+    @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder()
+    File temporarySubfolder
     
     def mockResSvc
     def module 
     
     void setUp() {
         super.setUp()
+        temporarySubfolder = temporaryFolder.newFolder('test-tmp')
 
-        def f = new File('./test-tmp/')
-        f.mkdirs()
-        FileUtils.cleanDirectory(f);
-        
         module = new ResourceModule()
         module.name = 'aggmodule'
         
@@ -29,7 +22,7 @@ class AggregatedResourceMetaTests extends GrailsUnitTestCase {
             updateDependencyOrder: { -> },
             modulesInDependencyOrder: [module.name],
             getMimeType: { String str -> 'text/plain' },
-            makeFileForURI: { uri -> new File(f, uri)} // @todo only works on unix sorry chaps not enough time to fix this
+            makeFileForURI: { uri -> new File(temporarySubfolder, uri)}
         ]
         
     }

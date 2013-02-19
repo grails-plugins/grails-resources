@@ -1,25 +1,23 @@
 package org.grails.plugin.resource
 
-import org.apache.commons.io.FileUtils
-
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.springframework.mock.web.MockServletContext
-import groovy.util.ConfigObject
-
-import grails.test.*
+import grails.test.GrailsUnitTestCase
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 
 class ResourceProcessorTests extends GrailsUnitTestCase {
+    @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder()
+    File temporarySubfolder
     def svc
     
     protected void setUp() {
         super.setUp()
         mockLogging(ResourceProcessor, true)
-        FileUtils.cleanDirectory(new File('./test-tmp/'));
+        temporarySubfolder = temporaryFolder.newFolder('test-tmp')
 
         svc = new ResourceProcessor()
         
         svc.grailsApplication = [
-            config : [grails:[resources:[work:[dir:'./test-tmp']]]],
+            config : [grails:[resources:[work:[dir:temporarySubfolder.getAbsolutePath()]]]],
             mainContext : [servletContext:[
                 getResource: { uri -> 
                     assertTrue uri.indexOf('#') < 0
@@ -52,6 +50,21 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
         assertNotNull meta
         assertEquals 'http://crackhouse.ck/css/somehack.css', meta.actualUrl
         assertEquals 'http://crackhouse.ck/css/somehack.css?x=y#whatever', meta.linkUrl
+    }
+
+    // GRESOURCES-116
+    void testPrepareAbsoluteURLWithMissingExtension() {
+        def r = new ResourceMeta()
+        r.workDir = new File('/tmp/test')
+        r.sourceUrl = 'http://maps.google.com/maps/api/js?v=3.5&sensor=false'
+        r.disposition = 'head'
+        r.tagAttributes = [type: 'js']
+
+        ResourceMeta meta = svc.prepareResource(r, true)
+        assertNotNull meta
+        assertEquals 'http://maps.google.com/maps/api/js', meta.actualUrl
+        assertEquals 'http://maps.google.com/maps/api/js?v=3.5&sensor=false', meta.linkUrl
+        assertEquals([type: 'js'], meta.tagAttributes)
     }
 
     void testBuildResourceURIForGrails1_4() {
