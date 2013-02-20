@@ -1,29 +1,20 @@
 package org.grails.plugin.resource
 
-import java.util.concurrent.ConcurrentHashMap
-
 import grails.util.Environment
-import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
-import org.springframework.web.util.WebUtils
-import org.springframework.beans.factory.InitializingBean
 import org.apache.commons.io.FilenameUtils
-import javax.servlet.ServletRequest
-import grails.util.Environment
-import org.springframework.util.AntPathMatcher
-//import groovyx.gpars.GParsPool
-
-import grails.spring.BeanBuilder
-import org.grails.plugin.resource.mapper.ResourceMappersFactory
-import org.grails.plugin.resource.module.*
-import java.lang.reflect.Modifier
-
-import org.codehaus.groovy.grails.plugins.PluginManagerHolder
-
-import org.grails.plugin.resource.util.ResourceMetaStore
-import org.grails.plugin.resource.AggregatedResourceMeta
-
 import org.apache.commons.logging.LogFactory
+import org.codehaus.groovy.grails.plugins.PluginManagerHolder
+import org.grails.plugin.resource.mapper.ResourceMapper
+import org.grails.plugin.resource.mapper.ResourceMappersFactory
+import org.grails.plugin.resource.module.ModuleDeclarationsFactory
+import org.grails.plugin.resource.module.ModulesBuilder
+import org.grails.plugin.resource.util.ResourceMetaStore
+import org.springframework.beans.factory.InitializingBean
+import org.springframework.util.AntPathMatcher
+import org.springframework.web.util.WebUtils
 
+import javax.servlet.ServletRequest
+import java.util.concurrent.ConcurrentHashMap
 /**
  * This is where it all happens.
  *
@@ -34,7 +25,7 @@ import org.apache.commons.logging.LogFactory
  * @author Luke Daley (ld@ldaley.com)
  */
 class ResourceProcessor implements InitializingBean {
-    
+
     static transactional = false
     
     boolean reloading
@@ -575,36 +566,42 @@ class ResourceProcessor implements InitializingBean {
         // Once delegated, its the delegate that needs to be processed, not the original
         def phase
         for (m in resourceMappers) {
-            if (r.delegating) {
-                break;
-            }
-
-            if (log.debugEnabled) {
-                log.debug "Running mapper ${m.name} (${m.artefact})"
-            }
-            
-            if (m.phase != phase) {
-                phase = m.phase
-                if (log.debugEnabled) {
-                    log.debug "Entering mapper phase ${phase}"
+            if (isNotDisabledInGlobalConfig(m)) {
+                if (r.delegating) {
+                    break;
                 }
-            }
-            
-            if (log.debugEnabled) {
-                log.debug "Applying mapper ${m.name} to ${r.processedFile} - delegating? ${r.delegating}"
-            }
-            def startTime = System.currentTimeMillis()
 
-            def appliedMapper = m.invokeIfNotExcluded(r)
-            if (log.debugEnabled) {
-                log.debug "Applied mapper ${m.name} to ${r.processedFile}"
+                if (log.debugEnabled) {
+                    log.debug "Running mapper ${m.name} (${m.artefact})"
+                }
+
+                if (m.phase != phase) {
+                    phase = m.phase
+                    if (log.debugEnabled) {
+                        log.debug "Entering mapper phase ${phase}"
+                    }
+                }
+
+                if (log.debugEnabled) {
+                    log.debug "Applying mapper ${m.name} to ${r.processedFile} - delegating? ${r.delegating}"
+                }
+                def startTime = System.currentTimeMillis()
+
+                def appliedMapper = m.invokeIfNotExcluded(r)
+                if (log.debugEnabled) {
+                    log.debug "Applied mapper ${m.name} to ${r.processedFile}"
+                }
+
+                def endTime = System.currentTimeMillis()
+                storeAggregateStat('mappers-time', m.name, endTime-startTime)
+
+                r.wasProcessedByMapper(m, appliedMapper)
             }
-
-            def endTime = System.currentTimeMillis()
-            storeAggregateStat('mappers-time', m.name, endTime-startTime)
-
-            r.wasProcessedByMapper(m, appliedMapper)
         }
+    }
+
+    private boolean isNotDisabledInGlobalConfig(ResourceMapper m) {
+        getConfigParamOrDefault('mappers.' + m.name + '.enabled', true)
     }
 
     void prepareSingleDeclaredResource(ResourceMeta r, Closure postPrepare = null) {
@@ -740,6 +737,7 @@ class ResourceProcessor implements InitializingBean {
             
             dsl.delegate = builder
             dsl.resolveStrategy = Closure.DELEGATE_FIRST
+            dsl.owner.class.metaClass.static.main = { builder.main(it) } // GPRESOURCES-50: hack to allow module name 'main'
             dsl()
         }
 
