@@ -549,7 +549,7 @@ class ResourceTagLib {
         def ctxPath = request.contextPath
 
         def uri = attrs.remove('uri')
-        def abs = uri?.indexOf('://') >= 0
+        def abs = uri?.indexOf('://') >= 0 || uri?.startsWith('//') // allow for scheme-less urls
 
         if (!uri) {
             // use the link generator to avoid stack overflow calling back into us
