@@ -16,7 +16,7 @@ log4j = {
     
 }
 
-grails.doc.authors = 'Marc Palmer (marc@grailsrocks.com), Luke Daley (ld@ldaley.com)'
+grails.doc.authors = 'Marc Palmer (marc@grailsrocks.com), Luke Daley (ld@ldaley.com), Peter N. Steinmetz (ndoc3@steinmetz.org)'
 grails.doc.license = 'Apache License 2.0'
 grails.doc.title = 'Resources Plugin'
 
