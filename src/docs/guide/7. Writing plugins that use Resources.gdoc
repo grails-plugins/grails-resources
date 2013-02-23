@@ -25,5 +25,5 @@ For example there may be YUI and a Google CSS minifier plugins. These should be 
 * yui-css-minified-resources
 * google-css-minified-resources
 
-In addition the mappers must be clearly named, i.e. YuiCssMinifyMapper and GoogleCssMinifyMapper. Such that the user can exclude them selectively with code such as *exclude:'yuicssminify'*.
+In addition the mappers must be clearly named, i.e. YuiCssMinifyResourceMapper and GoogleCssMinifyResourceMapper. Such that the user can exclude them selectively with code such as *exclude:'yuicssminify'*.
 

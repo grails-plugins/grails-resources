@@ -25,7 +25,7 @@ Example GSP page:
 <html>
    <head>
       <meta name="layout" content="main"/>
-      <r:require module="jquery-ui, blueprint"/>
+      <r:require modules="jquery-ui, blueprint"/>
       <g:if test="${customerBranding}">
           <r:require module="theme_${customer.theme}"/>
       </g:if>

@@ -11,6 +11,7 @@
 
 #compiled sources
 target/*
+target-eclipse/*
 out/*
 *.zip
 
@@ -22,5 +23,3 @@ plugin.xml
 dependencies.groovy
 /test-tmp/
 /src/docs/ref/Resources/
-grails-app/i18n/
-*.zip
