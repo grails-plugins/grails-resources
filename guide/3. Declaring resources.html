@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>3 Declaring resources 1.2-RC1</title>
+    <title>3 Declaring resources 1.2</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -51,6 +51,9 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0"><a href="../guide/9.%20Configuration.html"><strong>9</strong><span>Configuration</span></a>
                     </div>
                     
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/10.%20Security.html"><strong>10</strong><span>Security</span></a>
+                    </div>
+                    
                 </div>
             </div>
         </li>
@@ -87,9 +90,9 @@ function addJsClass() {
                 <div class="project">
                     <h1>3 Declaring resources - Reference Documentation</h1>
 
-                    <p><strong>Authors:</strong> Marc Palmer (marc@grailsrocks.com)</p>
+                    <p><strong>Authors:</strong> Marc Palmer (marc@grailsrocks.com), Luke Daley (ld@ldaley.com), Peter N. Steinmetz (ndoc3@steinmetz.org)</p>
 
-                    <p><strong>Version:</strong> 1.2-RC1</p>
+                    <p><strong>Version:</strong> 1.2</p>
 
                     
                 </div>
@@ -160,7 +163,6 @@ To declare that a module depends on another, you use dependsOn. It accepts a str
 
 
 <h2 id="3.1.2 The resource method">3.1.2 The resource method</h2>
-
 Declaring a resource is done using the "resource" method. This takes either a single string URI or a map of arguments that define the URL of the resource and any other specific options you require.<p class="paragraph"/>The single-string argument variant is a simple shortcut for resources that are safe to use all defaults:<p class="paragraph"/><div class="code"><pre>modules = &#123;
     ui &#123;
         resource '/css/forms.css'
@@ -176,6 +178,7 @@ Declaring a resource is done using the "resource" method. This takes either a si
 <li>id - Optional. Module-unique id of the resource to be used when <a href="../guide/single.html#5.%20Overriding%20resources" class="guide">overriding</a> resource properties. Defaults to the url of the resource if none supplied.</li>
 <li>linkOverride - Optional. The URL to use when rendering links for the resource, instead of the processed resource's URL. Allows your external resources to participate in dependency management, and some niche CDN requirements.</li>
 <li>wrapper - Optional. A Closure that will be used to render the resource link. The correct markup for linking will be passed in. Used primarily for MSIE workarounds i.e: wrapper: &#123; s -&#62; "&#60;!--if lt IE 8&#62;$s&#60;!endif--&#62;" &#125;. Note that supplying a wrapper will prevent bundling of that resource.</li>
+<li>plugin - Optional. If applicable, the name of the plugin a resource is being defined in.</li>
 </ul><p class="paragraph"/>Examples:<p class="paragraph"/><div class="code"><pre>modules = &#123;
     core &#123;
         resource url:&#91;dir:'css/blueprint',file:'screen.css'&#93;, attrs:&#91;media:'screen, projection'&#93;, bundle:'core&#45;ui'
@@ -184,6 +187,10 @@ Declaring a resource is done using the "resource" method. This takes either a si
     &#125;<p class="paragraph"/>    ui &#123;
         resource url:'/css/forms.css', bundle:'core&#45;ui'
         resource url:'/js/forms.js'
+    &#125;
+&#125;</pre></div><p class="paragraph"/><div class="code"><pre>modules = &#123;
+    'font&#45;awesome' &#123;
+        resource url: &#91;plugin: 'font&#45;awesome&#45;resources', dir: 'css', file: 'font&#45;awesome.css'&#93;
     &#125;
 &#125;</pre></div>
 
@@ -305,6 +312,9 @@ Bundling files is the process of concatenating multiple files of the same type i
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Tags/script.html">script</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/stash.html">stash</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Tags/use.html">use</a>

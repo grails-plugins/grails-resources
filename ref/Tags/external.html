@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>Resources Plugin 1.2-RC1</title>
+    <title>Resources Plugin 1.2</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -52,6 +52,9 @@ function addJsClass(el) {
                     <div class="toc-item" style="margin-left:0"><a href="../../guide/9.%20Configuration.html"><strong>9</strong><span>Configuration</span></a>
                     </div>
                     
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/10.%20Security.html"><strong>10</strong><span>Security</span></a>
+                    </div>
+                    
                 </div>
             </div>
         </li>
@@ -76,7 +79,7 @@ function addJsClass(el) {
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
-                <h1>r:external Tag</h1><p class="paragraph"/>This tag renders the right kind of links to external resources, based on their type, never including the same resource multiple times.<p class="paragraph"/>For example CSS files are rendered with:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;link rel=<span class="xml&#45;quote">"stylesheet"</span> .../&#62;</span></pre></div><p class="paragraph"/>or JS files are rendered with &#60;script&#62; tags. Images are rendered as favicons.<p class="paragraph"/>This is used internally by &#60;r:layoutResources/&#62;, and is rarely used on its own unless you must render links to resources without using the dependency mechanism and <a href="../../ref/Tags/require.html" class="Tags">require</a>.<p class="paragraph"/><h2>Attributes</h2>
+                <h1>r:external Tag</h1><p class="paragraph"/>This tag renders the right kind of links to external resources, based on their type, never including the same resource multiple times. Resources, which are already included in a bundle are not to be rendered with this tag, but <a href="../../ref/Tags/require.html" class="Tags">require</a> and &#60;r:layoutResources/&#62; should be used instead.<p class="paragraph"/>For example CSS files are rendered with:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;link rel=<span class="xml&#45;quote">"stylesheet"</span> .../&#62;</span></pre></div><p class="paragraph"/>or JS files are rendered with &#60;script&#62; tags. Images are rendered as favicons.<p class="paragraph"/>This is used internally by &#60;r:layoutResources/&#62;, and is rarely used on its own unless you must render links to resources without using the dependency mechanism and <a href="../../ref/Tags/require.html" class="Tags">require</a>. Resources that are included in a bundle, and have a disposition set to "defer", cannot be rendered directly with this tag.<p class="paragraph"/><h2>Attributes</h2>
 <ul class="star">
 <li>uri - Optional. The app-relative URI of the resource, i.e. "/css/main.css". Used as an alternative to dir/file combination</li>
 <li>file - Optional. The file attribute as used by g:resource</li>
@@ -148,6 +151,9 @@ function addJsClass(el) {
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Tags/script.html">script</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/stash.html">stash</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Tags/use.html">use</a>

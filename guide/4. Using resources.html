@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>4 Using resources 1.2-RC1</title>
+    <title>4 Using resources 1.2</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -51,6 +51,9 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0"><a href="../guide/9.%20Configuration.html"><strong>9</strong><span>Configuration</span></a>
                     </div>
                     
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/10.%20Security.html"><strong>10</strong><span>Security</span></a>
+                    </div>
+                    
                 </div>
             </div>
         </li>
@@ -87,9 +90,9 @@ function addJsClass() {
                 <div class="project">
                     <h1>4 Using resources - Reference Documentation</h1>
 
-                    <p><strong>Authors:</strong> Marc Palmer (marc@grailsrocks.com)</p>
+                    <p><strong>Authors:</strong> Marc Palmer (marc@grailsrocks.com), Luke Daley (ld@ldaley.com), Peter N. Steinmetz (ndoc3@steinmetz.org)</p>
 
-                    <p><strong>Version:</strong> 1.2-RC1</p>
+                    <p><strong>Version:</strong> 1.2</p>
 
                     
                 </div>
@@ -133,7 +136,7 @@ So you need to add two calls to <a href="../ref/Tags/layoutResources.html" class
 <span class="xml&#45;tag">&#60;/html&#62;</span></pre></div><p class="paragraph"/>You can of course include any common modules you require in your sitemesh layout using &#60;r:require&#62; but they must appear before the first &#60;r:layoutResources/&#62;.<p class="paragraph"/>In your GSP pages you invoke the <a href="../ref/Tags/require.html" class="Tags">require</a> tag as many times as required, even inside GSP templates that you include with g:render, and you can include resources conditionally - something that can be really hard to do without resource dependency management.<p class="paragraph"/>Example GSP page:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
    <span class="xml&#45;tag">&#60;head&#62;</span>
       <span class="xml&#45;tag">&#60;meta name=<span class="xml&#45;quote">"layout"</span> content=<span class="xml&#45;quote">"main"</span>/&#62;</span>
-      <span class="xml&#45;tag">&#60;r:require module=<span class="xml&#45;quote">"jquery&#45;ui, blueprint"</span>/&#62;</span>
+      <span class="xml&#45;tag">&#60;r:require modules=<span class="xml&#45;quote">"jquery&#45;ui, blueprint"</span>/&#62;</span>
       <span class="xml&#45;tag">&#60;g:if test=<span class="xml&#45;quote">"$&#123;customerBranding&#125;"</span>&#62;</span>
           <span class="xml&#45;tag">&#60;r:require module=<span class="xml&#45;quote">"theme_$&#123;customer.theme&#125;"</span>/&#62;</span>
       <span class="xml&#45;tag">&#60;/g:if&#62;</span>
@@ -159,7 +162,7 @@ When you need to render an &#60;img&#62; tag that you wish to be subject to the 
 <h2 id="4.3 Linking to resources explicitly, bypassing modules">4.3 Linking to resources explicitly, bypassing modules</h2>
 Sometimes you may need to link to a specific resource, or produce a URL pointing to the specific resource without rendering links to all the modules it depends on - or outside of a context where you can call &#60;r:layoutResources/&#62;. You may even wish to link to an undeclared resource, but still want it to be subject to processing on the fly.<p class="paragraph"/>To link to CSS or other resources that are not declared in a module you use &#60;r:external&#62;:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;r:external uri=<span class="xml&#45;quote">"js/custom.js"</span>/&#62;</span>
 <span class="xml&#45;tag">&#60;script type=<span class="xml&#45;quote">"text/javascript"</span>&#62;</span>
-    var urlOfCSSToLoadInJSCode = '$&#123;r.external(uri:<span class="xml&#45;quote">"css/custom.css"</span>).encodeAsJavaScript()';
+    var urlOfCSSToLoadInJSCode = '$&#123;r.external(uri:<span class="xml&#45;quote">"css/custom.css"</span>).encodeAsJavaScript()&#125;';
 <span class="xml&#45;tag">&#60;/script&#62;</span>
 <span class="xml&#45;tag">&#60;r:external uri=<span class="xml&#45;quote">"icons/favicon.ico"</span>/&#62;</span></pre></div><p class="paragraph"/>This would output the &#60;script&#62; and &#60;link&#62; tags required to include those resources, without rendering their dependencies first - whether the resource is declared in a module or not. The example shows how you might pass the URL of a resource to some JavaScript code for use later at runtime.<p class="paragraph"/>
 
@@ -235,6 +238,9 @@ Often in an application, especially those using custom Grails tags and rich UIs,
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Tags/script.html">script</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/stash.html">stash</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Tags/use.html">use</a>

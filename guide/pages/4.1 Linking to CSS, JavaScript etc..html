@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>4.1 Linking to CSS, JavaScript etc. 1.2-RC1</title>
+    <title>4.1 Linking to CSS, JavaScript etc. 1.2</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -51,6 +51,9 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0"><a href="../../guide/9.%20Configuration.html"><strong>9</strong><span>Configuration</span></a>
                     </div>
                     
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/10.%20Security.html"><strong>10</strong><span>Security</span></a>
+                    </div>
+                    
                 </div>
             </div>
         </li>
@@ -87,9 +90,9 @@ function addJsClass() {
                 <div class="project">
                     <h1>4.1 Linking to CSS, JavaScript etc. - Reference Documentation</h1>
 
-                    <p><strong>Authors:</strong> Marc Palmer (marc@grailsrocks.com)</p>
+                    <p><strong>Authors:</strong> Marc Palmer (marc@grailsrocks.com), Luke Daley (ld@ldaley.com), Peter N. Steinmetz (ndoc3@steinmetz.org)</p>
 
-                    <p><strong>Version:</strong> 1.2-RC1</p>
+                    <p><strong>Version:</strong> 1.2</p>
 
                     
                 </div>
@@ -111,7 +114,7 @@ So you need to add two calls to <a href="../ref/Tags/layoutResources.html" class
 <span class="xml&#45;tag">&#60;/html&#62;</span></pre></div><p class="paragraph"/>You can of course include any common modules you require in your sitemesh layout using &#60;r:require&#62; but they must appear before the first &#60;r:layoutResources/&#62;.<p class="paragraph"/>In your GSP pages you invoke the <a href="../ref/Tags/require.html" class="Tags">require</a> tag as many times as required, even inside GSP templates that you include with g:render, and you can include resources conditionally - something that can be really hard to do without resource dependency management.<p class="paragraph"/>Example GSP page:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
    <span class="xml&#45;tag">&#60;head&#62;</span>
       <span class="xml&#45;tag">&#60;meta name=<span class="xml&#45;quote">"layout"</span> content=<span class="xml&#45;quote">"main"</span>/&#62;</span>
-      <span class="xml&#45;tag">&#60;r:require module=<span class="xml&#45;quote">"jquery&#45;ui, blueprint"</span>/&#62;</span>
+      <span class="xml&#45;tag">&#60;r:require modules=<span class="xml&#45;quote">"jquery&#45;ui, blueprint"</span>/&#62;</span>
       <span class="xml&#45;tag">&#60;g:if test=<span class="xml&#45;quote">"$&#123;customerBranding&#125;"</span>&#62;</span>
           <span class="xml&#45;tag">&#60;r:require module=<span class="xml&#45;quote">"theme_$&#123;customer.theme&#125;"</span>/&#62;</span>
       <span class="xml&#45;tag">&#60;/g:if&#62;</span>
@@ -181,6 +184,9 @@ So you need to add two calls to <a href="../ref/Tags/layoutResources.html" class
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Tags/script.html">script</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/stash.html">stash</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Tags/use.html">use</a>
