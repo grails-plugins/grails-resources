@@ -74,4 +74,22 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
 		def expectedScript = '<script src="http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"'
 		assertTrue result.contains(expectedScript)
 	}
+
+    def testDispositionsOfTransitiveDependencies() {
+        String template = '''
+            <r:require modules="GPRESOURCES-207_module_A"/>
+
+            <r:layoutResources disposition="disposition_A"/>
+            <r:layoutResources disposition="disposition_B"/>
+            <r:layoutResources disposition="disposition_C"/>
+        '''
+        String result = applyTemplate(template)
+
+        assertTrue 'direct dependency "GPRESOURCES-207_module_A" - resource for disposition B', result.contains("/static/GPRESOURCES-207/_file3.js")
+        assertTrue 'direct dependency "GPRESOURCES-207_module_A" - resource for disposition C', result.contains("/static/GPRESOURCES-207/_file4.js")
+        assertTrue 'transitive dependency "GPRESOURCES-207_module_B" - resource for disposition B', result.contains("/static/GPRESOURCES-207/_file2.js")
+        // disposition A -- only via transitive dependency
+        assertTrue 'transitive dependency "GPRESOURCES-207_module_B" - resource for disposition A', result.contains("/static/GPRESOURCES-207/_file1.js")
+    }
+
 }
