@@ -18,6 +18,11 @@ environments {
 				         url: "css/main.css",
 						 wrapper: {"<!--${grailsApplication.ENV_DEVELOPMENT}-->"}
 			}
+
+            'GPRESOURCES-210_module_A' {
+                resource url: "/GPRESOURCES-210/file1.js", disposition: "duplicate_includes_check"
+                resource url: "/GPRESOURCES-210/file2.js", disposition: "duplicate_includes_check"
+            }
         }
     }
 }
