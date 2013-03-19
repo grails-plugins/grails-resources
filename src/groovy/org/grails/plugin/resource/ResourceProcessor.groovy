@@ -1156,19 +1156,18 @@ class ResourceProcessor implements InitializingBean {
      *
      * @param request to add dispositions to
      * @param moduleName
-     * :TODO: needs to add dispositions for all dependent modules as well
      */
     void addModuleDispositionsToRequest(request, String moduleName) {
         if (log.debugEnabled) {
             log.debug "Adding module dispositions for module [${moduleName}]"
-        } 
-        def module = modulesByName[moduleName]
-        if (module) {   
-            if (log.debugEnabled) {
-                log.debug "Adding module's dispositions to request: ${module.requiredDispositions}"
-            } 
-            for (d in module.requiredDispositions) {
-                DispositionsUtils.addDispositionToRequest(request, d, moduleName)
+        }
+        def moduleNamesRequired = getAllModuleNamesRequired([moduleName])
+        moduleNamesRequired.each { name ->
+            def module = modulesByName[name]
+            if (module) {
+                for (d in module.requiredDispositions) {
+                    DispositionsUtils.addDispositionToRequest(request, d, moduleName)
+                }
             }
         }
     }
