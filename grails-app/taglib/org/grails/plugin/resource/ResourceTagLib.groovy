@@ -1,13 +1,9 @@
 package org.grails.plugin.resource
 
-import grails.util.Environment
 import grails.util.GrailsUtil
-
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.apache.commons.io.FilenameUtils
-import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
 import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
-
+import org.grails.plugin.resource.util.DispositionsUtils
 
 /**
  * This taglib handles creation of all the links to resources, including the smart de-duping of them.
@@ -132,7 +128,7 @@ class ResourceTagLib {
         def trk = request.resourceModuleTracker
         if (trk == null) {
             if (log.debugEnabled) {
-                log.debug "createing new resource module tracker for request ${request}"
+                log.debug "creating new resource module tracker for request ${request}"
             }
             trk = new HashMap()
             request.resourceModuleTracker = trk
@@ -343,7 +339,7 @@ class ResourceTagLib {
         needsResourceLayout()
         
         def trkName = ResourceTagLib.makePageFragmentKey(type, disposition)
-        grailsResourceProcessor.addDispositionToRequest(request, disposition, '-page-fragments-')
+        DispositionsUtils.addDispositionToRequest(request, disposition, '-page-fragments-')
 
         def trk = request[trkName]
         if (!trk) {
@@ -383,15 +379,15 @@ class ResourceTagLib {
             log.debug "laying out resources for request ${request}: ${attrs}"
         }
 
-        def remainingDispositions = grailsResourceProcessor.getRequestDispositionsRemaining(request)
+        def remainingDispositions = DispositionsUtils.getRequestDispositionsRemaining(request)
         def dispositionToRender = attrs.disposition
         if (!dispositionToRender) {
-            if (!isAutoLayoutDone(ResourceProcessor.DISPOSITION_HEAD)) {
-                dispositionToRender = ResourceProcessor.DISPOSITION_HEAD
-                autoLayoutDone(ResourceProcessor.DISPOSITION_HEAD)
-            } else if (!isAutoLayoutDone(ResourceProcessor.DISPOSITION_DEFER)) {
-                dispositionToRender = ResourceProcessor.DISPOSITION_DEFER
-                autoLayoutDone(ResourceProcessor.DISPOSITION_DEFER)
+            if (!isAutoLayoutDone(DispositionsUtils.DISPOSITION_HEAD)) {
+                dispositionToRender = DispositionsUtils.DISPOSITION_HEAD
+                autoLayoutDone(DispositionsUtils.DISPOSITION_HEAD)
+            } else if (!isAutoLayoutDone(DispositionsUtils.DISPOSITION_DEFER)) {
+                dispositionToRender = DispositionsUtils.DISPOSITION_DEFER
+                autoLayoutDone(DispositionsUtils.DISPOSITION_DEFER)
             } else {
                 if (log.warnEnabled) {
                     log.warn "You seem to have too many r:layoutResources invocations with no disposition specified. It has already been called twice."
@@ -438,7 +434,7 @@ class ResourceTagLib {
             log.debug "Removing outstanding request disposition: ${dispositionToRender}"
         }
         
-        grailsResourceProcessor.doneDispositionResources(request, dispositionToRender)
+        DispositionsUtils.doneDispositionResources(request, dispositionToRender)
     }
 
     private layoutPageStash(String disposition) {
