@@ -1,19 +1,29 @@
 package org.grails.plugin.resource
 
 import grails.test.GroovyPagesTestCase
+import org.junit.Before
+
+import javax.activation.FileTypeMap
+import javax.activation.MimetypesFileTypeMap
 
 class ResourceTagLibIntegTests extends GroovyPagesTestCase {
     
     def grailsResourceProcessor
-    
-    protected makeMockResource(uri) {
-        [
-            uri:uri, 
-            disposition:'head', 
-            exists: { -> true }
-        ]
-    }
 
+    @Before
+    void setUp() {
+        super.setUp()
+
+        // adjust the mime type map used at the MockServletContext
+        // to return the correct mime type for CSS and JS files
+        // so that the bundle resource mapper will be applied to them
+        MimetypesFileTypeMap fileTypeMap = (MimetypesFileTypeMap) FileTypeMap.getDefaultFileTypeMap()
+        fileTypeMap.addMimeTypes(["text/javascript   js", "text/css   css"].join("\n"))
+
+        // reload all modules with bundling applied to them
+        grailsResourceProcessor.reloadAll()
+    }
+    
     def testExternalWithAbsoluteURI() {
         def result = applyTemplate('<r:external uri="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"/>', [:])
         assertTrue result.indexOf('"https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js') != -1
@@ -86,13 +96,13 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
         '''
         String result = applyTemplate(template)
 
-        assertTrue 'direct dependency "GPRESOURCES-207_module_A" - resource for disposition C', result.contains("/static/GPRESOURCES-207/_file4.js")
-        assertTrue 'direct dependency "GPRESOURCES-207_module_A" - resource for disposition D', result.contains("/static/GPRESOURCES-207/_file5.js")
-        assertTrue 'transitive dependency "GPRESOURCES-207_module_B" - resource for disposition C', result.contains("/static/GPRESOURCES-207/_file3.js")
+        assertTrue 'direct dependency "GPRESOURCES-207_module_A" - resource for disposition C', result.contains("/static/_bundle-bundle_GPRESOURCES-207_module_B_disposition_A.js")
+        assertTrue 'direct dependency "GPRESOURCES-207_module_A" - resource for disposition D', result.contains("/static/_bundle-bundle_GPRESOURCES-207_module_A_disposition_D.js")
+        assertTrue 'transitive dependency "GPRESOURCES-207_module_B" - resource for disposition C', result.contains("/static/_bundle-bundle_GPRESOURCES-207_module_B_disposition_C.js")
         // disposition B -- only via transitive dependency
-        assertTrue 'transitive dependency "GPRESOURCES-207_module_B" - resource for disposition B', result.contains("/static/GPRESOURCES-207/_file2.js")
+        assertTrue 'transitive dependency "GPRESOURCES-207_module_B" - resource for disposition B', result.contains("/static/_bundle-bundle_GPRESOURCES-207_module_B_disposition_B.js")
         // disposition A -- only via transitive dependency
-        assertTrue 'transitive dependency "GPRESOURCES-207_module_B" - resource for disposition A', result.contains("/static/GPRESOURCES-207/_file1.js")
+        assertTrue 'transitive dependency "GPRESOURCES-207_module_B" - resource for disposition A', result.contains("/static/_bundle-bundle_GPRESOURCES-207_module_B_disposition_A.js")
     }
 
     def testDispositionsOfTransitiveDependenciesWithStashedResource() {
@@ -109,14 +119,25 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
         '''
         String result = applyTemplate(template)
 
-        assertTrue 'direct dependency "GPRESOURCES-207_module_A" - resource for disposition C', result.contains("/static/GPRESOURCES-207/_file4.js")
-        assertTrue 'direct dependency "GPRESOURCES-207_module_A" - resource for disposition D', result.contains("/static/GPRESOURCES-207/_file5.js")
-        assertTrue 'transitive dependency "GPRESOURCES-207_module_B" - resource for disposition C', result.contains("/static/GPRESOURCES-207/_file3.js")
+        assertTrue 'direct dependency "GPRESOURCES-207_module_A" - resource for disposition C', result.contains("/static/_bundle-bundle_GPRESOURCES-207_module_A_disposition_C.js")
+        assertTrue 'direct dependency "GPRESOURCES-207_module_A" - resource for disposition D', result.contains("/static/_bundle-bundle_GPRESOURCES-207_module_A_disposition_D.js")
+        assertTrue 'transitive dependency "GPRESOURCES-207_module_B" - resource for disposition C', result.contains("/static/_bundle-bundle_GPRESOURCES-207_module_B_disposition_C.js")
         assertTrue 'stashed script - disposition B', result.contains("/*stashed*/")
         // disposition B -- via transitive dependency and stashed script
-        assertTrue 'transitive dependency "GPRESOURCES-207_module_B" - resource for disposition B', result.contains("/static/GPRESOURCES-207/_file2.js")
+        assertTrue 'transitive dependency "GPRESOURCES-207_module_B" - resource for disposition B', result.contains("/static/_bundle-bundle_GPRESOURCES-207_module_B_disposition_B.js")
         // disposition A -- only via transitive dependency
-        assertTrue 'transitive dependency "GPRESOURCES-207_module_B" - resource for disposition A', result.contains("/static/GPRESOURCES-207/_file1.js")
+        assertTrue 'transitive dependency "GPRESOURCES-207_module_B" - resource for disposition A', result.contains("/static/_bundle-bundle_GPRESOURCES-207_module_B_disposition_A.js")
     }
 
+
+    def testDuplicateIncludes() {
+        String template = '''
+            <r:require modules="GPRESOURCES-210_module_A"/>
+            <r:layoutResources disposition="duplicate_includes_check"/>
+        '''
+
+        String result = applyTemplate(template)
+
+        assertEquals 1, result.count("/static/_bundle-bundle_GPRESOURCES-210_module_A_duplicate_includes_check.js")
+    }
 }

@@ -1,17 +1,11 @@
 import grails.util.Environment
-
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
-
-import org.springframework.beans.factory.config.MethodInvokingFactoryBean
-import org.springframework.core.io.FileSystemResource
-
 import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
+import org.springframework.core.io.FileSystemResource
+import org.springframework.util.AntPathMatcher
 
+import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.ScheduledFuture
-
-import org.springframework.util.AntPathMatcher
 
 /**
  * @author Marc Palmer (marc@grailsrocks.com)

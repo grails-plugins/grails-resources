@@ -1,7 +1,4 @@
 package org.grails.plugin.resource.util
-
-import org.grails.plugin.resource.ResourceProcessor
-
 /**
  * Utility class with static methods for manipulating dispositions on Requests.
  *

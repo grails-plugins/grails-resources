@@ -243,8 +243,8 @@ class ResourceTagLib {
             return
         }
         
-        // Output link if not in defer or head disposition, or if not included when in defer or head disposition
-        if (!(disposition in ['defer', 'head']) || notAlreadyIncludedResource(info.resource?.linkUrl ?: info.uri)) {
+        // Output link if image disposition, or if not already included
+        if (disposition == 'image' || notAlreadyIncludedResource(info.resource?.linkUrl ?: info.uri)) {
             attrs.type = type
             if (info.debug) {
                 attrs.uri = info.resource?.linkUrl
