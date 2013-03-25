@@ -1,12 +1,9 @@
 package org.grails.plugin.resource
 
 import org.grails.plugin.resource.util.DispositionsUtils
+import org.springframework.web.context.support.WebApplicationContextUtils
 
 import javax.servlet.*
-import org.springframework.web.context.support.WebApplicationContextUtils
-import grails.util.Environment
-
-import org.grails.plugin.resource.util.DispositionsUtils
 
 /**
  * This just traps any obvious mistakes the user has made and warns them in dev mode
