@@ -8,6 +8,7 @@ import org.grails.plugin.resource.mapper.ResourceMapper
 import org.grails.plugin.resource.mapper.ResourceMappersFactory
 import org.grails.plugin.resource.module.ModuleDeclarationsFactory
 import org.grails.plugin.resource.module.ModulesBuilder
+import org.grails.plugin.resource.util.DispositionsUtils
 import org.grails.plugin.resource.util.ResourceMetaStore
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.util.AntPathMatcher
@@ -16,7 +17,7 @@ import org.springframework.web.util.WebUtils
 import javax.servlet.ServletRequest
 import java.util.concurrent.ConcurrentHashMap
 /**
- * This is where it all happens.
+ * Primary service facade to actions on resources.
  *
  * This class loads resource declarations (see reload()) and receives requests from the servlet filter to
  * serve resources. It will process the resource if necessary the first time, and then return the file.
@@ -37,12 +38,6 @@ class ResourceProcessor implements InitializingBean {
     static SYNTHETIC_MODULE = "__@synthetic-files@__"   // The placeholder for all the generated (i.e. aggregate) resources
 
     static REQ_ATTR_DEBUGGING = 'resources.debug'
-    static REQ_ATTR_DISPOSITIONS_REMAINING = 'resources.dispositions.remaining'
-    static REQ_ATTR_DISPOSITIONS_DONE = "resources.dispositions.done"
-    
-    static DISPOSITION_HEAD = 'head'
-    static DISPOSITION_DEFER = 'defer'
-    static DEFAULT_DISPOSITION_LIST = [DISPOSITION_HEAD, DISPOSITION_DEFER]
     static DEFAULT_ADHOC_INCLUDES = [
         '**/*.*'
     ]
@@ -64,7 +59,8 @@ class ResourceProcessor implements InitializingBean {
     
     def grailsLinkGenerator
     def grailsResourceLocator // A Grails 2-only bean
-    
+    def grailsApplication
+
     def staticUrlPrefix
     
     private File workDir
@@ -78,13 +74,13 @@ class ResourceProcessor implements InitializingBean {
     
     def resourceMappers
     
-    def grailsApplication
     @Lazy servletContext = { grailsApplication.mainContext.servletContext }()
     
     boolean processingEnabled
     
     List adHocIncludes
-    List adHocExcludes 
+    List adHocExcludes
+
     List optionalDispositions
     
     boolean isInternalModule(def moduleOrName) {
@@ -1154,75 +1150,27 @@ class ResourceProcessor implements InitializingBean {
         
         return result        
     }
-    
-    /**
-     * Get the set of dispositions required by resources in the current request, which have not yet been rendered
-     */
-    Set getRequestDispositionsRemaining(request) {
-        def dispositions = request[REQ_ATTR_DISPOSITIONS_REMAINING] 
-        // Return a new set of HEAD + DEFER if there is nothing in the request currently, this is our baseline
-        if (dispositions == null) {
-            dispositions = new HashSet()
-            request[REQ_ATTR_DISPOSITIONS_REMAINING] = dispositions
-        }
-        return dispositions 
-    }
 
     /**
-     * Add a disposition to the current request's set of them
+     * Add dispositions for a module to a Request.
+     *
+     * @param request to add dispositions to
+     * @param moduleName
      */
-    void addDispositionToRequest(request, String disposition, String reason) {
-        if (haveAlreadyDoneDispositionResources(request, disposition)) {
-            throw new IllegalArgumentException("""Cannot disposition [$disposition] to this request (required for [$reason]) - 
-that disposition has already been rendered. Check that your r:layoutResources tag comes after all
-Resource tags that add content to that disposition.""")
-        }
-        def dispositions = request[REQ_ATTR_DISPOSITIONS_REMAINING] 
-        if (dispositions != null) {
-            dispositions << disposition
-        } else {
-            request[REQ_ATTR_DISPOSITIONS_REMAINING] = [disposition] as Set
-        }
-    }
-    
     void addModuleDispositionsToRequest(request, String moduleName) {
         if (log.debugEnabled) {
             log.debug "Adding module dispositions for module [${moduleName}]"
-        } 
-        def module = modulesByName[moduleName]
-        if (module) {   
-            if (log.debugEnabled) {
-                log.debug "Adding module's dispositions to request: ${module.requiredDispositions}"
-            } 
-            for (d in module.requiredDispositions) {
-                addDispositionToRequest(request, d, moduleName)
+        }
+        def moduleNamesRequired = getAllModuleNamesRequired([moduleName])
+        moduleNamesRequired.each { name ->
+            def module = modulesByName[name]
+            if (module) {
+                for (d in module.requiredDispositions) {
+                    DispositionsUtils.addDispositionToRequest(request, d, moduleName)
+                }
             }
         }
     }
  
-    /**
-     * Add a disposition to the current request's set of them
-     */
-    void removeDispositionFromRequest(request, String disposition) {
-        def dispositions = request[REQ_ATTR_DISPOSITIONS_REMAINING] 
-        if (dispositions != null) {
-            dispositions.remove(disposition)
-        }
-    }
-    
-    void doneDispositionResources(request, String disposition) {
-        removeDispositionFromRequest(request, disposition)
-        def s = request[REQ_ATTR_DISPOSITIONS_DONE]
-        if (s == null) {
-            s = new HashSet()
-            request[REQ_ATTR_DISPOSITIONS_DONE] = s
-        }
-        s << disposition
-    }
-    
-    boolean haveAlreadyDoneDispositionResources(request,String disposition) {
-        def s = request[REQ_ATTR_DISPOSITIONS_DONE]
-        s == null ? false : s.contains(disposition)
-    }
-    
+
 }
