@@ -140,4 +140,94 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
 
         assertEquals 1, result.count("/static/_bundle-bundle_GPRESOURCES-210_module_A_duplicate_includes_check.js")
     }
+
+    void testStashOfTypeScript() {
+        String template = '''
+            <r:stash type="script" disposition="script_stash_disposition">script stash</r:stash>
+            <r:layoutResources disposition="script_stash_disposition"/>
+        '''
+
+        String result = applyTemplate(template)
+
+        assertEquals "<script type=\"text/javascript\">script stash</script>", result.trim()
+    }
+
+    void testStashOfTypeScriptWithMultipleEntries() {
+        String template = '''
+            <r:stash type="script" disposition="script_stash_disposition">script stash1;</r:stash>
+            <r:stash type="script" disposition="script_stash_disposition">script stash2;</r:stash>
+            <r:layoutResources disposition="script_stash_disposition"/>
+        '''
+
+        String result = applyTemplate(template)
+
+        assertEquals "<script type=\"text/javascript\">script stash1;script stash2;</script>", result.trim()
+    }
+
+    void testStashOfTypeStyle() {
+        String template = '''
+            <r:stash type="style" disposition="style_stash_disposition">style stash</r:stash>
+            <r:layoutResources disposition="style_stash_disposition"/>
+        '''
+
+        String result = applyTemplate(template)
+
+        assertEquals "<style type=\"text/css\">style stash</style>", result.trim()
+    }
+
+    void testStashOfTypeStyleWithMultipleEntries() {
+        String template = '''
+            <r:stash type="style" disposition="style_stash_disposition">style stash1;</r:stash>
+            <r:stash type="style" disposition="style_stash_disposition">style stash2;</r:stash>
+            <r:layoutResources disposition="style_stash_disposition"/>
+        '''
+
+        String result = applyTemplate(template)
+
+        assertEquals "<style type=\"text/css\">style stash1;style stash2;</style>", result.trim()
+    }
+
+    void testStashOfACustomType() {
+        String type = "custom-stash"
+        ResourceTagLib.STASH_WRITERS[type] = { out, stash ->
+            out << "<ul>"
+            for (s in stash) {
+                out << "<li>" << s << "</li>"
+            }
+            out << "</ul>"
+        }
+        String template = """
+            <r:stash type="${type}" disposition="${type}_stash_disposition">${type} stash</r:stash>
+            <r:layoutResources disposition="${type}_stash_disposition"/>
+        """
+
+        String result = applyTemplate(template)
+        // cleanup
+        ResourceTagLib.STASH_WRITERS.remove(type)
+
+        assertEquals "<ul><li>custom-stash stash</li></ul>", result.trim()
+    }
+
+    void testStashOfACustomTypeWithMultipleEntries() {
+        String type = "custom-stash"
+        ResourceTagLib.STASH_WRITERS[type] = { out, stash ->
+            out << "<ul>"
+            for (s in stash) {
+                out << "<li>" << s << "</li>"
+            }
+            out << "</ul>"
+        }
+        String template = """
+            <r:stash type="${type}" disposition="${type}_stash_disposition">${type} stash1;</r:stash>
+            <r:stash type="${type}" disposition="${type}_stash_disposition">${type} stash2;</r:stash>
+            <r:layoutResources disposition="${type}_stash_disposition"/>
+        """
+
+        String result = applyTemplate(template)
+        // cleanup
+        ResourceTagLib.STASH_WRITERS.remove(type)
+
+        assertEquals "<ul><li>custom-stash stash1;</li><li>custom-stash stash2;</li></ul>", result.trim()
+    }
+
 }

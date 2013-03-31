@@ -20,7 +20,7 @@ class ResourceTagLib {
     static REQ_ATTR_PREFIX_PAGE_FRAGMENTS = 'resources.plugin.page.fragments'
     static REQ_ATTR_PREFIX_AUTO_DISPOSITION = 'resources.plugin.auto.disposition'
     
-    static stashWriters = [
+    static STASH_WRITERS = [
         'script': { out, stash ->
             out << "<script type=\"text/javascript\">"
             for (s in stash) {
@@ -353,9 +353,8 @@ class ResourceTagLib {
         "${REQ_ATTR_PREFIX_PAGE_FRAGMENTS}:${type}:${disposition}"
     }
     
-    private consumePageFragments(String type, String disposition) {
-        def fraggles = request[ResourceTagLib.makePageFragmentKey(type, disposition)] ?: Collections.EMPTY_LIST
-        return fraggles
+    private List consumePageFragments(String type, String disposition) {
+        return (List) request[ResourceTagLib.makePageFragmentKey(type, disposition)] ?: Collections.EMPTY_LIST
     }
     
     private static String makeAutoDispositionKey( String disposition) {
@@ -437,12 +436,12 @@ class ResourceTagLib {
         DispositionsUtils.doneDispositionResources(request, dispositionToRender)
     }
 
-    private layoutPageStash(String disposition) {
-        def fragmentTypes = ['script', 'style']
-        for (t in fragmentTypes) {
-            def stash = consumePageFragments(t, disposition)
+    private layoutPageStash(final String disposition) {
+        final Set<String> fragmentTypes = STASH_WRITERS.keySet()
+        for (final String type in fragmentTypes) {
+            final List stash = consumePageFragments(type, disposition)
             if (stash) {
-                stashWriters[t](out, stash)
+                STASH_WRITERS[type](out, stash)
             }
         }
     }
