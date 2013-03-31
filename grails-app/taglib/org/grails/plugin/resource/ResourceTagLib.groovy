@@ -452,8 +452,13 @@ class ResourceTagLib {
      * @todo Later, we implement ESP hooks here and add scope="user" or scope="shared"
      */
     def script = { attrs, body ->
-        def dispos = attrs.remove('disposition') ?: 'defer'
-        stashPageFragment('script', dispos, body())
+        final String disposition = attrs.remove('disposition') ?: 'defer'
+        stashPageFragment('script', disposition, body())
+    }
+
+    def style = { attributes, body ->
+        final String disposition = attributes.remove("disposition") ?: DispositionsUtils.DISPOSITION_HEAD
+        stashPageFragment("style", disposition, body())
     }
 
     def stash = { attrs, body ->
