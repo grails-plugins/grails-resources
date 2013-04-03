@@ -10,6 +10,7 @@ import org.grails.plugin.resource.module.ModuleDeclarationsFactory
 import org.grails.plugin.resource.module.ModulesBuilder
 import org.grails.plugin.resource.util.DispositionsUtils
 import org.grails.plugin.resource.util.ResourceMetaStore
+import org.grails.plugin.resource.util.StatsManager	
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.util.AntPathMatcher
 import org.springframework.web.util.WebUtils
@@ -55,11 +56,11 @@ class ResourceProcessor implements InitializingBean {
         js:[disposition: 'defer']
     ]
 
-    Map statistics = [:]
-    
     def grailsLinkGenerator
     def grailsResourceLocator // A Grails 2-only bean
     def grailsApplication
+
+    StatsManager statsManager = new StatsManager()
 
     def staticUrlPrefix
     
@@ -71,9 +72,9 @@ class ResourceProcessor implements InitializingBean {
     def allResourcesByOriginalSourceURI = new ConcurrentHashMap()
 
     def modulesInDependencyOrder = []
-    
+
     def resourceMappers
-    
+
     @Lazy servletContext = { grailsApplication.mainContext.servletContext }()
     
     boolean processingEnabled
@@ -82,7 +83,45 @@ class ResourceProcessor implements InitializingBean {
     List adHocExcludes
 
     List optionalDispositions
-    
+
+    /**
+     * Initialize bean after properties have been set.
+     */
+    void afterPropertiesSet() {
+        processingEnabled = getConfigParamOrDefault('processing.enabled', true)
+        adHocIncludes = getConfigParamOrDefault('adhoc.includes', DEFAULT_ADHOC_INCLUDES)
+        adHocIncludes = adHocIncludes.collect { it.startsWith('/') ? it : '/'+it }
+
+        adHocExcludes = getConfigParamOrDefault('adhoc.excludes', DEFAULT_ADHOC_EXCLUDES)
+        adHocExcludes = adHocExcludes.collect { it.startsWith('/') ? it : '/'+it }
+
+        optionalDispositions = getConfigParamOrDefault('optional.dispositions', ['inline', 'image'])
+
+    }
+
+
+    /**
+     * Returns the config object under 'grails.resources'
+     */
+    ConfigObject getConfig() {
+        grailsApplication.config.grails.resources
+    }
+
+    /**
+     * Used to retrieve a resources config param, or return the supplied
+     * default value if no explicit value was set in config
+     */
+    def getConfigParamOrDefault(String key, defaultValue) {
+        // :TODO: this should be explained or code made clearer
+        def param = key.tokenize('.').inject(config) { conf, v -> conf[v] }
+
+        if (param instanceof ConfigObject) {
+            param.size() == 0 ? defaultValue : param
+        } else {
+            param
+        }
+    }
+
     boolean isInternalModule(def moduleOrName) {
         def n = moduleOrName instanceof ResourceModule ? moduleOrName.name : moduleOrName
         return n in [ADHOC_MODULE, SYNTHETIC_MODULE]        
@@ -128,18 +167,7 @@ class ResourceProcessor implements InitializingBean {
         
         modulesInDependencyOrder = ordered
     }
-    
-    void afterPropertiesSet() {
-        processingEnabled = getConfigParamOrDefault('processing.enabled', true)
-        adHocIncludes = getConfigParamOrDefault('adhoc.includes', DEFAULT_ADHOC_INCLUDES)
-        adHocIncludes = adHocIncludes.collect { it.startsWith('/') ? it : '/'+it }
 
-        adHocExcludes = getConfigParamOrDefault('adhoc.excludes', DEFAULT_ADHOC_EXCLUDES)
-        adHocExcludes = adHocExcludes.collect { it.startsWith('/') ? it : '/'+it }
-
-        optionalDispositions = getConfigParamOrDefault('optional.dispositions', ['inline', 'image'])
-    }
-    
     File getWorkDir() {
         // @todo this isn't threadsafe at startup if its lazy. We should change it.
         if (!this.@workDir) {
@@ -536,21 +564,7 @@ class ResourceProcessor implements InitializingBean {
 
         return r
     }
-        
-    def getStatValue(category, subcategory, defaultValue = 0) {
-        def cat = statistics[category]
-        if (cat == null) {
-            cat = [:]
-            statistics[category] = cat
-        }
-        return cat[subcategory] != null ? cat[subcategory] : defaultValue
-    }
-    
-    void storeAggregateStat(category, subcategory, value) {
-        def v = getStatValue(category, subcategory)
-        statistics[category][subcategory] = v + value
-    }
-    
+
     void applyMappers(ResourceMeta r) {
 
         // Now iterate over the mappers...
@@ -589,7 +603,7 @@ class ResourceProcessor implements InitializingBean {
                 }
 
                 def endTime = System.currentTimeMillis()
-                storeAggregateStat('mappers-time', m.name, endTime-startTime)
+                statsManager.storeAggregateStat('mappers-time', m.name, endTime-startTime)
 
                 r.wasProcessedByMapper(m, appliedMapper)
             }
@@ -850,16 +864,6 @@ class ResourceProcessor implements InitializingBean {
         resourcesChanged(resBatch)
     }
 
-    void dumpStats() {
-        if (log.debugEnabled) {
-            statistics.each { cat, subcats ->
-                subcats.each { sc, v ->
-                    log.debug "  ${sc} = $v"
-                }
-            }
-        }
-    }
-    
     /**
      *
      */
@@ -954,28 +958,6 @@ class ResourceProcessor implements InitializingBean {
         return s1.toString() + s2.toString() + s4.toString() + s5.toString()
     }
     
-    /**
-     * Returns the config object under 'grails.resources'
-     */
-    ConfigObject getConfig() {
-        grailsApplication.config.grails.resources
-    }
-    
-    /**
-     * Used to retrieve a resources config param, or return the supplied
-     * default value if no explicit value was set in config
-     */
-    def getConfigParamOrDefault(String key, defaultValue) {
-        // Witness my evil. Can you tell what it is yet?
-        def param = key.tokenize('.').inject(config) { conf, v -> conf[v] }
-
-        if (param instanceof ConfigObject) {
-            param.size() == 0 ? defaultValue : param
-        } else {
-            param
-        }
-    }
-    
     boolean isDebugMode(ServletRequest request) {
         if (getConfigParamOrDefault('debug', false)) {
             config.debug
@@ -1008,16 +990,17 @@ class ResourceProcessor implements InitializingBean {
         reloading = true
         try {
             log.info("Performing a resource mapper reload")
+
+            statsManager.resetStats()
             
-            resetStats()
             
             loadMappers()
             
             ResourceProcessorBatch reloadBatch = new ResourceProcessorBatch()
             
             loadResources(reloadBatch)
-            
-            dumpStats()
+
+            statsManager.dumpStats()
             log.info("Finished resource mapper reload")
         } finally {
             reloading = false
@@ -1029,13 +1012,13 @@ class ResourceProcessor implements InitializingBean {
         reloading = true
         try {
             log.info("Performing a module definition reload")
-            resetStats()
+            statsManager.resetStats()
 
             ResourceProcessorBatch reloadBatch = new ResourceProcessorBatch()
             
             loadModules(reloadBatch)
             
-            dumpStats()
+            statsManager.dumpStats()
             log.info("Finished module definition reload")
         } finally {
             reloading = false
@@ -1047,13 +1030,13 @@ class ResourceProcessor implements InitializingBean {
         try {
             log.info("Performing a changed file reload")
 
-            resetStats()
+            statsManager.resetStats()
 
             ResourceProcessorBatch reloadBatch = new ResourceProcessorBatch()
             
             loadResources(reloadBatch)
-            
-            dumpStats()
+
+            statsManager.dumpStats()
             log.info("Finished changed file reload")
         } finally {
             reloading = false
@@ -1065,25 +1048,21 @@ class ResourceProcessor implements InitializingBean {
         try {
             log.info("Performing a full reload")
 
-            resetStats()
+            statsManager.resetStats()
 
             loadMappers()
             
             ResourceProcessorBatch reloadBatch = new ResourceProcessorBatch()
             
             loadModules(reloadBatch)
-            
-            dumpStats()
+
+            statsManager.dumpStats()
             log.info("Finished full reload")
         } catch (Throwable t) {
             log.error "Unable to load resources", t
         } finally {
             reloading = false
         }
-    }
-    
-    void resetStats() {
-        statistics.clear()
     }
     
     /**
