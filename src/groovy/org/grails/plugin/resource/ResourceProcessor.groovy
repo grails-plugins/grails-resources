@@ -576,7 +576,7 @@ class ResourceProcessor implements InitializingBean {
         // Once delegated, its the delegate that needs to be processed, not the original
         def phase
         for (m in resourceMappers) {
-            if (isNotDisabledInGlobalConfig(m)) {
+            if (isMapperEnabledInGlobalConfig(m)) {
                 if (r.delegating) {
                     break;
                 }
@@ -610,7 +610,13 @@ class ResourceProcessor implements InitializingBean {
         }
     }
 
-    private boolean isNotDisabledInGlobalConfig(ResourceMapper m) {
+  /**
+   * Test if mapper is enabled in global configuration.
+   *
+   * @param mapper to check
+   * @return true if enabled, false otherwise
+   */
+    private boolean isMapperEnabledInGlobalConfig(ResourceMapper m) {
         getConfigParamOrDefault('mappers.' + m.name + '.enabled', true)
     }
 
@@ -698,7 +704,10 @@ class ResourceProcessor implements InitializingBean {
     }
     
     /**
-     * Resolve a resource to a URL by resource name
+     * Retrieve a module by name.
+     *
+     * @param name
+     * @return ResourceModule or null if none by that name
      */
     def getModule(name) {
         modulesByName[name]
