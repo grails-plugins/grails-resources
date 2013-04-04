@@ -1,11 +1,12 @@
 package org.grails.plugin.resource.mapper
 
-import org.codehaus.groovy.grails.*
-import org.grails.plugin.resources.artefacts.ResourceMapperArtefactHandler
-import org.grails.plugin.resource.ResourceMeta
-import org.springframework.util.AntPathMatcher
-import org.slf4j.LoggerFactory
 import grails.util.GrailsNameUtils
+
+import org.grails.plugin.resource.ResourceMeta
+import org.grails.plugin.resources.artefacts.ResourceMapperArtefactHandler
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.util.AntPathMatcher
 
 /**
  * The artefact facade used by the service to communicate with resource mapper artefacts.
@@ -15,77 +16,55 @@ import grails.util.GrailsNameUtils
  */
 class ResourceMapper {
 
-    static final DEFAULT_PRIORITY = 0
-    static final PATH_MATCHER = new AntPathMatcher()
-    
+    static final int DEFAULT_PRIORITY = 0
+    static final AntPathMatcher PATH_MATCHER = new AntPathMatcher()
+
     final artefact
     final config
-    final log
-    
+    private Logger log
+
     @Lazy phase = {
-        try {
-            artefact.phase
-        } catch (MissingPropertyException e) {
-            throw new IllegalArgumentException("Resource mapper ${name} must have a phase property defined")
+        try { artefact.phase }
+        catch (MissingPropertyException e) {
+            throw new IllegalArgumentException("Resource mapper $name must have a phase property defined")
         }
     }()
-    
+
     @Lazy operation = {
-        try {
-            artefact.operation
-        } catch (MissingPropertyException e) {
-            null
-        }
+        try { artefact.operation }
+        catch (MissingPropertyException e) { null }
     }()
-    
+
     @Lazy priority = {
-        try {
-            artefact.priority
-        } catch (MissingPropertyException e) {
-            DEFAULT_PRIORITY
-        }
+        try { artefact.priority }
+        catch (MissingPropertyException e) { DEFAULT_PRIORITY }
     }()
-    
+
     @Lazy name = {
-        try {
-            artefact.name
-        } catch (MissingPropertyException e) {
-            GrailsNameUtils.getLogicalName(artefact.class, ResourceMapperArtefactHandler.SUFFIX).toLowerCase()
+        try { artefact.name }
+        catch (MissingPropertyException e) {
+            GrailsNameUtils.getLogicalName(artefact.getClass(), ResourceMapperArtefactHandler.SUFFIX).toLowerCase()
         }
     }()
-    
+
     @Lazy defaultExcludes = {
-        try {
-            toStringList(artefact.defaultExcludes)
-        } catch (MissingPropertyException e) {
-            []
-        }
+        try { toStringList(artefact.defaultExcludes) }
+        catch (MissingPropertyException e) { [] }
     }()
 
     @Lazy defaultIncludes = {
-        try {
-            toStringList(artefact.defaultIncludes)
-        } catch (MissingPropertyException e) {
-            ['**/*']
-        }
+        try { toStringList(artefact.defaultIncludes) }
+        catch (MissingPropertyException e) { ['**/*'] }
     }()
 
     @Lazy excludes = {
-        if (config?.excludes) {
-            toStringList(config.excludes)
-        } else {
-            defaultExcludes
-        }
+        config?.excludes ? toStringList(config.excludes) : defaultExcludes
     }()
-    
+
     @Lazy includes = {
-        if (config?.includes) {
-            toStringList(config.includes)
-        } else {
-            defaultIncludes
-        }
+        config?.includes ? toStringList(config.includes) : defaultIncludes
     }()
-    
+
     /**
      * @param artefact an instance of the resource mapper artefact
      * @param mappersConfig the config object that is the config for all mappers
@@ -107,67 +86,63 @@ class ResourceMapper {
         def excludingPattern = getExcludingPattern(resource)
         if (!includingPattern) {
             if (log.debugEnabled) {
-                log.debug "Skipping ${resource.sourceUrl} due to includes pattern ${includes} not including it"
+                log.debug "Skipping $resource.sourceUrl due to includes pattern $includes not including it"
             }
             return false
         }
-        
+
         if (excludingPattern) {
             if (log.debugEnabled) {
-                log.debug "Skipping ${resource.sourceUrl} due to excludes pattern ${excludes}"
+                log.debug "Skipping $resource.sourceUrl due to excludes pattern $excludes"
             }
-            
             return false
-        } else if (resource.excludesMapperOrOperation(name, operation)) {
-            if (log.debugEnabled) {
-                log.debug "Skipping ${resource.sourceUrl} due to definition excluding mapper"
-            }
-            
-            return false
-        } else {
-            invoke(resource)
-            return true
         }
+
+        if (resource.excludesMapperOrOperation(name, operation)) {
+            if (log.debugEnabled) {
+                log.debug "Skipping $resource.sourceUrl due to definition excluding mapper"
+            }
+            return false
+        }
+
+        invoke(resource)
+        true
     }
-    
+
     private invoke(ResourceMeta resource) {
         if (log.debugEnabled) {
             log.debug "Beginning mapping ${resource.dump()}"
         }
-        
+
         try {
             artefact.map(resource, config)
         } catch (MissingMethodException e) {
-            if (artefact.class == e.type && e.method == "map") {
+            if (artefact.getClass() == e.type && e.method == "map") {
                 throw new Exception("The resource mapper '$name' does not implement the appropriate map method")
-            } else {
-                throw e
             }
-            
+            throw e
         }
-        
+
         if (log.debugEnabled) {
             log.debug "Done mapping ${resource.dump()}"
         }
     }
 
-    String stripLeadingSlash(s) {
+    String stripLeadingSlash(String s) {
         s.startsWith("/") ? s.substring(1) : s
     }
 
     String getExcludingPattern(ResourceMeta resource) {
         // The path matcher won't match **/* against a path starting with /, so it makes sense to remove it.
-        def sourceUrl = stripLeadingSlash(resource.sourceUrl)
-
+        String sourceUrl = stripLeadingSlash(resource.sourceUrl)
         excludes.find { PATH_MATCHER.match(it, sourceUrl) }
     }
-    
-    String getIncludingPattern(ResourceMeta resource) {
-        def sourceUrl = stripLeadingSlash(resource.sourceUrl)
 
+    String getIncludingPattern(ResourceMeta resource) {
+        String sourceUrl = stripLeadingSlash(resource.sourceUrl)
         includes.find { PATH_MATCHER.match(it, sourceUrl) }
     }
-    
+
     private toStringList(value) {
         value instanceof Collection ? value*.toString() : value.toString()
     }

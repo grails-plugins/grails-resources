@@ -1,17 +1,10 @@
 package org.grails.plugin.resource
 
-import grails.test.*
+import grails.test.GrailsUnitTestCase
 
 import org.grails.plugin.resource.util.ResourceMetaStore
 
 class ResourceMetaStoreTests extends GrailsUnitTestCase {
-    protected void setUp() {
-        super.setUp()
-    }
-
-    protected void tearDown() {
-        super.tearDown()
-    }
 
     void testAddingDeclaredResourceAddsBothProcessedAndSourceUrls() {
         def r = new ResourceMeta()
@@ -19,13 +12,13 @@ class ResourceMetaStoreTests extends GrailsUnitTestCase {
         r.workDir = new File('/tmp/test')
         r.processedFile = new File('/tmp/test/123456789.png')
         r.updateActualUrlFromProcessedFile()
- 
+
         def store = new ResourceMetaStore()
-        store.addDeclaredResource( { 
+        store.addDeclaredResource( {
             r.actualUrl = "/jquery/images/_bg.png"
             return r
         } )
-        
+
         assertEquals ResourceMetaStore.CLOSED_LATCH, store.latches["/jquery/images/bg.png"]
         assertEquals ResourceMetaStore.CLOSED_LATCH, store.latches["/jquery/images/_bg.png"]
     }
@@ -35,7 +28,7 @@ class ResourceMetaStoreTests extends GrailsUnitTestCase {
         def resURI = '/images/idonotexist.jpg'
         def res = store.getOrCreateAdHocResource(resURI, { throw new FileNotFoundException('Where my file?') } )
         assertNull "Resource should not have existed", res
-        
+
         assertNull store.latches[resURI]
     }
 }

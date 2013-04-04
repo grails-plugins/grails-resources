@@ -1,15 +1,11 @@
 package org.grails.plugin.resource
 
 class ResourceProcessorIntegTests extends GroovyTestCase {
-    
+
     def grailsResourceProcessor
-    
+
     protected makeMockResource(uri) {
-        [
-            uri:uri, 
-            disposition:'head', 
-            exists: { -> true }
-        ]
+        [uri:uri, disposition:'head', exists: { -> true }]
     }
 
     def testGettingModulesInDependencyOrder() {
@@ -28,7 +24,7 @@ class ResourceProcessorIntegTests extends GroovyTestCase {
 
         grailsResourceProcessor.modulesByName.putAll(testModules)
         grailsResourceProcessor.updateDependencyOrder()
-        
+
         def moduleNames = grailsResourceProcessor.getAllModuleNamesRequired(modsNeeded)
         println "Module names: ${moduleNames}"
         def moduleNameResults = grailsResourceProcessor.getModulesInDependencyOrder(moduleNames)

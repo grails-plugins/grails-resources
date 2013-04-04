@@ -1,15 +1,8 @@
 package org.grails.plugin.resource
 
-import grails.test.*
+import grails.test.GrailsUnitTestCase
 
 class ResourceMetaTests extends GrailsUnitTestCase {
-    protected void setUp() {
-        super.setUp()
-    }
-
-    protected void tearDown() {
-        super.tearDown()
-    }
 
     void testMovingFileUpdatesActualUrlCorrectly() {
         def r = new ResourceMeta()
@@ -17,7 +10,7 @@ class ResourceMetaTests extends GrailsUnitTestCase {
         r.workDir = new File('/tmp/test')
         r.processedFile = new File('/tmp/test/123456789.png')
         r.updateActualUrlFromProcessedFile()
-        
+
         assertEquals "/jquery/images/bg.png", r.sourceUrl
         assertEquals "/123456789.png", r.actualUrl
         assertEquals "/123456789.png", r.linkUrl
@@ -29,7 +22,7 @@ class ResourceMetaTests extends GrailsUnitTestCase {
         r.workDir = new File('/tmp/test')
         r.processedFile = new File('/tmp/test/jquery/images/bg.png.gz')
         r.updateActualUrlFromProcessedFile()
-        
+
         // All results must be abs to the work dir, with leading /
         assertEquals "/jquery/images/bg.png", r.sourceUrl
         assertEquals "/jquery/images/bg.png.gz", r.actualUrl
@@ -42,7 +35,7 @@ class ResourceMetaTests extends GrailsUnitTestCase {
         r.sourceUrl = "/jquery/images/bg.png#crackaddicts"
         r.processedFile = new File('/tmp/test/jquery/images/bg.png')
         r.updateActualUrlFromProcessedFile()
-        
+
         // All results must be abs to the work dir, with leading /
         assertEquals "Source url should have anchor stripped from it", "/jquery/images/bg.png", r.sourceUrl
         assertEquals "/jquery/images/bg.png", r.actualUrl
@@ -56,7 +49,7 @@ class ResourceMetaTests extends GrailsUnitTestCase {
         r.sourceUrl = "/jquery/images/bg.png?you=got&to=be&kidding=true#crackaddicts"
         r.processedFile = new File('/tmp/test/jquery/images/bg.png')
         r.updateActualUrlFromProcessedFile()
-        
+
         // All results must be abs to the work dir, with leading /
         assertEquals "Source url should have anchor stripped from it", "/jquery/images/bg.png", r.sourceUrl
         assertEquals "/jquery/images/bg.png", r.actualUrl
@@ -69,7 +62,7 @@ class ResourceMetaTests extends GrailsUnitTestCase {
         r.workDir = new File('/tmp/test')
         r.sourceUrl = "http://crackhouse.ck/jquery/images/bg.png?you=got&to=be&kidding=true#crackaddicts"
         r.updateActualUrlFromProcessedFile()
-        
+
         // All results must be abs to the work dir, with leading /
         assertEquals "Source url should have anchor stripped from it", "http://crackhouse.ck/jquery/images/bg.png", r.sourceUrl
         assertEquals "http://crackhouse.ck/jquery/images/bg.png", r.actualUrl
@@ -77,7 +70,7 @@ class ResourceMetaTests extends GrailsUnitTestCase {
         assertEquals "http://crackhouse.ck/jquery/images/bg.png?you=got&to=be&kidding=true#crackaddicts", r.linkUrl
     }
 
-    void testRelativePathCalculations() {        
+    void testRelativePathCalculations() {
         def data = [
             // Expected, base, target
             ["../images/logo.png", '/css/main.css', '/images/logo.png'],
@@ -100,4 +93,3 @@ class ResourceMetaTests extends GrailsUnitTestCase {
         }
     }
 }
-

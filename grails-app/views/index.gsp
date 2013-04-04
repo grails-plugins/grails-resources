@@ -18,7 +18,7 @@
 <r:external dir="css" file="legacy.css"/>
 <!-- This tests ad hoc resource deferral -->
 <r:external dir="js" file="core.js"/>
-<r:layoutResources/> 
+<r:layoutResources/>
 </g:set>
     ${output}
 </head>
@@ -31,7 +31,7 @@
                 ${output.encodeAsHTML()}
             </pre>
             <p>Grails logo using processing:<r:img uri="/images/grails_logo.png"/></p>
-    
+
             <r:script>
                 document.write("<p>This is going to come out in the footer<p>");
             </r:script>

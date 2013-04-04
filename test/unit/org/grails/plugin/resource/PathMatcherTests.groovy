@@ -1,7 +1,8 @@
 package org.grails.plugin.resource
 
+import grails.test.GrailsUnitTestCase
+
 import org.springframework.util.AntPathMatcher
-import grails.test.*
 
 class PathMatcherTests extends GrailsUnitTestCase {
     static final PATH_MATCHER = new AntPathMatcher()

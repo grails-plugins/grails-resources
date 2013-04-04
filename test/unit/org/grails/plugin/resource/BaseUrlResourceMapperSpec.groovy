@@ -4,11 +4,7 @@ import grails.plugin.spock.UnitSpec
 
 class BaseUrlResourceMapperSpec extends UnitSpec{
 
-    def mapper
-
-    def setup(){
-        mapper = new BaseUrlResourceMapper()
-    }
+    private BaseUrlResourceMapper mapper = new BaseUrlResourceMapper()
 
     def "test that mappers are configured correctly"(){
         setup:
@@ -84,5 +80,4 @@ class BaseUrlResourceMapperSpec extends UnitSpec{
         def module = [name: moduleName] as ResourceModule
         [module: module, bundle: 'bundle_head'] as ResourceMeta
     }
-
 }

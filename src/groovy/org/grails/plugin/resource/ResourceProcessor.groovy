@@ -1,20 +1,25 @@
 package org.grails.plugin.resource
 
 import grails.util.Environment
+
+import java.util.concurrent.ConcurrentHashMap
+
+import javax.servlet.ServletContext
+import javax.servlet.ServletRequest
+
 import org.apache.commons.io.FilenameUtils
-import org.apache.commons.logging.LogFactory
 import org.codehaus.groovy.grails.plugins.PluginManagerHolder
 import org.grails.plugin.resource.mapper.ResourceMapper
 import org.grails.plugin.resource.mapper.ResourceMappersFactory
 import org.grails.plugin.resource.module.ModuleDeclarationsFactory
 import org.grails.plugin.resource.module.ModulesBuilder
 import org.grails.plugin.resource.util.ResourceMetaStore
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.util.AntPathMatcher
 import org.springframework.web.util.WebUtils
 
-import javax.servlet.ServletRequest
-import java.util.concurrent.ConcurrentHashMap
 /**
  * This is where it all happens.
  *
@@ -26,113 +31,113 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class ResourceProcessor implements InitializingBean {
 
-    static transactional = false
-    
     boolean reloading
-    
-    def log = LogFactory.getLog(ResourceProcessor)
 
-    static final PATH_MATCHER = new AntPathMatcher()
-    static ADHOC_MODULE = "__@adhoc-files@__"        // The placeholder for all undeclared resources that are linked to
-    static SYNTHETIC_MODULE = "__@synthetic-files@__"   // The placeholder for all the generated (i.e. aggregate) resources
+    private Logger log = LoggerFactory.getLogger(getClass())
 
-    static REQ_ATTR_DEBUGGING = 'resources.debug'
-    static REQ_ATTR_DISPOSITIONS_REMAINING = 'resources.dispositions.remaining'
-    static REQ_ATTR_DISPOSITIONS_DONE = "resources.dispositions.done"
-    
-    static DISPOSITION_HEAD = 'head'
-    static DISPOSITION_DEFER = 'defer'
-    static DEFAULT_DISPOSITION_LIST = [DISPOSITION_HEAD, DISPOSITION_DEFER]
-    static DEFAULT_ADHOC_INCLUDES = [
-        '**/*.*'
-    ]
-    
-    static DEFAULT_ADHOC_EXCLUDES = [
-    ]
-    
-    static DEFAULT_MODULE_SETTINGS = [
+    static final AntPathMatcher PATH_MATCHER = new AntPathMatcher()
+    static final String ADHOC_MODULE = "__@adhoc-files@__"        // The placeholder for all undeclared resources that are linked to
+    static final String SYNTHETIC_MODULE = "__@synthetic-files@__"   // The placeholder for all the generated (i.e. aggregate) resources
+
+    static final String REQ_ATTR_DEBUGGING = 'resources.debug'
+    static final String REQ_ATTR_DISPOSITIONS_REMAINING = 'resources.dispositions.remaining'
+    static final String REQ_ATTR_DISPOSITIONS_DONE = "resources.dispositions.done"
+
+    static final String DISPOSITION_HEAD = 'head'
+    static final String DISPOSITION_DEFER = 'defer'
+    static final List<String> DEFAULT_DISPOSITION_LIST = [DISPOSITION_HEAD, DISPOSITION_DEFER]
+    static final List<String> DEFAULT_ADHOC_INCLUDES = ['**/*.*']
+
+    static final List<String> DEFAULT_ADHOC_EXCLUDES = []
+
+    static final Map DEFAULT_MODULE_SETTINGS = [
         css:[disposition: 'head'],
         rss:[disposition: 'head'],
         gif:[disposition: 'head'],
         jpg:[disposition: 'head'],
         png:[disposition: 'head'],
         ico:[disposition: 'head'],
-        js:[disposition: 'defer']
+        js: [disposition: 'defer']
     ]
 
     Map statistics = [:]
-    
+
     def grailsLinkGenerator
     def grailsResourceLocator // A Grails 2-only bean
-    
-    def staticUrlPrefix
-    
+
+    String staticUrlPrefix
+
     private File workDir
-    
-    def modulesByName = new ConcurrentHashMap()
 
-    def resourceInfo = new ResourceMetaStore()
-    def allResourcesByOriginalSourceURI = new ConcurrentHashMap()
+    Map<String, ResourceModule> modulesByName = new ConcurrentHashMap()
 
-    def modulesInDependencyOrder = []
-    
+    ResourceMetaStore resourceInfo = new ResourceMetaStore()
+    Map<String, ResourceMeta> allResourcesByOriginalSourceURI = new ConcurrentHashMap()
+
+    List<String> modulesInDependencyOrder = []
+
     def resourceMappers
-    
+
     def grailsApplication
-    @Lazy servletContext = { grailsApplication.mainContext.servletContext }()
-    
+    @Lazy ServletContext servletContext = { grailsApplication.mainContext.servletContext }()
+
     boolean processingEnabled
-    
+
     List adHocIncludes
-    List adHocExcludes 
-    List optionalDispositions
-    
-    boolean isInternalModule(def moduleOrName) {
+    List adHocExcludes
+    List<String> optionalDispositions
+
+    boolean isInternalModule(moduleOrName) {
         def n = moduleOrName instanceof ResourceModule ? moduleOrName.name : moduleOrName
-        return n in [ADHOC_MODULE, SYNTHETIC_MODULE]        
+        return n in [ADHOC_MODULE, SYNTHETIC_MODULE]
     }
-    
+
     /**
      * Topographic Sort ordering for a Directed Acyclic Graph of dependencies.
      * Less scary than it seemed, but still a bit hard to read. Think about vectors and edges.
      * Visit wikipedia.
      */
     void updateDependencyOrder() {
-        def modules = (modulesByName.collect { it.value }).findAll { !isInternalModule(it) }
-        def noIncomingEdges = modules.findAll { l -> !modules.any { l.name in it.dependsOn }  }
-        def ordered = []
+        List<ResourceModule> modules = (modulesByName.collect { it.value }).findAll { !isInternalModule(it) }
+        List<ResourceModule> noIncomingEdges = modules.findAll { l -> !modules.any { l.name in it.dependsOn } }
+        List<String> ordered = []
         Set visited = new HashSet()
-        
-        def visit
-        visit = { n -> 
-            if (!(n.name in visited)) {
-                visited << n.name
-                def incomingEdges = []
-                n.dependsOn?.each {d ->
-                    def m = modules.find { mod -> mod.name == d }
-                    if (!m) {
-                        log.warn "There is a dependency on module [${d}] by module [${n.name}] but no such module has been defined"
-                    } else {
-                        incomingEdges << m
-                    }
-                }
-                for (m in incomingEdges) {
-                    visit(m)
-                }
-                ordered << n.name
-            }
-        }
 
-        for (module in noIncomingEdges) {
-            visit(module)
+        for (ResourceModule module in noIncomingEdges) {
+            visit module, visited, modules, ordered
         }
-        
+ 
         ordered << ADHOC_MODULE
-        ordered << SYNTHETIC_MODULE 
-        
+        ordered << SYNTHETIC_MODULE
+ 
         modulesInDependencyOrder = ordered
     }
-    
+ 
+    protected visit(ResourceModule n, Set visited, List<ResourceModule> modules, List<String> ordered) {
+        if (n.name in visited) {
+            return
+        }
+ 
+        visited << n.name
+ 
+        List<ResourceModule> incomingEdges = []
+        for (d in n.dependsOn) {
+            ResourceModule m = modules.find { mod -> mod.name == d }
+            if (!m) {
+                log.warn "There is a dependency on module [${d}] by module [${n.name}] but no such module has been defined"
+            }
+            else {
+                incomingEdges << m
+            }
+        }
+ 
+        for (ResourceModule m in incomingEdges) {
+            visit m, visited, modules, ordered
+        }
+ 
+        ordered << n.name
+    }
+ 
     void afterPropertiesSet() {
         processingEnabled = getConfigParamOrDefault('processing.enabled', true)
         adHocIncludes = getConfigParamOrDefault('adhoc.includes', DEFAULT_ADHOC_INCLUDES)
@@ -143,7 +148,7 @@ class ResourceProcessor implements InitializingBean {
 
         optionalDispositions = getConfigParamOrDefault('optional.dispositions', ['inline', 'image'])
     }
-    
+
     File getWorkDir() {
         // @todo this isn't threadsafe at startup if its lazy. We should change it.
         if (!this.@workDir) {
@@ -153,35 +158,35 @@ class ResourceProcessor implements InitializingBean {
         assert this.@workDir
         return this.@workDir
     }
-    
+
     def getPluginManager() {
         // The plugin manager bean configured in integration testing is not the real thing and causes errors.
         // Using the pluginManager from the holder means that we always get a legit instance.
         // http://jira.codehaus.org/browse/GRAILSPLUGINS-2712
         PluginManagerHolder.pluginManager
     }
-    
-    def extractURI(request, adhoc) {
-        def uriStart = (adhoc ? request.contextPath : request.contextPath+staticUrlPrefix).size()
-        return uriStart < request.requestURI.size() ? request.requestURI[uriStart..-1] : ''
+
+    String extractURI(request, boolean adhoc) {
+        int uriStart = (adhoc ? request.contextPath : request.contextPath + staticUrlPrefix).size()
+        uriStart < request.requestURI.size() ? request.requestURI[uriStart..-1] : ''
     }
 
     boolean canProcessLegacyResource(uri) {
         // Apply our own url filtering rules because servlet mapping uris are too lame
         boolean included = adHocIncludes.find { p ->
-            PATH_MATCHER.match(p, uri) 
+            PATH_MATCHER.match(p, uri)
         }
         if (log.debugEnabled) {
-            log.debug "Legacy resource ${uri} matched includes? ${included}"
+            log.debug "Legacy resource $uri matched includes? $included"
         }
 
         if (included) {
             included = !(adHocExcludes.find { PATH_MATCHER.match(it, uri) })
             if (log.debugEnabled) {
-                log.debug "Legacy resource ${uri} passed excludes? ${included}"
+                log.debug "Legacy resource $uri passed excludes? $included"
             }
         }
-        
+
         return included
     }
 
@@ -196,7 +201,7 @@ class ResourceProcessor implements InitializingBean {
      * This is not recommended, its just a quick out of the box fix for legacy (or pre-"resources plugin" plugin) code.
      *
      * So a request for <ctx>/css/main.css comes in. This needs to redirect to e.g. <ctx>/static/css/342342353345343534.css
-     * This involves looking it up by source uri. Therefore the same resource may have multiple mappings in the 
+     * This involves looking it up by source uri. Therefore the same resource may have multiple mappings in the
      * resourceInfo map but they should not be conflicting.
      */
     boolean processLegacyResource(request, response) {
@@ -204,7 +209,7 @@ class ResourceProcessor implements InitializingBean {
             log.debug "Handling Legacy resource ${request.requestURI}"
         }
         def uri = ResourceProcessor.removeQueryParams(extractURI(request, true))
-        
+
         // Only handle it if it should be included in processing
         if (canProcessLegacyResource(uri)) {
             if (log.debugEnabled) {
@@ -218,7 +223,7 @@ class ResourceProcessor implements InitializingBean {
                 response.sendError(404, fnfe.message)
                 return
             }
-        
+
             if (Environment.current == Environment.DEVELOPMENT) {
                 if (res) {
                     response.setHeader('X-Grails-Resources-Original-Src', res?.sourceUrl)
@@ -230,11 +235,11 @@ class ResourceProcessor implements InitializingBean {
                 response.sendError(404)
             }
             return true
-        } else {
-            return false // we didn't handle this
         }
+
+        return false // we didn't handle this
     }
-    
+
     /**
      * Redirect the client to the actual processed Url, used for when an ad-hoc resource is accessed
      */
@@ -243,37 +248,35 @@ class ResourceProcessor implements InitializingBean {
         // NOTE: only works for local resources
         def u = request.contextPath+staticUrlPrefix+res.linkUrl
         if (log.debugEnabled) {
-            log.debug "Redirecting ad-hoc resource ${request.requestURI} to $u which makes it UNCACHEABLE - declare this resource "+
+            log.debug "Redirecting ad-hoc resource $request.requestURI to $u which makes it UNCACHEABLE - declare this resource "+
                 "and use resourceLink/module tags to avoid redirects and enable client-side caching"
         }
         response.sendRedirect(u)
     }
-    
+
     /**
      * Process a URI where the input URI matches a cached and declared resource URI,
      * without any redirects. This is the real deal
-     */ 
+     */
     void processModernResource(request, response) {
         if (log.debugEnabled) {
             log.debug "Handling resource ${request.requestURI}"
         }
         // Find the ResourceMeta for the request, or create it
-        def uri = ResourceProcessor.removeQueryParams(extractURI(request, false))
-        def inf
+        String uri = removeQueryParams(extractURI(request, false))
+        ResourceMeta inf
         try {
-            // Allow ad hoc creation of these resources too, incase they are requested directly 
+            // Allow ad hoc creation of these resources too, incase they are requested directly
             // across multiple nodes, even if this node has not yet created a link to that resource
             inf = getResourceMetaForURI(uri, true)
-        } catch (FileNotFoundException fnfe) {
-            response.sendError(404, fnfe.message)
+        } catch (FileNotFoundException e) {
+            response.sendError(404, e.message)
             return
         }
-        
+
         if (inf) {
             if (Environment.current == Environment.DEVELOPMENT) {
-                if (inf) {
-                    response.setHeader('X-Grails-Resources-Original-Src', inf.sourceUrl)
-                }
+                response.setHeader('X-Grails-Resources-Original-Src', inf.sourceUrl)
             }
 
             // See if its an ad-hoc resource that has come here via a relative link
@@ -289,7 +292,7 @@ class ResourceProcessor implements InitializingBean {
             if (log.debugEnabled) {
                 log.debug "Returning processed resource ${request.requestURI}"
             }
-            def data = inf.newInputStream()
+            InputStream data = inf.newInputStream()
             try {
                 // Now set up the response
                 response.contentType = inf.contentType
@@ -303,14 +306,14 @@ class ResourceProcessor implements InitializingBean {
                     }
                     for (processor in inf.requestProcessors) {
                         if (log.debugEnabled) {
-                            log.debug "Applying request processor on ${request.requestURI}: "+processor.class.name
+                            log.debug "Applying request processor on ${request.requestURI}: ${processor.getClass().name}"
                         }
                         def p = processor.clone()
                         p.delegate = inf
                         p(request, response)
                     }
                 }
-                
+
                 // @todo Could we do something faster here? Feels wrong, buffer size is tiny in Groovy
                 response.outputStream << data
             } finally {
@@ -320,7 +323,7 @@ class ResourceProcessor implements InitializingBean {
             response.sendError(404)
         }
     }
-    
+
     /**
      * See if we have a ResourceMeta for this URI.
      * @return null if not processed/created yet, the instance if it exists
@@ -328,33 +331,28 @@ class ResourceProcessor implements InitializingBean {
     ResourceMeta findResourceForURI(String uri) {
         resourceInfo[uri]
     }
-    
+
     ResourceMeta findSyntheticResourceById(bundleId) {
-        def mod = modulesByName[SYNTHETIC_MODULE]
-        if (mod) {
-            return mod.resources.find { r -> r.id == bundleId }
-        } else {
-            return null
-        }
+        modulesByName[SYNTHETIC_MODULE]?.resources?.find { ResourceMeta r -> r.id == bundleId }
     }
-    
+
     ResourceMeta newSyntheticResource(String uri, Class<ResourceMeta> type) {
         if (log.debugEnabled) {
-            log.debug "Creating synthetic resource of type ${type} for URI [${uri}]"
+            log.debug "Creating synthetic resource of type $type for URI [$uri]"
         }
-        def synthModule = getOrCreateSyntheticOrImplicitModule(true)
-        def agg = synthModule.addNewSyntheticResource(type, uri, this)
-        
+        ResourceModule synthModule = getOrCreateSyntheticOrImplicitModule(true)
+        ResourceModule agg = synthModule.addNewSyntheticResource(type, uri, this)
+
         if (log.debugEnabled) {
             log.debug "synthetic module resources: ${synthModule.resources}"
         }
-        
+
         return agg
     }
-    
+
     ResourceModule getOrCreateSyntheticOrImplicitModule(boolean synthetic) {
-        def mod
-        def moduleName = synthetic ? SYNTHETIC_MODULE : ADHOC_MODULE
+        ResourceModule mod
+        String moduleName = synthetic ? SYNTHETIC_MODULE : ADHOC_MODULE
         // We often get multiple simultaneous requests at startup and this causes
         // multiple creates and loss of concurrently processed resources
         synchronized (moduleName) {
@@ -369,20 +367,20 @@ class ResourceProcessor implements InitializingBean {
         }
         return mod
     }
-    
+
     ResourceMeta getExistingResourceMeta(uri) {
         resourceInfo[uri]
     }
-    
+
     /**
      * Get the existing or create a new ad-hoc ResourceMeta for the URI.
      * @returns The resource instance - which may have a null processedFile if the resource cannot be found
      */
-    ResourceMeta getResourceMetaForURI(uri, Boolean createAdHocResourceIfNeeded = true, String declaringResource = null, 
+    ResourceMeta getResourceMetaForURI(uri, Boolean createAdHocResourceIfNeeded = true, String declaringResource = null,
             Closure postProcessor = null) {
 
         // Declared resources will already exist, but ad-hoc or synthetic may need to be created
-        def res = resourceInfo.getOrCreateAdHocResource(uri) { -> 
+        def res = resourceInfo.getOrCreateAdHocResource(uri) { ->
 
             if (!createAdHocResourceIfNeeded) {
                 if (log.warnEnabled) {
@@ -390,26 +388,26 @@ class ResourceProcessor implements InitializingBean {
                 }
                 return null
             }
-            
+
             if (!canProcessLegacyResource(uri)) {
                 if (log.debugEnabled) {
                     log.debug("Skipping ad-hoc resource $uri as it is excluded")
                 }
                 return null
             }
-            
+
             // If we don't already have it, its either not been declared in the DSL or its Synthetic and its
             // not already been retrieved
-            def mod = getOrCreateSyntheticOrImplicitModule(false)
-    
+            ResourceModule mod = getOrCreateSyntheticOrImplicitModule(false)
+
             // Need to create ad-hoc resource, its not synthetic
             if (log.debugEnabled) {
                 log.debug "Creating new implicit resource for ${uri}"
             }
-            def r = new ResourceMeta(sourceUrl: uri, workDir: getWorkDir(), module:mod)
+            ResourceMeta r = new ResourceMeta(sourceUrl: uri, workDir: getWorkDir(), module:mod)
             r.declaringResource = declaringResource
-        
-            r = prepareResource(r, true)            
+
+            r = prepareResource(r, true)
 
             // Only if the URI mapped to a real file, do we add the resource
             // Prevents DoS with zillions of 404s
@@ -425,18 +423,18 @@ class ResourceProcessor implements InitializingBean {
                     }
                 }
             }
-            
+
             allResourcesByOriginalSourceURI[r.sourceUrl] = r
             return r
         } // end of closure
 
         return res
     }
-    
+
     /**
      * Workaround for replaceAll problems with \ in Java
      */
-    String makeFileSystemPathFromURI(uri) {
+    String makeFileSystemPathFromURI(String uri) {
         def chars = uri.chars
         chars.eachWithIndex { c, i ->
             if (c == '/') {
@@ -445,13 +443,13 @@ class ResourceProcessor implements InitializingBean {
         }
         new String(chars)
     }
-    
+
     File makeFileForURI(String uri) {
-        def splitPoint = uri.lastIndexOf('/')
-        def fileSystemDir = splitPoint > 0 ? makeFileSystemPathFromURI(uri[0..splitPoint-1]) : ''
-        def fileSystemFile = makeFileSystemPathFromURI(uri[splitPoint+1..-1])
-        def staticDir = new File(getWorkDir(), fileSystemDir)
-        
+        int splitPoint = uri.lastIndexOf('/')
+        String fileSystemDir = splitPoint > 0 ? makeFileSystemPathFromURI(uri[0..splitPoint-1]) : ''
+        String fileSystemFile = makeFileSystemPathFromURI(uri[splitPoint+1..-1])
+        File staticDir = new File(getWorkDir(), fileSystemDir)
+
         // force the structure
         if (!staticDir.exists()) {
             // Do not assert this, we are re-entrant and may get multiple simultaneous calls.
@@ -461,18 +459,18 @@ class ResourceProcessor implements InitializingBean {
                 log.error "Unable to create static resource cache directory: ${staticDir}"
             }
         }
-        
+
         if (log.debugEnabled) {
             log.debug "Creating file object for URI [$uri] from [${staticDir}] and [${fileSystemFile}]"
         }
-        def f = new File(staticDir, fileSystemFile)
+        File f = new File(staticDir, fileSystemFile)
         // Delete the existing file - it may be from previous release, we cannot tell.
         if (f.exists()) {
             assert f.delete()
         }
         return f
     }
-    
+
     /**
      * Take g.resource style args and create a link to that original resource in the app, relative to the app context path
      */
@@ -487,31 +485,27 @@ class ResourceProcessor implements InitializingBean {
      *
      */
     URL getOriginalResourceURLForURI(uri) {
-        if(grailsResourceLocator != null) {
-            def res = grailsResourceLocator.findResourceForURI(uri)
-            if(res != null) {
-                return res.URL
-            }
+        if (grailsResourceLocator == null) {
+            return servletContext.getResource(uri)
         }
-        else {
-            servletContext.getResource(uri)            
-        }
+
+        grailsResourceLocator.findResourceForURI(uri)?.URL
     }
-    
+
     /**
      * Resolve mime type for a URI by file extension
      */
     String getMimeType(uri) {
         servletContext.getMimeType(uri)
     }
-    
+
     /**
      * Execute the processing chain for the resource, returning list of URIs to add to uri -> resource mappings
      * for this resource
      */
     ResourceMeta prepareResource(ResourceMeta r, boolean adHocResource) {
         if (log.debugEnabled) {
-            log.debug "Preparing resource ${r.sourceUrl} (${r.dump()})"
+            log.debug "Preparing resource $r.sourceUrl (${r.dump()})"
         }
         if (r.delegating) {
             if (log.debugEnabled) {
@@ -519,10 +513,9 @@ class ResourceProcessor implements InitializingBean {
             }
             return
         }
-        
+
         if (!adHocResource && findResourceForURI(r.sourceUrl)) {
-            def existing = allResourcesByOriginalSourceURI[r.sourceUrl]
-            def modName = existing.module.name
+            String modName = allResourcesByOriginalSourceURI[r.sourceUrl].module.name
             throw new IllegalArgumentException(
                 "Skipping prepare resource for [${r.sourceUrl}] - This resource is declared in module [${r.module.name}] as well as module [${modName}]"
             )
@@ -530,17 +523,15 @@ class ResourceProcessor implements InitializingBean {
 
         r.beginPrepare(this)
 
-        if (processingEnabled) {
-            if (!r.originalAbsolute) {
-                applyMappers(r)
-            }
+        if (processingEnabled && !r.originalAbsolute) {
+            applyMappers(r)
         }
-        
-        r.endPrepare(this)        
+
+        r.endPrepare(this)
 
         return r
     }
-        
+
     def getStatValue(category, subcategory, defaultValue = 0) {
         def cat = statistics[category]
         if (cat == null) {
@@ -549,30 +540,30 @@ class ResourceProcessor implements InitializingBean {
         }
         return cat[subcategory] != null ? cat[subcategory] : defaultValue
     }
-    
+
     void storeAggregateStat(category, subcategory, value) {
         def v = getStatValue(category, subcategory)
         statistics[category][subcategory] = v + value
     }
-    
+
     void applyMappers(ResourceMeta r) {
 
         // Now iterate over the mappers...
         if (log.debugEnabled) {
             log.debug "Applying mappers to ${r.processedFile}"
         }
-    
+
         // Apply all mappers / or only those until the resource becomes delegated
         // Once delegated, its the delegate that needs to be processed, not the original
         def phase
         for (m in resourceMappers) {
             if (isNotDisabledInGlobalConfig(m)) {
                 if (r.delegating) {
-                    break;
+                    break
                 }
 
                 if (log.debugEnabled) {
-                    log.debug "Running mapper ${m.name} (${m.artefact})"
+                    log.debug "Running mapper $m.name ($m.artefact)"
                 }
 
                 if (m.phase != phase) {
@@ -583,16 +574,16 @@ class ResourceProcessor implements InitializingBean {
                 }
 
                 if (log.debugEnabled) {
-                    log.debug "Applying mapper ${m.name} to ${r.processedFile} - delegating? ${r.delegating}"
+                    log.debug "Applying mapper $m.name to $r.processedFile - delegating? $r.delegating"
                 }
-                def startTime = System.currentTimeMillis()
+                long startTime = System.currentTimeMillis()
 
                 def appliedMapper = m.invokeIfNotExcluded(r)
                 if (log.debugEnabled) {
-                    log.debug "Applied mapper ${m.name} to ${r.processedFile}"
+                    log.debug "Applied mapper $m.name to $r.processedFile"
                 }
 
-                def endTime = System.currentTimeMillis()
+                long endTime = System.currentTimeMillis()
                 storeAggregateStat('mappers-time', m.name, endTime-startTime)
 
                 r.wasProcessedByMapper(m, appliedMapper)
@@ -609,30 +600,31 @@ class ResourceProcessor implements InitializingBean {
             try {
                 prepareResource(r, false)
             } catch (FileNotFoundException fnfe) {
-                log.warn fnfe.message
+                if (log.warnEnabled) {
+                    log.warn fnfe.message
+                }
             }
         }
         if (postPrepare) {
             postPrepare()
         }
     }
-    
+
     void prepareResourceBatch(ResourceProcessorBatch batch) {
         if (log.debugEnabled) {
             log.debug "Preparing resource batch:"
-            batch.each { r ->
+            batch.each { ResourceMeta r ->
                 log.debug "Batch includes resource: ${r.sourceUrl}"
             }
         }
-        
+
         def affectedSynthetics = []
-        batch.each { r ->
-            r.reset() 
+        batch.each { ResourceMeta r ->
+            r.reset()
             resourceInfo.evict(r.sourceUrl)
 
             prepareSingleDeclaredResource(r) {
-                def u = r.sourceUrl
-                allResourcesByOriginalSourceURI[u] = r
+                allResourcesByOriginalSourceURI[r.sourceUrl] = r
             }
 
             if (r.delegating) {
@@ -646,17 +638,16 @@ class ResourceProcessor implements InitializingBean {
         if (log.debugEnabled) {
             log.debug "Preparing synthetic resources"
         }
-        for (r in affectedSynthetics) {
+        for (ResourceMeta r in affectedSynthetics) {
             if (log.debugEnabled) {
                 log.debug "Preparing synthetic resource: ${r.sourceUrl}"
             }
-            
+
             r.reset()
             resourceInfo.evict(r.sourceUrl)
-            
+
             prepareSingleDeclaredResource(r) {
-                def u = r.sourceUrl
-                allResourcesByOriginalSourceURI[u] = r
+                allResourcesByOriginalSourceURI[r.sourceUrl] = r
             }
         }
     }
@@ -665,52 +656,48 @@ class ResourceProcessor implements InitializingBean {
         if (log.debugEnabled) {
             log.debug "Storing resource module definition ${m.dump()}"
         }
-        
+
         if (batch) {
-            for (r in m.resources) {
+            for (ResourceMeta r in m.resources) {
                 batch.add(r)
             }
         }
 
         modulesByName[m.name] = m
     }
-    
+
     def defineModule(String name) {
         storeModule(new ResourceModule(name, this), null)
     }
 
     def defineModuleFromBuilder(builderInfo, ResourceProcessorBatch resBatch) {
-        def m = new ResourceModule(builderInfo.name, builderInfo.resources, builderInfo.defaultBundle, this)
+        ResourceModule m = new ResourceModule(builderInfo.name, builderInfo.resources, builderInfo.defaultBundle, this)
         storeModule(m, resBatch)
         builderInfo.dependencies?.each { d ->
             m.addModuleDependency(d)
         }
     }
-    
+
     /**
      * Resolve a resource to a URL by resource name
      */
-    def getModule(name) {
+    ResourceModule getModule(String name) {
         modulesByName[name]
     }
-        
+
     void forgetModules() {
-        if (log.infoEnabled) {
-            log.info "Forgetting all known modules..."
-        }
+        log.info "Forgetting all known modules..."
         modulesByName.clear()
         modulesInDependencyOrder.clear()
-        
+
         // If we forget modules we have to forget resources too
         forgetResources()
     }
 
     void forgetResources() {
-        if (log.infoEnabled) {
-            log.info "Forgetting all known resources..."
-        }
+        log.info "Forgetting all known resources..."
 
-        // These are bi-products of resource processing so need to go
+        // These are byproducts of resource processing so need to go
         modulesByName.remove(SYNTHETIC_MODULE)
         modulesByName.remove(ADHOC_MODULE)
 
@@ -720,29 +707,27 @@ class ResourceProcessor implements InitializingBean {
     }
 
     private loadModules(ResourceProcessorBatch batch) {
-        if (log.infoEnabled) {
-            log.info "Loading resource declarations..."
-        }
-        forgetModules()        
+        log.info "Loading resource declarations..."
+        forgetModules()
 
-        def declarations = ModuleDeclarationsFactory.getModuleDeclarations(grailsApplication)
-        
+        Map<String, Closure> declarations = ModuleDeclarationsFactory.getModuleDeclarations(grailsApplication)
+
         def modules = []
         def builder = new ModulesBuilder(modules)
 
-        declarations.each { sourceClassName, dsl ->
+        declarations.each { String sourceClassName, Closure dsl ->
             if (log.debugEnabled) {
                 log.debug("evaluating resource modules from $sourceClassName")
             }
-            
+
             dsl.delegate = builder
             dsl.resolveStrategy = Closure.DELEGATE_FIRST
-            dsl.owner.class.metaClass.static.main = { builder.main(it) } // GPRESOURCES-50: hack to allow module name 'main'
+            dsl.owner.getClass().metaClass.static.main = { builder.main(it) } // GPRESOURCES-50: hack to allow module name 'main'
             dsl()
         }
 
         // Always do app modules after
-        def appModules = ModuleDeclarationsFactory.getApplicationConfigDeclarations(grailsApplication)
+        Closure appModules = ModuleDeclarationsFactory.getApplicationConfigDeclarations(grailsApplication)
         if (appModules) {
             if (log.debugEnabled) {
                 log.debug("evaluating resource modules from application Config")
@@ -751,16 +736,17 @@ class ResourceProcessor implements InitializingBean {
             appModules.resolveStrategy = Closure.DELEGATE_FIRST
             appModules()
         }
-        
+
         if (log.debugEnabled) {
             log.debug("resource modules after evaluation: $modules")
         }
-        
+
         // Now merge in any overrides
         if (log.debugEnabled) {
             log.debug "Merging in module overrides ${builder._moduleOverrides}"
         }
-        builder._moduleOverrides.each { overriddenModule ->
+
+        for (overriddenModule in builder._moduleOverrides) {
             if (log.debugEnabled) {
                 log.debug "Merging in module overrides for ${overriddenModule}"
             }
@@ -780,48 +766,45 @@ class ResourceProcessor implements InitializingBean {
                     existingModule.dependencies = overriddenModule.dependencies
                 }
                 overriddenModule.resources.each { res ->
-                    def existingResources = existingModule.resources.findAll { 
+                    def existingResources = existingModule.resources.findAll {
                         it.id ? (it.id == res.id) : (it.url == res.id)
                     }
                     if (existingResources) {
                         if (log.debugEnabled) {
-                            log.debug "Overriding ${overriddenModule.name} resources with id ${res.id} with "+
-                                "new settings: ${res}"
+                            log.debug "Overriding $overriddenModule.name resources with id $res.id with new settings: $res"
                         }
                         // Merge, not replace - for each matching resource
                         existingResources.each { r ->
                             r.putAll(res)
                         }
                     }
-                } 
+                }
             } else {
                 if (log.warnEnabled) {
-                    log.warn "Attempt to override resource module ${overriddenModule.name} but "+
-                        "there is nothing to override, this module does not exist"
+                    log.warn "Attempt to override resource module $overriddenModule.name but there is nothing to override, this module does not exist"
                 }
             }
         }
-        
+
         modules.each { m -> defineModuleFromBuilder(m, batch) }
-        
+
         updateDependencyOrder()
-        
+
         resourcesChanged(batch)
     }
-    
+
     private resourcesChanged(ResourceProcessorBatch batch) {
         prepareResourceBatch(batch)
 
         resolveSyntheticResourceDependencies()
     }
 
-    private collectResourcesThatNeedProcessing(module, batch) {
+    private void collectResourcesThatNeedProcessing(ResourceModule module, ResourceProcessorBatch batch) {
         // Reset them all in case this is a reload
-        for (r in module?.resources) {
+        for (ResourceMeta r in module?.resources) {
             if (log.debugEnabled) {
                 log.debug "Has resource [${r.sourceUrl}] changed? ${r.dirty}"
             }
-    
             if (r.dirty) {
                 batch.add(r)
             }
@@ -829,17 +812,15 @@ class ResourceProcessor implements InitializingBean {
     }
 
     private loadResources(ResourceProcessorBatch resBatch) {
-        if (log.infoEnabled) {
-            log.info "Loading declared resources..."
-        }
-                
+        log.info "Loading declared resources..."
+
         // Check for any declared or ad hoc resources that need processing
         for (m in modulesInDependencyOrder) {
             if (m != SYNTHETIC_MODULE) {
-                def module = modulesByName[m]
-                collectResourcesThatNeedProcessing(module, resBatch)
+                collectResourcesThatNeedProcessing(modulesByName[m], resBatch)
             }
         }
+
 /* @todo add this later when we understand what less-css-resources needs
         // Now do the derived synthetic resources as we know any changed components
         // have now been reset
@@ -858,54 +839,50 @@ class ResourceProcessor implements InitializingBean {
         if (log.debugEnabled) {
             statistics.each { cat, subcats ->
                 subcats.each { sc, v ->
-                    log.debug "  ${sc} = $v"
+                    log.debug "  $sc = $v"
                 }
             }
         }
     }
-    
-    /**
-     *
-     */
+
     void resolveSyntheticResourceDependencies() {
         // @todo:
-        // 1. Go through all SYNTHETIC resources 
+        // 1. Go through all SYNTHETIC resources
         // 2. Add all resources before it in the current module as deps to the resources
         // 3. Iterate over module deps of resource's owning module, in module dep order
         // 4. Add all their resources as deps, before existing deps
         // 5. Repeat 2-4 for all resources on all declared modules, in module dep order (bottom up)
     }
-    
-    static removeQueryParams(uri) {
-        def qidx = uri.indexOf('?')
+
+    static String removeQueryParams(String uri) {
+        int qidx = uri.indexOf('?')
         qidx > 0 ? uri[0..qidx-1] : uri
     }
-    
+
     def getDefaultSettingsForURI(uri, typeOverride = null) {
-        
+
         if (!typeOverride) {
             // Strip off query args
-            def extUrl = ResourceProcessor.removeQueryParams(uri)
-            
-            def ext = FilenameUtils.getExtension(extUrl)
+            String extUrl = ResourceProcessor.removeQueryParams(uri)
+
+            String ext = FilenameUtils.getExtension(extUrl)
             if (log.debugEnabled) {
-                log.debug "Extension extracted from ${uri} ([$extUrl]) is ${ext}"
+                log.debug "Extension extracted from $uri ([$extUrl]) is $ext"
             }
             typeOverride = ext
         }
-        
+
         DEFAULT_MODULE_SETTINGS[typeOverride]
     }
-    
-    
-    def dumpResources(toLog = true) {
+
+    def dumpResources(boolean toLog = true) {
         def s1 = new StringBuilder()
-        modulesByName.keySet().sort().each { moduleName ->
-            def mod = modulesByName[moduleName]
+        modulesByName.keySet().sort().each { String moduleName ->
+            ResourceModule mod = modulesByName[moduleName]
             s1 << "Module: ${moduleName}\n"
             s1 << "   Depends on modules: ${mod.dependsOn}\n"
-            def res = []+mod.resources
-            res.sort({ a,b -> a.actualUrl <=> b.actualUrl}).each { resource ->
+            List<ResourceMeta> res = [] + mod.resources
+            res.sort({ a,b -> a.actualUrl <=> b.actualUrl}).each { ResourceMeta resource ->
                 if (resource instanceof AggregatedResourceMeta) {
                     s1 << "   Synthetic Resource: ${resource.sourceUrl}\n"
                 } else {
@@ -920,7 +897,7 @@ class ResourceProcessor implements InitializingBean {
                 s1 << "             -- source Extension: ${resource.sourceUrlExtension}\n"
                 s1 << "             -- query params/fragment: ${resource.sourceUrlParamsAndFragment}\n"
                 s1 << "             -- url for linking: ${resource.linkUrl}\n"
-                s1 << "             -- content length: ${resource.contentLength} (original ${resource.originalContentLength})\n"
+                s1 << "             -- content length: $resource.contentLength (original ${resource.originalContentLength})\n"
                 s1 << "             -- link override: ${resource.linkOverride}\n"
                 s1 << "             -- excluded mappers: ${resource.excludedMappers?.join(', ')}\n"
                 s1 << "             -- attributes: ${resource.attributes}\n"
@@ -930,41 +907,41 @@ class ResourceProcessor implements InitializingBean {
             }
         }
         def s2 = new StringBuilder()
-        resourceInfo.keySet().sort().each { uri ->
+        resourceInfo.keySet().sort().each { String uri ->
             def res = resourceInfo[uri]
-            s2 << "Resource URI: ${uri} => ${res.processedFile}\n"
+            s2 << "Resource URI: $uri => $res.processedFile\n"
         }
         updateDependencyOrder()
         def s4 = "Dependency load order: ${modulesInDependencyOrder}\n"
 
         def s5 = "Mapper application order: ${resourceMappers*.name}\n"
-        
+
         if (toLog) {
             log.debug '-'*50
             log.debug "Resource definitions"
-            log.debug(s1)
+            log.debug(s1.toString())
             log.debug '-'*50
             log.debug "Resource URI cache"
             log.debug '-'*50
-            log.debug(s2)
+            log.debug(s2.toString())
             log.debug '-'*50
             log.debug "Module load order"
             log.debug '-'*50
-            log.debug(s4)
+            log.debug(s4.toString())
             log.debug '-'*50
-            log.debug(s5)
+            log.debug(s5.toString())
             log.debug '-'*50
-        } 
+        }
         return s1.toString() + s2.toString() + s4.toString() + s5.toString()
     }
-    
+
     /**
      * Returns the config object under 'grails.resources'
      */
     ConfigObject getConfig() {
         grailsApplication.config.grails.resources
     }
-    
+
     /**
      * Used to retrieve a resources config param, or return the supplied
      * default value if no explicit value was set in config
@@ -979,7 +956,7 @@ class ResourceProcessor implements InitializingBean {
             param
         }
     }
-    
+
     boolean isDebugMode(ServletRequest request) {
         if (getConfigParamOrDefault('debug', false)) {
             config.debug
@@ -989,7 +966,7 @@ class ResourceProcessor implements InitializingBean {
             false
         }
     }
-    
+
     private isExplicitDebugRequest(ServletRequest request) {
         if (Environment.current == Environment.DEVELOPMENT) {
             def requestContainsDebug = request.getParameter('_debugResources') != null
@@ -1000,7 +977,7 @@ class ResourceProcessor implements InitializingBean {
             false
         }
     }
-    
+
     private void loadMappers() {
         resourceMappers = ResourceMappersFactory.createResourceMappers(grailsApplication, config.mappers)
     }
@@ -1012,23 +989,22 @@ class ResourceProcessor implements InitializingBean {
         reloading = true
         try {
             log.info("Performing a resource mapper reload")
-            
+
             resetStats()
-            
+
             loadMappers()
-            
+
             ResourceProcessorBatch reloadBatch = new ResourceProcessorBatch()
-            
+
             loadResources(reloadBatch)
-            
+
             dumpStats()
             log.info("Finished resource mapper reload")
         } finally {
             reloading = false
         }
     }
-    
-    
+
     synchronized reloadModules() {
         reloading = true
         try {
@@ -1036,9 +1012,9 @@ class ResourceProcessor implements InitializingBean {
             resetStats()
 
             ResourceProcessorBatch reloadBatch = new ResourceProcessorBatch()
-            
+
             loadModules(reloadBatch)
-            
+
             dumpStats()
             log.info("Finished module definition reload")
         } finally {
@@ -1054,16 +1030,16 @@ class ResourceProcessor implements InitializingBean {
             resetStats()
 
             ResourceProcessorBatch reloadBatch = new ResourceProcessorBatch()
-            
+
             loadResources(reloadBatch)
-            
+
             dumpStats()
             log.info("Finished changed file reload")
         } finally {
             reloading = false
         }
     }
-    
+
     void reloadAll() {
         reloading = true
         try {
@@ -1072,11 +1048,11 @@ class ResourceProcessor implements InitializingBean {
             resetStats()
 
             loadMappers()
-            
+
             ResourceProcessorBatch reloadBatch = new ResourceProcessorBatch()
-            
+
             loadModules(reloadBatch)
-            
+
             dumpStats()
             log.info("Finished full reload")
         } catch (Throwable t) {
@@ -1085,13 +1061,13 @@ class ResourceProcessor implements InitializingBean {
             reloading = false
         }
     }
-    
+
     void resetStats() {
         statistics.clear()
     }
-    
+
     /**
-     * Return a list of all the names of all modules required (included the input modules) to 
+     * Return a list of all the names of all modules required (included the input modules) to
      * satisfy the dependencies of the input list of module names.
      */
     def getAllModuleNamesRequired(moduleNameList) {
@@ -1108,12 +1084,12 @@ class ResourceProcessor implements InitializingBean {
                 throw new IllegalArgumentException("No module found with name [${m}]")
             }
         }
-        
+
         return result
     }
-    
+
     /**
-     * Return a list of all the names of all modules required (included the input modules) to 
+     * Return a list of all the names of all modules required (included the input modules) to
      * satisfy the dependencies of the input list of module names.
      */
     def getAllModuleNamesRequired(Map <String, Boolean> moduleNamesAndMandatory) {
@@ -1135,7 +1111,7 @@ class ResourceProcessor implements InitializingBean {
                 throw new IllegalArgumentException("No module found with name [${m.key}]")
             }
         }
-        
+
         return result
     }
 
@@ -1145,27 +1121,27 @@ class ResourceProcessor implements InitializingBean {
     def getModulesInDependencyOrder(moduleNameList) {
         def result = []
 
-        def modules = moduleNameList as HashSet
+        Set modules = moduleNameList
         for (m in modulesInDependencyOrder) {
             if (modules.contains(m)) {
                 result << m
             }
         }
-        
-        return result        
+
+        return result
     }
-    
+
     /**
      * Get the set of dispositions required by resources in the current request, which have not yet been rendered
      */
     Set getRequestDispositionsRemaining(request) {
-        def dispositions = request[REQ_ATTR_DISPOSITIONS_REMAINING] 
+        Set dispositions = request[REQ_ATTR_DISPOSITIONS_REMAINING]
         // Return a new set of HEAD + DEFER if there is nothing in the request currently, this is our baseline
         if (dispositions == null) {
-            dispositions = new HashSet()
+            dispositions = []
             request[REQ_ATTR_DISPOSITIONS_REMAINING] = dispositions
         }
-        return dispositions 
+        return dispositions
     }
 
     /**
@@ -1173,43 +1149,43 @@ class ResourceProcessor implements InitializingBean {
      */
     void addDispositionToRequest(request, String disposition, String reason) {
         if (haveAlreadyDoneDispositionResources(request, disposition)) {
-            throw new IllegalArgumentException("""Cannot disposition [$disposition] to this request (required for [$reason]) - 
+            throw new IllegalArgumentException("""Cannot disposition [$disposition] to this request (required for [$reason]) -
 that disposition has already been rendered. Check that your r:layoutResources tag comes after all
 Resource tags that add content to that disposition.""")
         }
-        def dispositions = request[REQ_ATTR_DISPOSITIONS_REMAINING] 
-        if (dispositions != null) {
-            dispositions << disposition
-        } else {
-            request[REQ_ATTR_DISPOSITIONS_REMAINING] = [disposition] as Set
+        Set dispositions = request[REQ_ATTR_DISPOSITIONS_REMAINING]
+        if (dispositions == null) {
+            dispositions = []
+            request[REQ_ATTR_DISPOSITIONS_REMAINING] = dispositions
         }
+        dispositions << disposition
     }
-    
+
     void addModuleDispositionsToRequest(request, String moduleName) {
         if (log.debugEnabled) {
             log.debug "Adding module dispositions for module [${moduleName}]"
-        } 
+        }
         def module = modulesByName[moduleName]
-        if (module) {   
+        if (module) {
             if (log.debugEnabled) {
                 log.debug "Adding module's dispositions to request: ${module.requiredDispositions}"
-            } 
+            }
             for (d in module.requiredDispositions) {
                 addDispositionToRequest(request, d, moduleName)
             }
         }
     }
- 
+
     /**
      * Add a disposition to the current request's set of them
      */
     void removeDispositionFromRequest(request, String disposition) {
-        def dispositions = request[REQ_ATTR_DISPOSITIONS_REMAINING] 
+        def dispositions = request[REQ_ATTR_DISPOSITIONS_REMAINING]
         if (dispositions != null) {
             dispositions.remove(disposition)
         }
     }
-    
+
     void doneDispositionResources(request, String disposition) {
         removeDispositionFromRequest(request, disposition)
         def s = request[REQ_ATTR_DISPOSITIONS_DONE]
@@ -1219,10 +1195,9 @@ Resource tags that add content to that disposition.""")
         }
         s << disposition
     }
-    
+
     boolean haveAlreadyDoneDispositionResources(request,String disposition) {
         def s = request[REQ_ATTR_DISPOSITIONS_DONE]
         s == null ? false : s.contains(disposition)
     }
-    
 }

@@ -1,12 +1,12 @@
 package org.grails.plugin.resources.artefacts;
 
-import org.codehaus.groovy.grails.commons.*;
+import org.codehaus.groovy.grails.commons.AbstractGrailsClass;
 
 /**
  * @author Luke Daley (ld@ldaley.com)
  */
 public class DefaultResourcesClass extends AbstractGrailsClass implements ResourcesClass {
-    public DefaultResourcesClass(Class clazz) {
+    public DefaultResourcesClass(Class<?> clazz) {
         super(clazz, ResourcesArtefactHandler.SUFFIX);
     }
 }

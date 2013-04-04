@@ -1,7 +1,8 @@
 package org.grails.plugin.resource.util
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import grails.util.Environment
+
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 /**
  * This is a horrible hack to replicate what we need from g.resource() for pre-Grails 1.4 apps
@@ -10,13 +11,12 @@ import grails.util.Environment
  * NOTE this is a lame implementation that NEVER adds servletContextPath!
  */
 class HalfBakedLegacyLinkGenerator {
-    
+
     def pluginManager
-    
+
     String resource(Map args) {
         getResourceUrl(args)
     }
-    
 
     // ********************* EVIL - I HATE INABILITY TO REUSE! ***********************
     /**
@@ -54,8 +54,7 @@ class HalfBakedLegacyLinkGenerator {
                 } else {
                     throw new IllegalArgumentException("Attribute absolute='true' specified but no grails.serverURL set in Config")
                 }
-            }
-            else {
+            } else {
                 // @todo work out how to get servlet context path
                 // For servlets SDK 2.5 you can servletContext.getContextPath()
                 s << ''
@@ -65,19 +64,18 @@ class HalfBakedLegacyLinkGenerator {
         if (args.contextPath) {
             s << args.contextPath
         }
-        
+
         def dir = args['dir']
         if (args.plugin) {
             s << pluginManager.getPluginPath(args.plugin) ?: ''
         }
         if (dir) {
-            s << (dir.startsWith("/") ?  dir : "/${dir}")
+            s << (dir.startsWith("/") ? dir : "/${dir}")
         }
         def file = args['file']
         if (file) {
-            s << (file.startsWith("/") || dir?.endsWith('/') ?  file : "/${file}")
-        }    
+            s << (file.startsWith("/") || dir?.endsWith('/') ? file : "/${file}")
+        }
         return s.toString()
     }
-    
 }

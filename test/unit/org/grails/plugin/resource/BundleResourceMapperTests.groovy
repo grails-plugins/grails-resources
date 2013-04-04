@@ -1,10 +1,10 @@
 package org.grails.plugin.resource
 
-import grails.test.GrailsUnitTestCase;
+import grails.test.GrailsUnitTestCase
 
-public class BundleResourceMapperTests extends GrailsUnitTestCase {
+class BundleResourceMapperTests extends GrailsUnitTestCase {
 
-    BundleResourceMapper mapper = new BundleResourceMapper()
+    private BundleResourceMapper mapper = new BundleResourceMapper()
 
     void testRecognisedArtifactsAreBundledIfRequested() {
 
@@ -17,21 +17,17 @@ public class BundleResourceMapperTests extends GrailsUnitTestCase {
         ]
 
         List resultingBundle
-        Map grailsResourceProcessor = [
-                findSyntheticResourceById: { String bundleId -> return resultingBundle },
-        ]
 
-        mapper.grailsResourceProcessor = grailsResourceProcessor
+        ResourceProcessor.metaClass.findSyntheticResourceById = { String bundleId -> resultingBundle }
+        mapper.grailsResourceProcessor = new ResourceProcessor()
 
         expectedBundling.each { String resourceType, Boolean shouldBundle ->
             resultingBundle = [[existing:'bundle']]
-            Map resource = [identifier:UUID.randomUUID(), contentType: resourceType, bundle:'myBundle', sourceUrlExtension:'js']
+				Map resource = [identifier:UUID.randomUUID(), contentType: resourceType, bundle:'myBundle', sourceUrlExtension:'js']
 
-            mapper.map(resource, null)
+            mapper.map resource, new ConfigObject()
 
             assert (resultingBundle[1]?.identifier == resource.identifier) == shouldBundle
         }
-
     }
-
 }
