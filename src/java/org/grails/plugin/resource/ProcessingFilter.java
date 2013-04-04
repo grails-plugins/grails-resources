@@ -2,38 +2,26 @@ package org.grails.plugin.resource;
 
 import java.io.IOException;
 
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * Handles all static resource requests and delegates to the service to return them.
  *
  * @author Marc Palmer (marc@grailsrocks.com)
  */
-public class ProcessingFilter implements Filter {
+public class ProcessingFilter extends OncePerRequestFilter {
 
     private ResourceProcessor grailsResourceProcessor;
     private boolean adhoc;
 
-    public void init(FilterConfig config) throws ServletException {
-        adhoc = config.getInitParameter("adhoc").equals("true");
-
-        WebApplicationContext applicationContext = WebApplicationContextUtils.getWebApplicationContext(config.getServletContext());
-        grailsResourceProcessor = (ResourceProcessor) applicationContext.getBean("grailsResourceProcessor");
-    }
-
-    public void destroy() {
-    }
-
-    public void doFilter(ServletRequest request, ServletResponse response,
-        FilterChain chain) throws IOException, ServletException {
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
 
         boolean debugging = grailsResourceProcessor.isDebugMode(request);
         if (debugging) {
@@ -51,5 +39,13 @@ public class ProcessingFilter implements Filter {
         if (!response.isCommitted()) {
             chain.doFilter(request, response);
         }
+    }
+
+    public void setGrailsResourceProcessor(ResourceProcessor grailsResourceProcessor) {
+        this.grailsResourceProcessor = grailsResourceProcessor;
+    }
+
+    public void setAdhoc(boolean adhoc) {
+        this.adhoc = adhoc;
     }
 }

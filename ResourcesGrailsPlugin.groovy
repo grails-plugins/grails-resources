@@ -4,10 +4,13 @@ import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
+import org.grails.plugin.resource.DevModeSanityFilter
+import org.grails.plugin.resource.ProcessingFilter
 import org.grails.plugin.resource.ResourceProcessor
 import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
 import org.springframework.core.io.FileSystemResource
 import org.springframework.util.AntPathMatcher
+import org.springframework.web.filter.DelegatingFilterProxy
 
 /**
  * @author Marc Palmer (marc@grailsrocks.com)
@@ -106,52 +109,31 @@ class ResourcesGrailsPlugin {
 
         // Legacy service name
         springConfig.addAlias "resourceService", "grailsResourceProcessor"
+
+        // register the backing Spring bean for each of the filters        
+        for (f in findFilters(application)) {
+            "$f.name"(f.filterClass) { bean ->
+                bean.autowire = 'byName'
+
+                f.params.each { k, v ->
+                    delegate."$k" = v
+                }
+            }
+        }        
     }
 
     def doWithWebDescriptor = { webXml ->
-        def adHocPatterns = getAdHocPatterns(application)
 
-        def declaredResFilter = [
-            name:'DeclaredResourcesPluginFilter',
-            filterClass:"org.grails.plugin.resource.ProcessingFilter",
-            urlPatterns:["/${getUriPrefix(application)}/*"]
-        ]
-
-        def adHocFilter = [
-            name:'AdHocResourcesPluginFilter',
-            filterClass:"org.grails.plugin.resource.ProcessingFilter",
-            params: [adhoc:true],
-            urlPatterns: adHocPatterns
-        ]
-
-        def filtersToAdd = [declaredResFilter]
-        if (adHocPatterns) {
-            filtersToAdd << adHocFilter
-        }
-
-        if ( Environment.current == Environment.DEVELOPMENT) {
-            filtersToAdd << [
-                name:'ResourcesDevModeFilter',
-                filterClass:"org.grails.plugin.resource.DevModeSanityFilter",
-                urlPatterns:['/*'],
-                dispatchers:['REQUEST']
-            ]
-        }
+        def filtersToAdd = findFilters(application)
 
         log.info("Adding servlet filters")
         def filters = webXml.filter[0]
         filters + {
             filtersToAdd.each { f ->
-                log.info "Adding filter: $f.name with class $f.filterClass and init-params: $f.params"
+                log.info "Adding filter: $f.name with class $f.filterClass.name and init-params: $f.params"
                 'filter' {
                     'filter-name'(f.name)
-                    'filter-class'(f.filterClass)
-                    f.params?.each { k, v ->
-                        'init-param' {
-                            'param-name'(k)
-                            'param-value'(v.toString())
-                        }
-                    }
+                    'filter-class'(DelegatingFilterProxy.name)
                 }
             }
         }
@@ -238,6 +220,39 @@ class ResourcesGrailsPlugin {
         }
 
         true
+    }
+
+    private List findFilters(application) {
+        def adHocPatterns = getAdHocPatterns(application)
+
+        def declaredResFilter = [
+            name:'DeclaredResourcesPluginFilter',
+            filterClass: ProcessingFilter,
+            urlPatterns:["/${getUriPrefix(application)}/*"]
+        ]
+
+        def filtersToAdd = [declaredResFilter]
+
+        if (adHocPatterns) {
+            def adHocFilter = [
+                name:'AdHocResourcesPluginFilter',
+                filterClass: ProcessingFilter,
+                params: [adhoc:true],
+                urlPatterns: adHocPatterns
+            ]
+            filtersToAdd << adHocFilter
+        }
+
+        if (Environment.isDevelopmentMode()) {
+            filtersToAdd << [
+                name:'ResourcesDevModeFilter',
+                filterClass: DevModeSanityFilter,
+                urlPatterns:['/*'],
+                dispatchers:['REQUEST']
+            ]
+        }
+
+        filtersToAdd
     }
 
     def onConfigChange = { event ->

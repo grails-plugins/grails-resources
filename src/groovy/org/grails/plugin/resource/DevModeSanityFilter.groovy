@@ -1,25 +1,24 @@
 package org.grails.plugin.resource
 
-import javax.servlet.Filter
 import javax.servlet.FilterChain
 import javax.servlet.FilterConfig
 import javax.servlet.ServletException
-import javax.servlet.ServletRequest
-import javax.servlet.ServletResponse
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
-import org.springframework.web.context.support.WebApplicationContextUtils
+import org.springframework.web.filter.OncePerRequestFilter
 
 /**
  * This just traps any obvious mistakes the user has made and warns them in dev mode
  *
  * @author Marc Palmer (marc@grailsrocks.com)
  */
-class DevModeSanityFilter implements Filter {
+class DevModeSanityFilter extends OncePerRequestFilter {
 
     static final String RELOADING_DOC = """
 <html>
 <head>
-<meta http-equiv=\"refresh\" content="1"></meta>
+<meta http-equiv="refresh" content="1"></meta>
 <style type="text/css" media="screen">
     body {font-size:75%;color:#222;background:#fff;font-family:"Helvetica Neue", Arial, Helvetica, sans-serif; text-align: center;margin-top:200px}
     h1 {font-weight:normal;color:#111;}
@@ -32,14 +31,7 @@ class DevModeSanityFilter implements Filter {
 
     ResourceProcessor grailsResourceProcessor
 
-    void init(FilterConfig config) throws ServletException {
-        def applicationContext = WebApplicationContextUtils.getWebApplicationContext(config.servletContext)
-        grailsResourceProcessor = applicationContext.grailsResourceProcessor
-    }
-
-    void destroy() {}
-
-    void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+	 protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException ,IOException {
 
         if (grailsResourceProcessor.reloading) {
             response.contentType = "text/html"
