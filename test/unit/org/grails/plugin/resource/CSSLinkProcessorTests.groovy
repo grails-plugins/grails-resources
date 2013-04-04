@@ -1,19 +1,14 @@
 package org.grails.plugin.resource
-import grails.test.GrailsUnitTestCase
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 
-class CSSLinkProcessorTests extends GrailsUnitTestCase {
-    @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder()
-    File temporarySubfolder
-    def mockResSvc
-    
-    void setUp() {
+class CSSLinkProcessorTests extends AbstractResourcePluginTests {
+
+    private ResourceProcessor mockResSvc
+
+    protected void setUp() {
         super.setUp()
-        temporarySubfolder = temporaryFolder.newFolder('test-tmp')
-        mockResSvc = [
-            config : [ rewrite: [css: true] ]
-        ]
+
+        ResourceProcessor.metaClass.getConfig = { -> [rewrite: [css: true]] as ConfigObject }
+        mockResSvc = new ResourceProcessor()
     }
 
     protected ResourceMeta makeRes(String reluri, String contents) {
@@ -28,7 +23,7 @@ class CSSLinkProcessorTests extends GrailsUnitTestCase {
         r.processedFile << new ByteArrayInputStream(contents.bytes)
         return r
     }
-    
+
     /**
      * This simulates a test where the image resources are moved to a new flat dir
      * but the CSS is *not* moved, to force recalculation of paths
@@ -79,10 +74,10 @@ class CSSLinkProcessorTests extends GrailsUnitTestCase {
             'data:font/opentype;base64,ABCDEF123456789ABCDEF123456789',
             '//mydomain.com/protocol-relative-url'
         ]
-        def cursor = 0
-        
-        def processor = new CSSLinkProcessor()
-        processor.process(res, mockResSvc) { prefix, original, suffix ->
+
+        int cursor = 0
+
+        new CSSLinkProcessor().process(res, mockResSvc) { prefix, original, suffix ->
             assertEquals expectedLinks[cursor++], original
         }
     }

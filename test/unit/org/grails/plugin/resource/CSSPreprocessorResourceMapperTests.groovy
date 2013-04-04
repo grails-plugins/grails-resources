@@ -1,27 +1,21 @@
 package org.grails.plugin.resource
 
-import grails.test.GrailsUnitTestCase
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
+class CSSPreprocessorResourceMapperTests extends AbstractResourcePluginTests {
 
-class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
-    @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder()
-    File temporarySubfolder
-
-    void setUp() {
+    protected void setUp() {
         super.setUp()
-        temporarySubfolder = temporaryFolder.newFolder('test-tmp')
-        mockLogging(org.grails.plugin.resource.CSSPreprocessorResourceMapper)
+        mockLogging(CSSPreprocessorResourceMapper)
     }
+
     /**
      * This simulates a test where the image resources are moved to a new flat dir
      * but the CSS is *not* moved, to force recalculation of paths
      */
     void testCSSPreprocessing() {
 
-        def svc = [
-            config : [ rewrite: [css: true] ]
-        ]
+        ResourceProcessor.metaClass.getConfig = { -> [rewrite: [css: true]] as ConfigObject }
+        def svc = new ResourceProcessor()
+
         def r = new ResourceMeta(sourceUrl:'/css/main.css')
         r.workDir = temporarySubfolder
         r.actualUrl = r.sourceUrl
@@ -38,11 +32,8 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
 .bg5 { background: url(http://google.com/images/bg5.png) }
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
-        
-        new org.grails.plugin.resource.CSSPreprocessorResourceMapper().with {
-            grailsResourceProcessor = svc
-            map(r, new ConfigObject())
-        }
+
+        new CSSPreprocessorResourceMapper(grailsResourceProcessor: svc).map r, new ConfigObject()
 
         def outcome = r.processedFile.text
         def expected = """
@@ -52,7 +43,7 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
 .bg4 { background: url(resource:/css/bg4.png) }
 .bg5 { background: url(http://google.com/images/bg5.png) }
 """
-    
+
         assertEquals expected, outcome
     }
 
@@ -61,12 +52,11 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
      * as they are not valid URLs
      */
     void testCSSPreprocessingWithInvalidURI() {
-        def svc = [
-            getResourceMetaForURI : {  uri, adHoc, declRes, postProc = null ->
-                new ResourceMeta(actualUrl: uri, processedFile: new File(uri+'.gz'))
-            },
-            config : [ rewrite: [css: true] ]
-        ]
+        ResourceProcessor.metaClass.getConfig = { -> [rewrite: [css: true]] as ConfigObject }
+        ResourceProcessor.metaClass.getResourceMetaForURI = { String uri, Boolean adHoc, String declRes, Closure postProc ->
+            new ResourceMeta(actualUrl: uri, processedFile: new File(uri + '.gz'))
+        }
+        def svc = new ResourceProcessor()
 
         def r = new ResourceMeta(sourceUrl:'/css/main.css')
         r.workDir = temporarySubfolder
@@ -82,10 +72,7 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
 
-        new org.grails.plugin.resource.CSSPreprocessorResourceMapper().with {
-            grailsResourceProcessor = svc
-            map(r, new ConfigObject())
-        }
+        new CSSPreprocessorResourceMapper(grailsResourceProcessor: svc).map r, new ConfigObject()
 
         def outcome = r.processedFile.text
         def expected = """
@@ -95,18 +82,17 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
 
         assertEquals expected, outcome
     }
-    
+
     /**
      * This simulates CSS that uses some MS IE css behaviour hacks that can cause problems
      * as they are not valid URLs
      */
     void testCSSPreprocessingDoesNothingToDataURLs() {
-        def svc = [
-            getResourceMetaForURI : {  uri, adHoc, declRes, postProc = null ->
-                new ResourceMeta(actualUrl: uri, processedFile: new File(uri+'.gz'))
-            },
-            config : [ rewrite: [css: true] ]
-        ]
+        ResourceProcessor.metaClass.getConfig = { -> [rewrite: [css: true]] as ConfigObject }
+        ResourceProcessor.metaClass.getResourceMetaForURI = { String uri, Boolean adHoc, String declRes, Closure postProc ->
+            new ResourceMeta(actualUrl: uri, processedFile: new File(uri + '.gz'))
+        }
+        def svc = new ResourceProcessor()
 
         def r = new ResourceMeta(sourceUrl:'/css/main.css')
         r.workDir = temporarySubfolder
@@ -124,10 +110,7 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
 """
         r.processedFile << new ByteArrayInputStream(css.bytes)
 
-        new org.grails.plugin.resource.CSSPreprocessorResourceMapper().with {
-            grailsResourceProcessor = svc
-            map(r, new ConfigObject())
-        }
+        new CSSPreprocessorResourceMapper(grailsResourceProcessor: svc).map r, new ConfigObject()
 
         def outcome = r.processedFile.text
         def expected = """

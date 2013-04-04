@@ -1,6 +1,6 @@
 package org.grails.plugin.resource
 
-import grails.test.*
+import grails.test.GrailsUnitTestCase
 
 class URLUtilsTests extends GrailsUnitTestCase {
     void testRelativeCSSUris() {

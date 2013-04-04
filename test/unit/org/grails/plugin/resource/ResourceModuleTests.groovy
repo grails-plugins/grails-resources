@@ -1,33 +1,30 @@
 package org.grails.plugin.resource
 
-import grails.test.*
+import grails.test.GrailsUnitTestCase
 
-import org.grails.plugin.resource.module.*
+import org.springframework.mock.web.MockServletContext
 
 class ResourceModuleTests extends GrailsUnitTestCase {
-    def svc
-    
+
+    private ResourceProcessor svc
+
     protected void setUp() {
         super.setUp()
-        
-        svc = new Expando()
-        svc.getDefaultSettingsForURI = { uri, type ->
-            [:]
-        }
+
+        ResourceProcessor.metaClass.getDefaultSettingsForURI = { String uri, String type -> [:] }
+
+        svc = new ResourceProcessor(grailsApplication: [config: [:] as ConfigObject,
+                                                         mainContext: [servletContext: new MockServletContext()]])
     }
 
-    protected void tearDown() {
-        super.tearDown()
-    }
-    
     void testDefaultBundleFalse() {
         def resources = [
             [url:'simile/simile.css'],
             [url:'simile/simile.js']
         ]
-        
+
         def m = new ResourceModule('testModule', resources, false, svc)
-        
+
         assertEquals 2, m.resources.size()
         assertTrue m.resources.every { it.bundle == null }
     }
@@ -37,11 +34,11 @@ class ResourceModuleTests extends GrailsUnitTestCase {
             [url:'simile/simile.css', disposition:'head'],
             [url:'simile/simile.js', disposition:'head']
         ]
-        
+
         def m = new ResourceModule('testModule', resources, null, svc)
-        
+
         assertEquals 2, m.resources.size()
-        m.resources.each { r -> 
+        m.resources.each { r ->
             assertEquals 'bundle_testModule_head', r.bundle
         }
     }
@@ -51,11 +48,11 @@ class ResourceModuleTests extends GrailsUnitTestCase {
             [url:'simile/simile.css', disposition:'defer'],
             [url:'simile/simile.js', disposition:'defer']
         ]
-        
+
         def m = new ResourceModule('testModule', resources, "frank-and-beans", svc)
 
         assertEquals 2, m.resources.size()
-        m.resources.each { r -> 
+        m.resources.each { r ->
             assertEquals 'frank-and-beans_defer', r.bundle
         }
     }
@@ -64,9 +61,9 @@ class ResourceModuleTests extends GrailsUnitTestCase {
         def resources = [
             [url:'simile/simile.js', disposition:'head', exclude:'minify']
         ]
-        
+
         def m = new ResourceModule('testModule', resources, null, svc)
-        
+
         assertEquals 1, m.resources.size()
         assertTrue m.resources[0].excludedMappers.contains('minify')
     }
@@ -75,9 +72,9 @@ class ResourceModuleTests extends GrailsUnitTestCase {
         def resources = [
             [url:'simile/simile.js', disposition:'head', exclude:['minify']]
         ]
-        
+
         def m = new ResourceModule('testModule', resources, null, svc)
-        
+
         assertEquals 1, m.resources.size()
         assertTrue m.resources[0].excludedMappers.contains('minify')
     }
@@ -86,11 +83,10 @@ class ResourceModuleTests extends GrailsUnitTestCase {
         def resources = [
             'js/test.js'
         ]
-        
+
         def m = new ResourceModule('testModule', resources, null, svc)
-        
+
         assertEquals 1, m.resources.size()
         assertEquals "/js/test.js", m.resources[0].sourceUrl
     }
-
 }

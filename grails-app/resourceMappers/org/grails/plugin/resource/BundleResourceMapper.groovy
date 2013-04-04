@@ -6,25 +6,25 @@ import org.grails.plugin.resource.mapper.MapperPhase
  * This mapper creates synthetic AggregatedResourceMeta instances for any bundle
  * names found in the resource declarations, and gathers up info about those resources
  * so that when the bundle itself is requested, the aggregated file is created and returned.
- * 
+ *
  * This sets any ResourceMeta to which this mapper applies, to be "delegating" to the new aggregated resource
  * so when those resources are rendered/requested, the bundle URI is written out.
  *
  * @author Marc Palmer (marc@grailsrocks.com)
  */
 class BundleResourceMapper {
-    
+
     def phase = MapperPhase.AGGREGATION
-    
+
     def grailsResourceProcessor
-    
+
     static MIMETYPE_TO_RESOURCE_META_CLASS = [
         'text/css': CSSBundleResourceMeta,
         'text/javascript': JavaScriptBundleResourceMeta,
         'application/javascript': JavaScriptBundleResourceMeta,
         'application/x-javascript': JavaScriptBundleResourceMeta
     ]
-    
+
     /**
      * Find resources that belong in bundles, and create the bundles, and make the resource delegate to the bundle.
      * Creates a new aggregated resource for the bundle and shoves all the resourceMetas into it.
@@ -37,7 +37,7 @@ class BundleResourceMapper {
         if (bundleId) {
             def resType = MIMETYPE_TO_RESOURCE_META_CLASS[resource.contentType]
             if (!resType) {
-                log.warn "Cannot create a bundle from resource [${resource.sourceUrl}], "+
+                log.warn "Cannot create a bundle from resource [${resource.sourceUrl}], " +
                     "the content type [${resource.contentType}] is not supported. Set the resource to exclude bundle mapper."
                 return
             }

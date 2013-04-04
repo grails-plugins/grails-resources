@@ -16,13 +16,13 @@ import org.grails.plugin.resource.mapper.MapperPhase
 class CSSRewriterResourceMapper {
 
 //    def priority = 1000
-    
+
     def phase = MapperPhase.LINKREALISATION
-    
+
     def grailsResourceProcessor
-    
+
     static defaultIncludes = ['**/*.css']
-    
+
     /**
      * Find all url() and fix up the url if it is not absolute
      * NOTE: This needs to run after any plugins that move resources around, but before any that obliterate
@@ -34,10 +34,10 @@ class CSSRewriterResourceMapper {
 
         def processor = new CSSLinkProcessor()
         processor.process(resource, grailsResourceProcessor) { prefix, originalUrl, suffix ->
-            
+
             if (originalUrl.startsWith('resource:')) {
                 def uri = originalUrl - 'resource:'
-                
+
                 if (log.debugEnabled) {
                     log.debug "Calculated URI of CSS resource [$originalUrl] as [$uri]"
                 }
@@ -53,14 +53,12 @@ class CSSRewriterResourceMapper {
                     if (log.debugEnabled) {
                         log.debug "Calculating URL of ${linkedToResource?.dump()} relative to ${resource.dump()}"
                     }
-
                     def fixedUrl = linkedToResource.relativeToWithQueryParams(resource)
                     def replacement = "${prefix}${fixedUrl}${suffix}"
 
                     if (log.debugEnabled) {
                         log.debug "Rewriting CSS URL '${originalUrl}' to '$replacement'"
                     }
-
                     return replacement
                 } else {
                     log.warn "Cannot resolve CSS resource, leaving link as is: ${originalUrl}"

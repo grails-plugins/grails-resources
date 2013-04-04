@@ -1,41 +1,33 @@
 package org.grails.plugin.resource
 
-import grails.test.GrailsUnitTestCase
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
+import org.springframework.mock.web.DelegatingServletOutputStream
+import javax.servlet.ServletContext
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-class ResourceProcessorTests extends GrailsUnitTestCase {
-    @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder()
-    File temporarySubfolder
-    def svc
-    
+class ResourceProcessorTests extends AbstractResourcePluginTests {
+    private ResourceProcessor svc = new ResourceProcessor()
+
     protected void setUp() {
         super.setUp()
         mockLogging(ResourceProcessor, true)
-        temporarySubfolder = temporaryFolder.newFolder('test-tmp')
 
-        svc = new ResourceProcessor()
-        
         svc.grailsApplication = [
             config : [grails:[resources:[work:[dir:temporarySubfolder.getAbsolutePath()]]]],
             mainContext : [servletContext:[
-                getResource: { uri -> 
+                getResource: { uri ->
                     assertTrue uri.indexOf('#') < 0
-                    new URL('file:./test/test-files'+uri) 
+                    new URL('file:./test/test-files' + uri)
                 },
                 getMimeType: { uri -> "test/nothing" }
-            ]]
+            ] as ServletContext]
         ]
-    }
-
-    protected void tearDown() {
-        super.tearDown()
     }
 
     void testPrepareURIWithHashFragment() {
         def r = new ResourceMeta()
         r.sourceUrl = '/somehack.xml#whatever'
-        
+
         def meta = svc.prepareResource(r, true)
         assertNotNull meta
         assertEquals '/somehack.xml', meta.actualUrl
@@ -45,7 +37,7 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
     void testPrepareAbsoluteURLWithQueryParams() {
         def r = new ResourceMeta()
         r.sourceUrl = 'http://crackhouse.ck/css/somehack.css?x=y#whatever'
-        
+
         def meta = svc.prepareResource(r, true)
         assertNotNull meta
         assertEquals 'http://crackhouse.ck/css/somehack.css', meta.actualUrl
@@ -70,7 +62,7 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
     void testBuildResourceURIForGrails1_4() {
         def r = new ResourceMeta()
         r.sourceUrl = '/somehack.xml#whatever'
-        
+
         def meta = svc.prepareResource(r, true)
         assertNotNull meta
         assertEquals '/somehack.xml', meta.actualUrl
@@ -80,7 +72,7 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
     void testBuildResourceURIForGrails1_3AndLower() {
         def r = new ResourceMeta()
         r.sourceUrl = '/somehack.xml#whatever'
-        
+
         def meta = svc.prepareResource(r, true)
         assertNotNull meta
         assertEquals '/somehack.xml', meta.actualUrl
@@ -88,7 +80,7 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
     }
 
     void testProcessLegacyResourceIncludesExcludes() {
-        
+
         svc.adHocIncludes = ['/**/*.css', '/**/*.js', '/images/**']
         svc.adHocExcludes = ['/**/*.exe', '/**/*.gz', '/unsafe/**/*.css']
 
@@ -101,25 +93,26 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
             [requestURI: '/downloads/archive.tar.gz', expected:false],
             [requestURI: '/unsafe/nested/problematic.css', expected:false]
         ]
-        
+
         testData.each { d ->
-            def request = [contextPath:'resources', requestURI: 'resources'+d.requestURI]
-            
+            def request = [getContextPath: { -> 'resources' }, getRequestURI: { -> 'resources' + d.requestURI }] as HttpServletRequest
+
             // We know if it tried to handle it if it 404s, we can't be bothered to creat resourcemeta for all those
             def didHandle = false
             def response = [
-                sendError: { code, msg = null -> didHandle = (code == 404) },
-                sendRedirect: { uri -> }
-            ]
-            
+                sendError: { int code, String msg = null -> didHandle = (code == 404) },
+                sendRedirect: { String uri -> },
+                setHeader: { String name, String val -> }
+            ] as HttpServletResponse
+
             svc.processLegacyResource(request, response)
-            
+
             assertEquals "Failed on ${d.requestURI}", d.expected, didHandle
         }
     }
 
     void testProcessLegactResourceIncludesExcludesSpecificFile() {
-        
+
         svc.adHocIncludes = ['/**/*.js']
         svc.adHocExcludes = ['/**/js/something.js']
 
@@ -130,23 +123,24 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
             [requestURI: '/xxx/js/something.js', expected:false],
             [requestURI: 'xxx/js/something.js', expected:false]
         ]
-        
+
         testData.each { d ->
-            def request = [contextPath:'resources', requestURI: 'resources'+d.requestURI]
-            
+            def request = [getContextPath: { -> 'resources' }, getRequestURI: { -> 'resources' + d.requestURI }] as HttpServletRequest
+
             // We know if it tried to handle it if it 404s, we can't be bothered to create resourcemeta for all those
-            def didHandle = false
+            boolean didHandle = false
             def response = [
-                sendError: { code, msg = null -> didHandle = true },
-                sendRedirect: { uri -> }
-            ]
-            
+                sendError: { int code, String msg = null -> didHandle = true },
+                sendRedirect: { String uri -> },
+                setHeader: { String name, String val -> }
+            ] as HttpServletResponse
+
             svc.processLegacyResource(request, response)
-            
+
             assertEquals "Failed on ${d.requestURI}", d.expected, didHandle
         }
     }
-    
+
     void testAddingDispositionToRequest() {
         def request = [:]
         assertTrue svc.getRequestDispositionsRemaining(request).empty
@@ -196,9 +190,9 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
         }
 
         println "Dependency order: ${res}"
-        
+
         assertEquals res.size()-2, svc.modulesByName.keySet().size() // take off the synth + adhoc
-        
+
         assertTrue pos('a') > pos('b')
 
         assertTrue pos('e') > pos('f')
@@ -213,37 +207,37 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
 
         assertTrue pos('f') > pos('d')
     }
-    
+
     void testWillNot404OnAdhocResourceWhenAccessedDirectlyFromStaticUrl() {
-		svc.adHocIncludes = ['/**/*.xml']
-		svc.staticUrlPrefix = '/static'
-        def request = [contextPath:'resources', requestURI: 'resources/static/somehack.xml']
-        
-        def out = new ByteArrayOutputStream();
-        def redirectUri = null
-        
+        svc.adHocIncludes = ['/**/*.xml']
+        svc.staticUrlPrefix = '/static'
+        def request = [getContextPath: { -> 'resources' }, getRequestURI: { -> 'resources/static/somehack.xml' }] as HttpServletRequest
+
+        DelegatingServletOutputStream a
+        def baos = new ByteArrayOutputStream()
+        def out = new DelegatingServletOutputStream(baos)
+
+        String redirectUri
+
         def response = [
-            sendError: { code, msg = null -> },
-            sendRedirect: { uri -> redirectUri = uri },
-            setContentLength: { l -> },
-            setDateHeader: { d, l -> },
-            outputStream: out
-	    ]
-	    
-    
-    	svc.processModernResource(request, response);
-    	
-    	// the response was written
-    	assertTrue(out.size() > 0)
-    	assertNull(redirectUri);
-    	
-    	// the legacy resource should now redirect
-   	    svc.processLegacyResource(
-   	      	[contextPath:'resources', 
-   	    	requestURI: 'resources/somehack.xml'], 
-   	    	response);
-   	    	
-    	assertNotNull(redirectUri);   	    	
+            sendError: { int code, String msg = null -> },
+            sendRedirect: { String uri -> redirectUri = uri },
+            setContentLength: { int l -> },
+            setDateHeader: { String d, long l -> },
+            getOutputStream: { -> out },
+            setHeader: { String name, String val -> },
+            setContentType: { String type -> }
+        ] as HttpServletResponse
+
+        svc.processModernResource(request, response)
+
+        // the response was written
+        assertTrue(baos.size() > 0)
+        assertNull(redirectUri)
+
+        // the legacy resource should now redirect
+        svc.processLegacyResource([contextPath:'resources', requestURI: 'resources/somehack.xml'], response)
+
+        assertNotNull(redirectUri)
     }
 }
-

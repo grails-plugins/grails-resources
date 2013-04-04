@@ -1,31 +1,24 @@
 package org.grails.plugin.resource
 
-import grails.test.*
+import grails.test.GrailsUnitTestCase
 
-import org.grails.plugin.resource.module.*
+import org.grails.plugin.resource.module.ModulesBuilder
 
 class ResourceModulesBuilderTests extends GrailsUnitTestCase {
-    def svc
-    
+
+    private svc = new Expando()
+
     protected void setUp() {
         super.setUp()
-        
-        svc = new Expando()
-        svc.getDefaultSettingsForURI = { uri, type ->
-            [:]
-        }
+
+        svc.getDefaultSettingsForURI = { uri, type -> [:] }
     }
 
-    protected void tearDown() {
-        super.tearDown()
-    }
-    
     void testModuleOverrides() {
         def modules = []
         def bld = new ModulesBuilder(modules)
-        
-        bld.'jquery' {
-        }
+
+        bld.'jquery' {}
 
         bld.'horn-smutils' {
             dependsOn(['jquery'])
@@ -47,7 +40,7 @@ class ResourceModulesBuilderTests extends GrailsUnitTestCase {
                 dependsOn(['smutils', 'jquery'])
             }
         }
-        
+
         assert 4 == modules.size()
         assert 1 == bld._moduleOverrides.size()
         assert 'horn' == bld._moduleOverrides[0].name
@@ -58,11 +51,11 @@ class ResourceModulesBuilderTests extends GrailsUnitTestCase {
     void testModuleDependsOnSyntaxes() {
         def modules = []
         def bld = new ModulesBuilder(modules)
-        
+
         bld.'moduleA' {
             dependsOn(['jquery', 'jquery-ui'])
         }
-        
+
         bld.'moduleB' {
             dependsOn 'jquery, jquery-ui'
         }
@@ -87,13 +80,13 @@ class ResourceModulesBuilderTests extends GrailsUnitTestCase {
     void testDefaultBundleFalse() {
         def modules = []
         def bld = new ModulesBuilder(modules)
-        
+
         bld.testModule {
             defaultBundle false
             resource url:'simile/simile.css'
             resource url:'simile/simile.js'
         }
-        
+
         assertEquals 1, modules.size()
         assertEquals 'testModule', modules[0].name
         assertEquals false, modules[0].defaultBundle
@@ -102,12 +95,12 @@ class ResourceModulesBuilderTests extends GrailsUnitTestCase {
     void testDefaultBundling() {
         def modules = []
         def bld = new ModulesBuilder(modules)
-        
+
         bld.testModule {
             resource url:'simile/simile.css'
             resource url:'simile/simile.js'
         }
-        
+
         assertEquals 1, modules.size()
         assertEquals 'testModule', modules[0].name
         assertNull modules[0].defaultBundle
@@ -116,13 +109,13 @@ class ResourceModulesBuilderTests extends GrailsUnitTestCase {
     void testDefaultBundleWithName() {
         def modules = []
         def bld = new ModulesBuilder(modules)
-        
+
         bld.testModule {
             defaultBundle "frank-and-beans"
             resource url:'simile/simile.css'
             resource url:'simile/simile.js'
         }
-        
+
         assertEquals 1, modules.size()
         assertEquals 'testModule', modules[0].name
         assertEquals 'frank-and-beans', modules[0].defaultBundle

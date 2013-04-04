@@ -1,9 +1,5 @@
 package org.grails.plugin.resource
 
-import org.apache.commons.logging.LogFactory
-
-import org.apache.commons.io.FilenameUtils
-
 /**
  * Holder for info about a resource that is made up of other resources
  *
@@ -12,19 +8,13 @@ import org.apache.commons.io.FilenameUtils
  */
 class AggregatedResourceMeta extends ResourceMeta {
 
-    def log = LogFactory.getLog(this.class)
-
-    def resources = []
-    def inheritedModuleDependencies = new HashSet()
-    
-    void reset() {
-        super.reset()
-    }
+    List<ResourceMeta> resources = []
+    Set<ResourceModule> inheritedModuleDependencies = []
 
     boolean containsResource(ResourceMeta r) {
         resources.find { r.sourceUrl == it.sourceUrl }
     }
-    
+
     @Override
     boolean isDirty() {
         resources.any { it.dirty }
@@ -36,7 +26,7 @@ class AggregatedResourceMeta extends ResourceMeta {
         if (!containsResource(r)) {
             resources << r
             inheritedModuleDependencies << r.module
-        
+
             // Update our aggregated sourceUrl
             sourceUrl = "${sourceUrl}, ${r.sourceUrl}"
         }
@@ -50,8 +40,8 @@ class AggregatedResourceMeta extends ResourceMeta {
         processedFile.newWriter('UTF-8', true)
     }
 
-    protected initFile(grailsResourceProcessor) {
-        def commaPos = sourceUrl.indexOf(',') 
+    protected void initFile(grailsResourceProcessor) {
+        int commaPos = sourceUrl.indexOf(',')
         if (commaPos == -1) {
             commaPos = sourceUrl.size()
         }
@@ -60,48 +50,48 @@ class AggregatedResourceMeta extends ResourceMeta {
         processedFile = grailsResourceProcessor.makeFileForURI(actualUrl)
         processedFile.createNewFile()
 
-        this.contentType = grailsResourceProcessor.getMimeType(actualUrl)
+        contentType = grailsResourceProcessor.getMimeType(actualUrl)
     }
 
     @Override
     void beginPrepare(grailsResourceProcessor) {
         initFile(grailsResourceProcessor)
 
-        this.originalSize = resources.originalSize.sum()
-        
+        originalSize = resources.originalSize.sum()
+
         buildAggregateResource(grailsResourceProcessor)
     }
 
     void buildAggregateResource(grailsResourceProcessor) {
-        def moduleOrder = grailsResourceProcessor.modulesInDependencyOrder
+        List<String> moduleOrder = grailsResourceProcessor.modulesInDependencyOrder
 
-        def newestLastMod = 0
-        
+        long newestLastMod = 0
+
         def bundledContent = new StringBuilder()
-        
+
         // Add the resources to the file in the order determined by module dependencies!
-        moduleOrder.each { m ->
-            resources.each { r ->
+        for (String m in moduleOrder) {
+            for (ResourceMeta r in resources) {
                 if (r.module.name == m) {
                     // Append to the existing file
                     if (log.debugEnabled) {
-                        log.debug "Appending contents of ${r.processedFile} to ${processedFile}"
+                        log.debug "Appending contents of $r.processedFile to $processedFile"
                     }
                     bundledContent << r.processedFile.getText("UTF-8")
                     bundledContent << "\r\n"
-                    
+
                     if (r.originalLastMod > newestLastMod) {
                         newestLastMod = r.originalLastMod
                     }
                 }
             }
         }
-        
+
         def out = getWriter()
         out << bundledContent
         out << "\r\n"
         out.close()
-        
-        this.originalLastMod = newestLastMod
+
+        originalLastMod = newestLastMod
     }
 }

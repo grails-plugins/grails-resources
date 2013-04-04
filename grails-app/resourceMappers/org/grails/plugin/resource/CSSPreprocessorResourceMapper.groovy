@@ -5,7 +5,7 @@ import org.grails.plugin.resource.mapper.MapperPhase
 /**
  * This mapper is the first phase of CSS rewriting.
  *
- * It will find any relative URIs in the CSS and convert them to a "resource:<originalURI-made-absolute>" 
+ * It will find any relative URIs in the CSS and convert them to a "resource:<originalURI-made-absolute>"
  * so that later after mappers have been applied, the URIs can be fixed up and restored to URIs relative to the
  * new CSS output file's location. For example a bundle or "hashandcache" mapper may move the CSS file to a completely
  * different place, thus breaking all the relative links to images.
@@ -22,7 +22,7 @@ class CSSPreprocessorResourceMapper {
     static defaultIncludes = ['**/*.css']
 
     def grailsResourceProcessor
-    
+
     /**
      * Find all url() and fix up the url if it is not absolute
      * NOTE: This needs to run after any plugins that move resources around, but before any that obliterate
@@ -31,24 +31,24 @@ class CSSPreprocessorResourceMapper {
     def map(resource, config) {
         if (resource instanceof AggregatedResourceMeta) {
             if (log.debugEnabled) {
-                log.debug "CSS Preprocessor skipping ${resource} because it is aggregated (already processed each file in it)"
+                log.debug "CSS Preprocessor skipping $resource because it is aggregated (already processed each file in it)"
             }
             return null
         }
-        
+
         def processor = new CSSLinkProcessor()
-        
+
         if (log.debugEnabled) {
             log.debug "CSS Preprocessor munging ${resource}"
         }
 
         processor.process(resource, grailsResourceProcessor) { prefix, originalUrl, suffix ->
-            
+
             if (log.debugEnabled) {
                 log.debug "CSS Preprocessor munging url $originalUrl"
             }
-            
-            // We don't do absolutes or full URLs - perhaps we should do "/" at some point? If app 
+
+            // We don't do absolutes or full URLs - perhaps we should do "/" at some point? If app
             // is mapped to root context then some people might do this but its lame
             // Also skip already-processed resources (i.e. bundled CSS)
             if (!URLUtils.isRelativeURL(originalUrl)) {
@@ -81,10 +81,9 @@ class CSSPreprocessorResourceMapper {
                     log.debug "Calculated absoluted URI of CSS resource [$originalUrl] as [$uri]"
                 }
                 return "${prefix}${uri}${suffix}"
-            } else {
-                return "${prefix}${originalUrl}${suffix}"
             }
 
+            return "${prefix}${originalUrl}${suffix}"
         }
         return null
     }
