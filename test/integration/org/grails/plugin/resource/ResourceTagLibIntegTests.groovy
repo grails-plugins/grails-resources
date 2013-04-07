@@ -140,4 +140,32 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
 
         assertEquals 1, result.count("/static/_bundle-bundle_GPRESOURCES-210_module_A_duplicate_includes_check.js")
     }
+
+    def testStyleTagWithDefaultDisposition() {
+        String template = '''
+            <r:style>
+            /* stashed styles */
+            </r:style>
+
+            <r:layoutResources disposition="head"/>
+        '''
+
+        String result = applyTemplate(template)
+
+        assertTrue result ==~ /\s*<style type="text\/css">\s*\/\* stashed styles \*\/\s*<\/style>\s*/
+    }
+
+    def testStyleTagWithCustomDisposition() {
+        String template = '''
+            <r:style disposition="custom_disposition">
+            /* stashed styles */
+            </r:style>
+
+            <r:layoutResources disposition="custom_disposition"/>
+        '''
+
+        String result = applyTemplate(template)
+
+        assertTrue result ==~ /\s*<style type="text\/css">\s*\/\* stashed styles \*\/\s*<\/style>\s*/
+    }
 }
