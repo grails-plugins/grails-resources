@@ -25,8 +25,7 @@ class URLUtils {
      * the file containing the url is moved
      */
     static Boolean isRelativeURL(url) {
-        !url.startsWith('/') && 
-        !url.startsWith('data:') && 
+        !url.startsWith('data:') &&
         !url.startsWith('#') && 
         !(url.indexOf('://') >= 0)
     }
