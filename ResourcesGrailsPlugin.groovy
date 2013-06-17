@@ -41,8 +41,6 @@ class ResourcesGrailsPlugin {
         "file:./web-app/**/*.*" // Watch for resource changes, we need excludes here for WEB-INF+META-INF when grails impls this
     ]
 
-    def author = "Marc Palmer, Luke Daley"
-    def authorEmail = "marc@grailsrocks.com, ld@ldaley.com"
     def title = "Resources"
     def description = 'HTML resource management enhancements to replace g.resource etc.'
     def documentation = "http://grails-plugins.github.com/grails-resources"
@@ -51,7 +49,8 @@ class ResourcesGrailsPlugin {
     def organization = [ name: "Grails Community", url: "http://grails.org/" ]
     def developers = [
             [ name: "Marc Palmer", email: "marc@grailsrocks.com" ],
-            [ name: "Luke Daley", email: "ld@ldaley.com" ] 
+            [ name: "Luke Daley", email: "ld@ldaley.com" ],
+            [ name: "Peter N. Steinmetz", email: "ndoc3@steinmetz.org"]
     ]
     def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPRESOURCES" ]
     def scm = [ url: "https://github.com/grails-plugins/grails-resources" ]
