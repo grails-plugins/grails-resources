@@ -184,35 +184,20 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
     }
     
     void testWillNot404OnAdhocResourceWhenAccessedDirectlyFromStaticUrl() {
-		processor.adHocIncludes = ['/**/*.xml']
-		processor.staticUrlPrefix = '/static'
-        def request = [contextPath:'resources', requestURI: 'resources/static/somehack.xml']
+		processor.adHocIncludes = ["/**/*.xml"]
+		processor.staticUrlPrefix = "/static"
+
+        GrailsMockHttpServletRequest request = new GrailsMockHttpServletRequest()
+        request.contextPath = "resources"
+        request.requestURI = "resources/static/somehack.xml"
         
-        def out = new ByteArrayOutputStream();
-        def redirectUri = null
-        
-        def response = [
-            sendError: { code, msg = null -> },
-            sendRedirect: { uri -> redirectUri = uri },
-            setContentLength: { l -> },
-            setDateHeader: { d, l -> },
-            outputStream: out
-	    ]
-	    
-    
-    	processor.processModernResource(request, response);
-    	
-    	// the response was written
-    	assertTrue(out.size() > 0)
-    	assertNull(redirectUri);
-    	
-    	// the legacy resource should now redirect
-   	    processor.processLegacyResource(
-   	      	[contextPath:'resources', 
-   	    	requestURI: 'resources/somehack.xml'], 
-   	    	response);
-   	    	
-    	assertNotNull(redirectUri);   	    	
+        GrailsMockHttpServletResponse response = new GrailsMockHttpServletResponse()
+
+    	processor.processModernResource(request, response)
+
+        assert response.redirectedUrl == null
+        assert response.contentAsString.size() > 0
+        assert response.contentLength > 0
     }
 
     void testRedirectToActualUrlWithAbsoluteLinkUrlRedirectedToThatUrl() {
