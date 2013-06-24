@@ -24,17 +24,18 @@ grails.project.dependency.resolution = {
     }
     dependencies {
 //        build 'org.codehaus.gpars:gpars:0.12'
+        test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
     }
     plugins {        
         provided(":webxml:1.4.1") 
         build(":tomcat:$grailsVersion") {
             export = false
         }
-        build(":release:2.1.0") {
+        build(":release:2.2.1", ':rest-client-builder:1.0.3') {
             export = false
         }
-        test(":spock:0.6"){
-            export = false
+        test(":spock:0.7") {
+            exclude "spock-grails-support"
         }
     }
 }
