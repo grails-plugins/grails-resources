@@ -43,7 +43,7 @@ class BaseUrlResourceMapper {
 	private String getUrl(configItem, linkUrl){
 		def url;
 		if(configItem){
-			if(configItem instanceof java.util.List){
+			if(configItem instanceof java.util.List && configItem.size()>0){
 				int cdnNum = getHashedResourceNum(linkUrl, configItem.size());
 				url = configItem[cdnNum]
 			}
