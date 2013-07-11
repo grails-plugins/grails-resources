@@ -79,6 +79,49 @@ class BaseUrlResourceMapperSpec extends UnitSpec{
         exception.message.contains('All modules bundled together must have the same baseUrl override')
         exception.message.contains(resourceBundle.resources.first().bundle)
     }
+	
+	//GPRESOURCES-???
+	def "mapper uses rotating baseUrl but only when config.default configured as a list"() {
+		setup:
+		def resource = [ linkUrl : '/images.jpg' ]
+		def config = [ enabled: true, default: 'http://www.google.com/' ]
+
+		when:
+		mapper.map( resource, config )
+
+		then:
+		resource.linkOverride == 'http://www.google.com/images.jpg'
+	}
+	
+	def "mapper uses rotating baseUrl but only when config.default configured as a non-empty list"() {
+		setup:
+		def resource = [ linkUrl : '/images.jpg' ]
+		def config = [ enabled: true, default: [] ]
+
+		when:
+		mapper.map( resource, config )
+
+		then:
+		resource.linkOverride == null
+	}
+	
+	def "mapper uses rotating baseUrl when baseUrl configured as a list"() {
+		setup:
+		def resourceOne = [ linkUrl : '/images.jpg' ]
+		def resourceTwo = [ linkUrl : '/images.png' ]
+		def resourceThree = [ linkUrl : '/images.gif' ]
+		def config = [ enabled: true, default: ['http://cdn1.google.com/', 'http://cdn2.google.com/', 'http://cdn3.google.com/']]
+
+		when:
+		mapper.map( resourceOne, config )
+		mapper.map( resourceTwo, config )
+		mapper.map( resourceThree, config )
+		
+		then:
+		resourceOne.linkOverride == 'http://cdn3.google.com/images.jpg'
+		resourceTwo.linkOverride == 'http://cdn3.google.com/images.png'
+		resourceThree.linkOverride == 'http://cdn2.google.com/images.gif'
+	}
 
     private ResourceMeta bundledResource(String moduleName) {
         def module = [name: moduleName] as ResourceModule
