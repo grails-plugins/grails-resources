@@ -24,13 +24,13 @@ class BaseUrlResourceMapper {
 
             String moduleName = getModuleName(resource)
             if (moduleName && config.modules[moduleName]) {
-				url = config.modules[moduleName]
+				url = getUrl(config.modules[moduleName], resource.linkUrl)
 			}
 
 			if (!url) {
-				url = config.default
-			}
-
+				url = getUrl(config.default, resource.linkUrl)
+			}		
+			
             if (url) {
                 if (url.endsWith('/')) {
                     url = url[0..-2]
@@ -39,6 +39,27 @@ class BaseUrlResourceMapper {
             }
         }
     }
+	
+	private String getUrl(configItem, linkUrl){
+		def url;
+		if(configItem){
+			if(configItem instanceof java.util.List && configItem.size()>0){
+				int cdnNum = getHashedResourceNum(linkUrl, configItem.size());
+				url = configItem[cdnNum]
+			}
+			else{
+				url = configItem;
+			}
+		}
+		return url;
+	}
+	
+	private int getHashedResourceNum(String toHash, int maxNum){
+		if(toHash.contains('/')){
+			toHash = toHash.substring(toHash.lastIndexOf('/'));
+		}
+		return toHash.hashCode() % (maxNum+1);
+	}
 
     void verifySameBaseUrlForAllModulesInBundle(AggregatedResourceMeta bundle, Map config) {
         def moduleNames = bundle.resources.collect this.&getModuleName
