@@ -1,9 +1,7 @@
 package org.grails.plugin.resource
+import org.springframework.web.context.support.WebApplicationContextUtils
 
 import javax.servlet.*
-import org.springframework.web.context.support.WebApplicationContextUtils
-import grails.util.Environment
-
 /**
  * This just traps any obvious mistakes the user has made and warns them in dev mode
  * 
@@ -37,7 +35,17 @@ class DevModeSanityFilter implements Filter {
     void doFilter(ServletRequest request, ServletResponse response,
         FilterChain chain) throws IOException, ServletException {
 
+        boolean processReloading = false
+
         if (grailsResourceProcessor.reloading) {
+            if (grailsResourceProcessor.isDebugMode(request) && request.getAttribute('resources.adhoc')) {
+                processReloading = false //don't add reloading stub for adhoc resources in dev mode
+            } else {
+                processReloading = true
+            }
+        }
+
+        if (processReloading) {
             response.contentType = "text/html"
             response.writer << RELOADING_DOC
         } else {

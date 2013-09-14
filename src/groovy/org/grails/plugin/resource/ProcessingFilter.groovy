@@ -1,9 +1,7 @@
 package org.grails.plugin.resource
+import org.springframework.web.context.support.WebApplicationContextUtils
 
 import javax.servlet.*
-import org.springframework.web.context.support.WebApplicationContextUtils
-import grails.util.Environment
-
 /**
  * This is the servlet filter that handles all static resource requests and delegates to the service
  * to return them.
@@ -31,6 +29,7 @@ class ProcessingFilter implements Filter {
         def debugging = grailsResourceProcessor.isDebugMode(request)
         if (debugging) {
             request.setAttribute('resources.debug', debugging)
+            if (adhoc) request.setAttribute('resources.adhoc', true)
         }
         if (!debugging) {
             if (adhoc) {
