@@ -1,17 +1,11 @@
 import grails.util.Environment
-
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
-
-import org.springframework.beans.factory.config.MethodInvokingFactoryBean
-import org.springframework.core.io.FileSystemResource
-
 import org.grails.plugin.resource.util.HalfBakedLegacyLinkGenerator
+import org.springframework.core.io.FileSystemResource
+import org.springframework.util.AntPathMatcher
 
+import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.ScheduledFuture
-
-import org.springframework.util.AntPathMatcher
 
 /**
  * @author Marc Palmer (marc@grailsrocks.com)
@@ -22,7 +16,7 @@ class ResourcesGrailsPlugin {
     static DEFAULT_URI_PREFIX = 'static'
     static DEFAULT_ADHOC_PATTERNS = ["/images/*", "*.css", "*.js"].asImmutable()
 
-    def version = "1.2"
+    def version = "1.2.1-SNAPSHOT"
     def grailsVersion = "1.3 > *"
 
     def loadAfter = ['logging'] // retained to ensure correct loading under Grails < 2.0
@@ -47,8 +41,6 @@ class ResourcesGrailsPlugin {
         "file:./web-app/**/*.*" // Watch for resource changes, we need excludes here for WEB-INF+META-INF when grails impls this
     ]
 
-    def author = "Marc Palmer, Luke Daley"
-    def authorEmail = "marc@grailsrocks.com, ld@ldaley.com"
     def title = "Resources"
     def description = 'HTML resource management enhancements to replace g.resource etc.'
     def documentation = "http://grails-plugins.github.com/grails-resources"
@@ -57,7 +49,8 @@ class ResourcesGrailsPlugin {
     def organization = [ name: "Grails Community", url: "http://grails.org/" ]
     def developers = [
             [ name: "Marc Palmer", email: "marc@grailsrocks.com" ],
-            [ name: "Luke Daley", email: "ld@ldaley.com" ] 
+            [ name: "Luke Daley", email: "ld@ldaley.com" ],
+            [ name: "Peter N. Steinmetz", email: "ndoc3@steinmetz.org"]
     ]
     def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPRESOURCES" ]
     def scm = [ url: "https://github.com/grails-plugins/grails-resources" ]

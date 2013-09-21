@@ -48,7 +48,7 @@ class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
         def expected = """
 .bg1 { background: url(resource:/images/theme/bg1.png) }
 .bg2 { background: url(resource:/css/images/bg2.png) }
-.bg3 { background: url(/images/bg3.png) }
+.bg3 { background: url(resource:/images/bg3.png) }
 .bg4 { background: url(resource:/css/bg4.png) }
 .bg5 { background: url(http://google.com/images/bg5.png) }
 """

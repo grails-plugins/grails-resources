@@ -1,8 +1,9 @@
 package org.grails.plugin.resource
 
-import javax.servlet.*
+import org.grails.plugin.resource.util.DispositionsUtils
 import org.springframework.web.context.support.WebApplicationContextUtils
-import grails.util.Environment
+
+import javax.servlet.*
 
 /**
  * This just traps any obvious mistakes the user has made and warns them in dev mode
@@ -44,8 +45,9 @@ class DevModeSanityFilter implements Filter {
             chain.doFilter(request, response)
 
             if (request.getAttribute('resources.need.layout')) {
-                def dispositionsLeftOver = grailsResourceProcessor.getRequestDispositionsRemaining(request)
+                def dispositionsLeftOver = DispositionsUtils.getRequestDispositionsRemaining(request)
                 if (dispositionsLeftOver) {
+                    // :TODO: should move this initialization from ResourceProcessor
                     def optionals = grailsResourceProcessor.optionalDispositions
                     dispositionsLeftOver -= optionals
                     if (dispositionsLeftOver) {

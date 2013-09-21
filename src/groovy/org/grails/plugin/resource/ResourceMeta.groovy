@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.core.io.UrlResource
 import org.apache.commons.io.FilenameUtils
+import org.springframework.core.io.FileSystemResource
 
 import org.grails.plugin.resource.mapper.ResourceMapper
 
@@ -154,17 +155,26 @@ class ResourceMeta {
     void updateContentLength() {
         if (processedFile) {
             this.@contentLength = processedFile.size().toInteger()
-        } else if (originalResource?.URL.protocol in ['jndi', 'file']) {
-            this.@contentLength = originalResource?.URL.openConnection().contentLength        
+        } else if (originalResource?.URL.protocol in ['jndi', 'file']) { 
+            this.@contentLength = getOriginalResourceLength()
         } else {
             this.@contentLength = 0
+        }
+    }
+
+    long getOriginalResourceLength() {
+        if (originalResource && (originalResource instanceof FileSystemResource)) {
+            return originalResource.file.size()
+        } else {
+            // This may not close the connection in a timely manner if non-HTTP URL
+            return originalResource?.URL.openConnection().contentLength        
         }
     }
 
     void setOriginalResource(Resource res) {
         this.originalResource = res
         updateExists()
-        this.originalContentLength = originalResource?.URL.openConnection().contentLength        
+        this.originalContentLength = getOriginalResourceLength()
         updateContentLength()
     }
     
