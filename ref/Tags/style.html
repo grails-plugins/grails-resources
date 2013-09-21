@@ -79,21 +79,22 @@ function addJsClass(el) {
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
-                <h1>r:stash Tag</h1><p class="paragraph"/>Using this tag you can write "inline" content anywhere in your GSP (providing you use Sitemesh layouts) and place into any disposition.<p class="paragraph"/>Corresponding <a href="../../ref/Tags/layoutResources.html" class="tags">layoutResources</a> can write these out.<p class="paragraph"/>This mechanism is used internally for inline <a href="../../ref/Tags/script.html" class="tags">script</a> invocations.<p class="paragraph"/>Currently only <code>script</code> and <code>style</code> types are supported.<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
+                <h1>r:style Tag</h1><p class="paragraph"/>Using this tag you can write "inline" CSS anywhere in your GSP (providing you use Sitemesh layouts), which will be placed at the used disposition. The disposition "head" is used as default.<p class="paragraph"/>The code is executed after all the other resources in the given disposition have been included, so you can easily stack up little fragments that set up your UI elements or perform other functions.<p class="paragraph"/>Assuming a Sitemesh layout that calls &#60;r:layoutResources/&#62; at the correct times, the following causes alerts to occur when head and page body load:<p class="paragraph"/><div class="code"><pre><span class="xml&#45;tag">&#60;html&#62;</span>
    <span class="xml&#45;tag">&#60;head&#62;</span>
       <span class="xml&#45;tag">&#60;meta name=<span class="xml&#45;quote">"layout"</span> content=<span class="xml&#45;quote">"main"</span>/&#62;</span>
+      <span class="xml&#45;tag">&#60;r:require modules=<span class="xml&#45;quote">"jquery&#45;ui, blueprint"</span>/&#62;</span>
+      <span class="xml&#45;tag">&#60;r:require module=<span class="xml&#45;quote">"single&#45;module"</span>/&#62;</span><p class="paragraph"/>      <span class="xml&#45;tag">&#60;r:style&#62;</span>
+         p &#123;
+            color: $&#123;&#91;'blue', 'green', 'red', 'yellow'&#93;&#91;new Random().nextInt(4)&#93;&#125; !important;
+         &#125;
+      <span class="xml&#45;tag">&#60;/r:style&#62;</span>
    <span class="xml&#45;tag">&#60;/head&#62;</span>
    <span class="xml&#45;tag">&#60;body&#62;</span>
-       <span class="xml&#45;tag">&#60;r:stash type=<span class="xml&#45;quote">"style"</span> disposition=<span class="xml&#45;quote">"head&#45;end"</span>&#62;</span>
-          .ugly&#45;inline&#45;style &#123; border: none; &#125;
-       <span class="xml&#45;tag">&#60;/r:stash&#62;</span><p class="paragraph"/>       <span class="xml&#45;tag">&#60;r:stash type=<span class="xml&#45;quote">"script"</span> disposition=<span class="xml&#45;quote">"middle"</span>&#62;</span>
-          window.alert('This is same as r:script with disposition=<span class="xml&#45;quote">"middle"</span>'');
-       <span class="xml&#45;tag">&#60;/r:stash&#62;</span>
+      <span class="xml&#45;tag">&#60;p&#62;</span>Text in a random color.<span class="xml&#45;tag">&#60;/p&#62;</span>
    <span class="xml&#45;tag">&#60;/body&#62;</span>
 <span class="xml&#45;tag">&#60;/html&#62;</span></pre></div><p class="paragraph"/><h2>Attributes</h2>
 <ul class="star">
-<li>type - Required. The type of the stash - values supported are "script" and "style"</li>
-<li>disposition - Required. The disposition name to use for the stash.</li>
+<li>disposition - Optional. The disposition name of the code. Defaults to "head", but can be any other disposition like "defer".</li>
 </ul><p class="paragraph"/>
             </div>
         </td>
