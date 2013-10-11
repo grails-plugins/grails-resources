@@ -1088,7 +1088,9 @@ class ResourceProcessor implements InitializingBean {
     void addModuleDispositionsToRequest(request, String moduleName) {
         log.debug "Adding module dispositions for module [${moduleName}]"
 
-        def moduleNamesRequired = getAllModuleNamesRequired([moduleName])
+        Boolean mandatory = request.resourceModuleTracker[moduleName] != Boolean.FALSE
+        def moduleNamesRequired = getAllModuleNamesRequired(["$moduleName":mandatory])
+
         moduleNamesRequired.each { name ->
             def module = modulesByName[name]
             if (module) {
