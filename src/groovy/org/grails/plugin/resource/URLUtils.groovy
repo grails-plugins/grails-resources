@@ -5,7 +5,7 @@ package org.grails.plugin.resource
  */
 class URLUtils {
     
-    //def static externalURLPattern = /^((https?)?:?\/\/).*/
+    def static externalURLPattern = /^((https?:?)?\/\/).*/
 
     /**
      * Take a base URI and a target URI and resolve target against the base
@@ -33,7 +33,6 @@ class URLUtils {
     }
 
     static Boolean isExternalURL(url){
-        //return url ==~ externalURLPattern
-        return url ==~ /^((https?)?:?\/\/).*/
+        return url ==~ externalURLPattern
     }
 }

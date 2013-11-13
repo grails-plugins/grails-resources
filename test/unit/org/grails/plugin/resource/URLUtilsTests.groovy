@@ -46,9 +46,10 @@ class URLUtilsTests extends GrailsUnitTestCase {
     void testIsExternalUrl() {
         assertTrue URLUtils.isExternalURL('http://images.examples.com')
         assertTrue URLUtils.isExternalURL('https://images.examples.com')
-        assertTrue URLUtils.isExternalURL('://images.examples.com')
         assertTrue URLUtils.isExternalURL('//images.examples.com')
+        
         assertFalse URLUtils.isExternalURL('/images/exapmles.com')
+        assertFalse URLUtils.isExternalURL('://images.examples.com')
     }
 
 }
