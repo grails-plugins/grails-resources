@@ -222,7 +222,7 @@ class ResourceMeta {
     // Hook for when preparation is starting
     void beginPrepare(grailsResourceProcessor) {
         def uri = this.sourceUrl
-        if (!uri.contains('://')) {
+        if (!URLUtils.isExternalURL(uri)) {
             
             // Delete whatever file may already be there
             processedFile?.delete()

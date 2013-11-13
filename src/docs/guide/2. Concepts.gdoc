@@ -12,7 +12,7 @@ h2. Bundling of Resources into Modules with Dependency Management.
 
 In the resources framework, you define resource modules that have a name and contain one or more resources. The modules are declared in separate files named like ModuleResources.groovy (forming a Resources artefact) or in a separate modules block within Config.groovy.
 
-The resources can either be local to the application, and declared with the usual map of attributes, such as @dir:@ and @file:@, or external to the application, with an absolute url containing @://@ . 
+The resources can either be local to the application, and declared with the usual map of attributes, such as @dir:@ and @file:@, or external to the application, with an absolute url containing @//@ . 
 
 When resources in a module are required on a groovy server page (GSP), for example a css file in a set, this requirement is indicated by including a [require|Tags] tag for the module in the header. Links to the resources themselves are then included in the GSP by including one or two [layoutResources|Tags] tags. The first is placed in the header and the second at the bottom of the page to render any items which should be deferred to the end of the page, such as javascript fragments. 
 
@@ -34,7 +34,7 @@ h2. Tag Library to Render Links to Resources Not Declared in Modules.
 
 The Resources plugin also provides tags which can be used to render links to resources which are not declared in a module. This function assumes greater importance since Grails 1.4, as the @g:resource@, @g:external@, and @g:img@ tags now call the corresponding tags in the Resources plugin.
 
-Resources which haven't been declared in a module fall into two classes, those which *are* served by the application and those which refer to a resource *not* served by the application. The former have a context relative URI whereas the latter have an absolute URI, which the plugin defines as a URI that contains the characters @://@ . 
+Resources which haven't been declared in a module fall into two classes, those which *are* served by the application and those which refer to a resource *not* served by the application. The former have a context relative URI whereas the latter have an absolute URI, which the plugin defines as a URI that contains the characters @//@ . 
 
 The primary tag to render links to either type of resource is the [external|Tags] tag. This tag can take a URI (relative or absolute) or a combination of other attributes to specify the resource, such as directory and file. The [img|Tags] tag may be used with similar arguments to render a link to an image file. 
 

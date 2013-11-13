@@ -43,4 +43,12 @@ class URLUtilsTests extends GrailsUnitTestCase {
         assertFalse URLUtils.isRelativeURL("http://www.example.org/absolute/path")
     }
 
+    void testIsExternalUrl() {
+        assertTrue URLUtils.isExternalURL('http://images.examples.com')
+        assertTrue URLUtils.isExternalURL('https://images.examples.com')
+        assertTrue URLUtils.isExternalURL('://images.examples.com')
+        assertTrue URLUtils.isExternalURL('//images.examples.com')
+        assertFalse URLUtils.isExternalURL('/images/exapmles.com')
+    }
+
 }

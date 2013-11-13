@@ -5,10 +5,12 @@ package org.grails.plugin.resource
  */
 class URLUtils {
     
+    //def static externalURLPattern = /^((https?)?:?\/\/).*/
+
     /**
      * Take a base URI and a target URI and resolve target against the base
      * using the normal rules e.g. "../x", "./x" "x" results in a link relative to the base's folder
-     * and / is app-absolute, and anything with a protocol :// is absolute
+     * and / is app-absolute, and anything with a protocol // is absolute
      *
      * Please note, I take full responsibility for the nastiness of this code. I could not 
      * find a nice way to do this, and I wanted to find an existing lib to do it. Its
@@ -27,6 +29,11 @@ class URLUtils {
     static Boolean isRelativeURL(url) {
         !url.startsWith('data:') &&
         !url.startsWith('#') && 
-        !(url.indexOf('://') >= 0)
+        !(url.indexOf('//') >= 0)
+    }
+
+    static Boolean isExternalURL(url){
+        //return url ==~ externalURLPattern
+        return url ==~ /^((https?)?:?\/\/).*/
     }
 }

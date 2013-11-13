@@ -263,7 +263,7 @@ class ResourceProcessor implements InitializingBean {
     void redirectToActualUrl(ResourceMeta res, HttpServletRequest request, HttpServletResponse response) {
         // Now redirect the client to the processed url
         String url
-        if (res.linkUrl.contains("://")) {
+        if (URLUtils.isExternalURL(res.linkUrl)) {
             url = res.linkUrl
 
         } else {
