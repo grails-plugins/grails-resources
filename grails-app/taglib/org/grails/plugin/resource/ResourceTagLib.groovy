@@ -503,7 +503,7 @@ class ResourceTagLib {
         def debugMode = grailsResourceProcessor.isDebugMode(request)
         
         for (r in module.resources) { 
-            if (!r.exists() && !r.actualUrl?.contains('://')) {
+            if (!r.exists() && !URLUtils.isExternalURL(r.actualUrl)) {
                 throw new IllegalArgumentException("Module [$name] depends on resource [${r.sourceUrl}] but the file cannot be found")
             }
             if (log.debugEnabled) {
@@ -549,14 +549,14 @@ class ResourceTagLib {
         def ctxPath = request.contextPath
 
         def uri = attrs.remove('uri')
-        def abs = uri?.indexOf('://') >= 0
+        def abs = URLUtils.isExternalURL(uri)
 
         if (!uri) {
             // use the link generator to avoid stack overflow calling back into us
             // via g.resource
             attrs.contextPath = ctxPath
             uri = grailsLinkGenerator.resource(attrs)
-            abs = uri.contains('://') 
+            abs = URLUtils.isExternalURL(uri)
         } else {
             if (!abs) {
                 uri = ctxPath + uri
@@ -619,7 +619,7 @@ class ResourceTagLib {
         // we resolve without query params, but must keep them for linking        
         def linkUrl = res ? res.linkUrl : contextRelUri
 
-        if (linkUrl.contains('://')) {
+        if (URLUtils.isExternalURL(linkUrl)) {
             // @todo do we need to toggle http/https here based on current request protocol?
             return [uri:linkUrl, resource:res]
         } else {
