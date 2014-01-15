@@ -197,22 +197,24 @@ class ResourcesGrailsPlugin {
     }
     
     def onChange = { event ->
-        if (event.source instanceof FileSystemResource) {
-            if (isResourceWeShouldProcess(event.source.file)) {
-                log.info("Scheduling reload of resource files due to change of file $event.source.file")
-                triggerReload {
-                    event.application.mainContext.grailsResourceProcessor.reloadChangedFiles()
+        if (event.application?.mainContext?.grailsResourceProcessor) {
+            if (event.source instanceof FileSystemResource) {
+                if (isResourceWeShouldProcess(event.source.file)) {
+                    log.info("Scheduling reload of resource files due to change of file $event.source.file")
+                    triggerReload {
+                        event.application.mainContext.grailsResourceProcessor.reloadChangedFiles()
+                    }
                 }
-            }
-        } else if (handleChange(application, event, getResourceMapperArtefactHandler().TYPE, log)) {
-            log.info("Scheduling reload of mappers due to change of $event.source.name")
-            triggerReload {
-                event.application.mainContext.grailsResourceProcessor.reloadMappers()
-            }
-        } else if (handleChange(application, event, getResourcesArtefactHandler().TYPE, log)) {
-            log.info("Scheduling reload of modules due to change of $event.source.name")
-            triggerReload {
-                event.application.mainContext.grailsResourceProcessor.reloadModules()
+            } else if (handleChange(application, event, getResourceMapperArtefactHandler().TYPE, log)) {
+                log.info("Scheduling reload of mappers due to change of $event.source.name")
+                triggerReload {
+                    event.application.mainContext.grailsResourceProcessor.reloadMappers()
+                }
+            } else if (handleChange(application, event, getResourcesArtefactHandler().TYPE, log)) {
+                log.info("Scheduling reload of modules due to change of $event.source.name")
+                triggerReload {
+                    event.application.mainContext.grailsResourceProcessor.reloadModules()
+                }
             }
         }
     }
