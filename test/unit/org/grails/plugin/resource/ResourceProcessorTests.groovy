@@ -1,21 +1,21 @@
 package org.grails.plugin.resource
 
-import grails.test.GrailsUnitTestCase
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletResponse
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 
-class ResourceProcessorTests extends GrailsUnitTestCase {
+@TestMixin(GrailsUnitTestMixin)
+class ResourceProcessorTests {
     @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder()
     File temporarySubfolder
     ResourceProcessor processor
 
-    @Override
-    void setUp() {
-        super.setUp()
-
-        mockLogging(ResourceProcessor, true)
+    @org.junit.Before
+    void setupTest() {
+        //mockLogging(ResourceProcessor, true)
         temporarySubfolder = temporaryFolder.newFolder('test-tmp')
         processor = new ResourceProcessor()
         

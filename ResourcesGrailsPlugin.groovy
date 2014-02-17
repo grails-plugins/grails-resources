@@ -16,7 +16,7 @@ class ResourcesGrailsPlugin {
     static DEFAULT_URI_PREFIX = 'static'
     static DEFAULT_ADHOC_PATTERNS = ["/images/*", "*.css", "*.js"].asImmutable()
 
-    def version = "1.2.1"
+    def version = "1.2.2-SNAPSHOT"
     def grailsVersion = "1.3 > *"
 
     def loadAfter = ['logging'] // retained to ensure correct loading under Grails < 2.0
@@ -29,7 +29,8 @@ class ResourcesGrailsPlugin {
             "web-app/js/**/*.*",
             "web-app/images/**/*.*",
             "grails-app/resourceMappers/**/test/*",
-            "grails-app/conf/*Resources.groovy"
+            "grails-app/conf/*Resources.groovy",
+			"grails-app/conf/META-INF/mime.types"
     ]
 
     def artefacts = [getResourceMapperArtefactHandler(), getResourcesArtefactHandler()]

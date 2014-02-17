@@ -1,60 +1,51 @@
 package org.grails.plugin.resource
 
 import grails.test.GroovyPagesTestCase
+import grails.test.mixin.integration.IntegrationTestMixin
+import grails.test.mixin.TestMixin
 import org.junit.Before
 
-import javax.activation.FileTypeMap
-import javax.activation.MimetypesFileTypeMap
-
+@TestMixin(IntegrationTestMixin)
 class ResourceTagLibIntegTests extends GroovyPagesTestCase {
-    
     def grailsResourceProcessor
 
     @Before
-    void setUp() {
-        super.setUp()
-
-        // adjust the mime type map used at the MockServletContext
-        // to return the correct mime type for CSS and JS files
-        // so that the bundle resource mapper will be applied to them
-        MimetypesFileTypeMap fileTypeMap = (MimetypesFileTypeMap) FileTypeMap.getDefaultFileTypeMap()
-        fileTypeMap.addMimeTypes(["text/javascript   js", "text/css   css"].join("\n"))
-
+    void setupResources() {
         // reload all modules with bundling applied to them
         grailsResourceProcessor.reloadAll()
     }
     
-    def testExternalWithAbsoluteURI() {
+    void testExternalWithAbsoluteURI() {
         def result = applyTemplate('<r:external uri="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"/>', [:])
         assertTrue result.indexOf('"https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js') != -1
     }
 
-    def testExternalWithAdhocResourceURIThatIsExcluded() {
+    void testExternalWithAdhocResourceURIThatIsExcluded() {
         def result = applyTemplate('<r:external uri="js/core.js"/>', [:])
         assertTrue result.indexOf('/js/core.js') != -1
     }
 
-    def testExternalWithAdhocResourceDirAndFileThatIsExcluded() {
+    void testExternalWithAdhocResourceDirAndFileThatIsExcluded() {
         def result = applyTemplate('<r:external dir="js" file="core.js"/>', [:])
         assertTrue result.indexOf('/js/core.js') != -1
     }
 
-    def testExternalWithAdhocResourceURI() {
+    void testExternalWithAdhocResourceURI() {
         def result = applyTemplate('<r:external uri="js/adhoc.js"/>', [:])
         assertTrue result.indexOf('/static/js/_adhoc.js') != -1
     }
 
-    def testExternalWithAdhocResourceURIWithSlash() {
+    void testExternalWithAdhocResourceURIWithSlash() {
         def result = applyTemplate('<r:external uri="/js/adhoc.js"/>', [:])
         assertTrue result.indexOf('/static/js/_adhoc.js') != -1
     }
 
-    def testExternalWithAdhocResourceDirAndFile() {
+    void testExternalWithAdhocResourceDirAndFile() {
         def result = applyTemplate('<r:external dir="js" file="adhoc.js"/>', [:])
         assertTrue result.indexOf('/static/js/_adhoc.js') != -1
     }
 	
-	def testGoogleFontsWithQueriesInModule() {
+	void testGoogleFontsWithQueriesInModule() {
 		def template = '''<html>
 							<head>
 							  <r:require modules="testurl"/>
@@ -69,7 +60,7 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
 		assertTrue result.contains(expectedLink)
 	}
 	
-	def testGoogleMapsInModule() {
+	void testGoogleMapsInModule() {
 		def template = '''<html>
 							<head>
 							  <r:require modules="google-maps"/>
@@ -85,7 +76,7 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
 		assertTrue result.contains(expectedScript)
 	}
 
-    def testDispositionsOfTransitiveDependencies() {
+    void testDispositionsOfTransitiveDependencies() {
         String template = '''
             <r:require modules="GPRESOURCES-207_module_A"/>
 
@@ -105,7 +96,7 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
         assertTrue 'transitive dependency "GPRESOURCES-207_module_B" - resource for disposition A', result.contains("/static/_bundle-bundle_GPRESOURCES-207_module_B_disposition_A.js")
     }
 
-    def testDispositionsOfTransitiveDependenciesWithStashedResource() {
+    void testDispositionsOfTransitiveDependenciesWithStashedResource() {
         String template = '''
             <r:require modules="GPRESOURCES-207_module_A"/>
             <r:script disposition="disposition_B">
@@ -118,6 +109,8 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
             <r:layoutResources disposition="disposition_D"/>
         '''
         String result = applyTemplate(template)
+        
+        new File('/tmp/testout.txt').text=result
 
         assertTrue 'direct dependency "GPRESOURCES-207_module_A" - resource for disposition C', result.contains("/static/_bundle-bundle_GPRESOURCES-207_module_A_disposition_C.js")
         assertTrue 'direct dependency "GPRESOURCES-207_module_A" - resource for disposition D', result.contains("/static/_bundle-bundle_GPRESOURCES-207_module_A_disposition_D.js")
@@ -130,7 +123,7 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
     }
 
 
-    def testDuplicateIncludes() {
+    void testDuplicateIncludes() {
         String template = '''
             <r:require modules="GPRESOURCES-210_module_A"/>
             <r:layoutResources disposition="duplicate_includes_check"/>
@@ -141,7 +134,7 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
         assertEquals 1, result.count("/static/_bundle-bundle_GPRESOURCES-210_module_A_duplicate_includes_check.js")
     }
 
-    def testStyleTagWithDefaultDisposition() {
+    void testStyleTagWithDefaultDisposition() {
         String template = '''
             <r:style>
             /* stashed styles */
@@ -155,7 +148,7 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
         assertTrue result ==~ /\s*<style type="text\/css">\s*\/\* stashed styles \*\/\s*<\/style>\s*/
     }
 
-    def testStyleTagWithCustomDisposition() {
+    void testStyleTagWithCustomDisposition() {
         String template = '''
             <r:style disposition="custom_disposition">
             /* stashed styles */

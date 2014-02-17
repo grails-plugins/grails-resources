@@ -1,6 +1,10 @@
 package org.grails.plugin.resource
 
-class ResourceProcessorIntegTests extends GroovyTestCase {
+import grails.test.mixin.integration.IntegrationTestMixin
+import grails.test.mixin.TestMixin
+
+@TestMixin(IntegrationTestMixin)
+class ResourceProcessorIntegTests {
     
     def grailsResourceProcessor
     
@@ -12,7 +16,7 @@ class ResourceProcessorIntegTests extends GroovyTestCase {
         ]
     }
 
-    def testGettingModulesInDependencyOrder() {
+    void testGettingModulesInDependencyOrder() {
         def testModules = [
             a: [name:'a', resources: [ makeMockResource('a.css') ] ],
             b: [name:'b', dependsOn:['a'], resources: [ makeMockResource('b.css') ] ],
@@ -34,10 +38,10 @@ class ResourceProcessorIntegTests extends GroovyTestCase {
         def moduleNameResults = grailsResourceProcessor.getModulesInDependencyOrder(moduleNames)
         println "Modules: ${moduleNameResults}"
 
-        assertTrue moduleNameResults.indexOf('a') < moduleNameResults.indexOf('b')
-        assertTrue moduleNameResults.indexOf('b') < moduleNameResults.indexOf('c')
-        assertTrue moduleNameResults.indexOf('b') < moduleNameResults.indexOf('d')
-        assertTrue moduleNameResults.indexOf('b') < moduleNameResults.indexOf('e')
-        assertTrue moduleNameResults.indexOf('d') < moduleNameResults.indexOf('e')
+        assert moduleNameResults.indexOf('a') < moduleNameResults.indexOf('b')
+        assert moduleNameResults.indexOf('b') < moduleNameResults.indexOf('c')
+        assert moduleNameResults.indexOf('b') < moduleNameResults.indexOf('d')
+        assert moduleNameResults.indexOf('b') < moduleNameResults.indexOf('e')
+        assert moduleNameResults.indexOf('d') < moduleNameResults.indexOf('e')
     }
 }

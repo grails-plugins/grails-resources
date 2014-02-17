@@ -1,8 +1,8 @@
 package org.grails.plugin.resource
 
-import grails.plugin.spock.UnitSpec
+import spock.lang.Specification
 
-class BaseUrlResourceMapperSpec extends UnitSpec{
+class BaseUrlResourceMapperSpec extends Specification {
 
     def mapper
 

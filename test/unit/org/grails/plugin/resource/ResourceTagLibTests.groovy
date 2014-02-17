@@ -10,12 +10,8 @@ import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
 @TestFor(ResourceTagLib)
 class ResourceTagLibTests {
 	
-	ResourceTagLib tagLib
-	
-	@Before
-    void setUp() {
-        tagLib = applicationContext.getBean(ResourceTagLib)
-        
+    @Before
+    void setupTest() {
         Object.metaClass.encodeAsHTML = { -> delegate.toString() }
     }
 

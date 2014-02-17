@@ -1,8 +1,10 @@
 package org.grails.plugin.resource
 
-import grails.test.GrailsUnitTestCase;
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin;
 
-public class BundleResourceMapperTests extends GrailsUnitTestCase {
+public @TestMixin(GrailsUnitTestMixin)
+class BundleResourceMapperTests {
 
     BundleResourceMapper mapper = new BundleResourceMapper()
 

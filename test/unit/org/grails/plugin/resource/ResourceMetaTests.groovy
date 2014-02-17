@@ -1,16 +1,10 @@
 package org.grails.plugin.resource
 
-import grails.test.*
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 
-class ResourceMetaTests extends GrailsUnitTestCase {
-    protected void setUp() {
-        super.setUp()
-    }
-
-    protected void tearDown() {
-        super.tearDown()
-    }
-
+@TestMixin(GrailsUnitTestMixin)
+class ResourceMetaTests {
     void testMovingFileUpdatesActualUrlCorrectly() {
         def r = new ResourceMeta()
         r.sourceUrl = "/jquery/images/bg.png"

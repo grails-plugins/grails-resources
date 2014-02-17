@@ -1,3 +1,7 @@
+import grails.test.mixin.integration.IntegrationTestMixin
+import grails.test.mixin.TestMixin
+
+@TestMixin(IntegrationTestMixin)
 class InitialisationSmokeTests {
 
     def grailsResourceProcessor
