@@ -41,10 +41,11 @@ class ResourceProcessor implements InitializingBean {
     static SYNTHETIC_MODULE = "__@synthetic-files@__"   // The placeholder for all the generated (i.e. aggregate) resources
 
     static DEFAULT_ADHOC_INCLUDES = [
-            '**/*.*'
+        '/images/**', '/css/**', '/js/**', '/plugins/**'
     ]
 
     static DEFAULT_ADHOC_EXCLUDES = [
+        '/WEB-INF/**'
     ]
 
     static DEFAULT_MODULE_SETTINGS = [
