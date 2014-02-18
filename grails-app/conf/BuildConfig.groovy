@@ -26,7 +26,7 @@ grails.project.dependency.resolution = {
     }
     plugins {        
         provided(":webxml:1.4.1") 
-        compile(":tomcat:7.0.50") {
+        build(":tomcat:7.0.50.1") {
             export = false
         }
         compile(':release:3.0.1', ':rest-client-builder:1.0.3') {
