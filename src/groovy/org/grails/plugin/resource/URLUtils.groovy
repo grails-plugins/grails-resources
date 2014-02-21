@@ -35,4 +35,21 @@ class URLUtils {
     static Boolean isExternalURL(url){
         return url ==~ externalURLPattern
     }
+    
+    static String normalizeUri(String uri) {
+        String current = uri
+        boolean changed = true
+        // handle double-encoding
+        while (changed) { 
+            String normalized = doNormalizeUri(current)
+            changed = (current != normalized)
+            current = normalized       
+        }
+        current
+    }
+    
+    private static String doNormalizeUri(String uri) {
+        // file is used just for normalization, it won't be used for resolving the resource
+        new URI(new URL('file:///' + uri.replaceAll(' ', '%20')).getPath()).normalize().getPath()
+    }
 }
