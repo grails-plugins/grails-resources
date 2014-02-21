@@ -201,7 +201,7 @@ class ResourceProcessor implements InitializingBean {
         log.debug "Legacy resource ${uri} matched includes? ${included}"
 
         if (included) {
-            included = !(adHocExcludes.find { PATH_MATCHER.match(it, uri) })
+            included = !(adHocExcludes.find { PATH_MATCHER.match(it, uri) || PATH_MATCHER.match(it.toLowerCase(), uri.toLowerCase()) })
             log.debug "Legacy resource ${uri} passed excludes? ${included}"
         }
 
