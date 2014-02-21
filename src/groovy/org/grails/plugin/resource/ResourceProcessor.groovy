@@ -45,7 +45,7 @@ class ResourceProcessor implements InitializingBean {
     ]
 
     static DEFAULT_ADHOC_EXCLUDES = [
-        '**/WEB-INF/**', '**/META-INF/**'
+        '**/WEB-INF/**', '**/META-INF/**', '**/*.class', '**/*.jar', '**/*.properties', '**/*.groovy', '**/*.gsp', '**/*.java'
     ]
 
     static DEFAULT_MODULE_SETTINGS = [
