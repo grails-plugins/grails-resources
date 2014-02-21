@@ -190,7 +190,7 @@ class ResourceProcessor implements InitializingBean {
 
     def extractURI(request, adhoc) {
         def uriStart = (adhoc ? request.contextPath : request.contextPath + staticUrlPrefix).size()
-        return uriStart < request.requestURI.size() ? request.requestURI[uriStart..-1] : ''
+        normalizeUri(uriStart < request.requestURI.size() ? request.requestURI[uriStart..-1] : '')
     }
 
     boolean canProcessLegacyResource(uri) {
@@ -393,6 +393,11 @@ class ResourceProcessor implements InitializingBean {
 
     ResourceMeta getExistingResourceMeta(uri) {
         resourceInfo[uri]
+    }
+    
+    static String normalizeUri(String uri) {
+        // File is used just for normalization, it won't be used for resolving the resource
+        new File(new URI('file:///' + uri).normalize().toASCIIString().toURL().toURI()).getPath()
     }
 
     /**
