@@ -397,7 +397,7 @@ class ResourceProcessor implements InitializingBean {
     
     static String normalizeUri(String uri) {
         // File is used just for normalization, it won't be used for resolving the resource
-        new File(new URI('file:///' + uri).normalize().toASCIIString().toURL().toURI()).getPath()
+        new File(new URI('file:///' + uri.replaceAll(' ', '%20')).normalize().toASCIIString().toURL().toURI()).getPath()
     }
 
     /**
