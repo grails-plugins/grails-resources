@@ -6,6 +6,7 @@ package org.grails.plugin.resource
 class URLUtils {
     
     def static externalURLPattern = /^((https?:?)?\/\/).*/
+    private static final int MAX_NORMALIZE_ITERATIONS = 3
 
     /**
      * Take a base URI and a target URI and resolve target against the base
@@ -38,9 +39,13 @@ class URLUtils {
     
     static String normalizeUri(String uri) {
         String current = uri
+        int counter=0
         boolean changed = true
         // handle double-encoding
         while (changed) { 
+            if (counter++ > MAX_NORMALIZE_ITERATIONS) {
+                throw new IllegalArgumentException("unable to normalize input uri ${uri}")
+            }
             String normalized = doNormalizeUri(current)
             changed = (current != normalized)
             current = normalized       
