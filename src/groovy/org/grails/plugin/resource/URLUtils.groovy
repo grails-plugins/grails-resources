@@ -38,23 +38,11 @@ class URLUtils {
     }
     
     static String normalizeUri(String uri) {
-        String current = uri
-        int counter=0
-        boolean changed = true
-        // handle double-encoding
-        while (changed) { 
-            if (counter++ > MAX_NORMALIZE_ITERATIONS) {
-                throw new IllegalArgumentException("unable to normalize input uri ${uri}")
-            }
-            String normalized = doNormalizeUri(current)
-            changed = (current != normalized)
-            current = normalized       
+        if (uri == null) return null
+        String normalized = RequestUtil.normalize(uri)
+        if (normalized == null) {
+            throw new IllegalArgumentException("illegal uri ${uri}")
         }
-        current
-    }
-    
-    private static String doNormalizeUri(String uri) {
-        // file is used just for normalization, it won't be used for resolving the resource
-        new URI(new URL('file:///' + uri.replaceAll(' ', '%20')).getPath()).normalize().getPath()
+        normalized
     }
 }
