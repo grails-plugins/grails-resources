@@ -24,5 +24,27 @@ class URLUtilsSpec extends Specification {
     def 'allow spaces in path'() {
         expect:
         normalizeUri('/parentdir/a b c.xml') == '/parentdir/a b c.xml'
+        normalizeUri('/parentdir/a%20b%20c.xml') == '/parentdir/a b c.xml'
+    }
+    
+    def 'fail if contains .. path travelsal after decoding'() {
+        when:
+        normalizeUri('/some/path/%2e%2e/some-dir/file.xml')
+        then:
+        thrown IllegalArgumentException
+    }
+    
+    def 'fail if contains backslash after decoding'() {
+        when:
+        normalizeUri('/some/path/%2e%2e%5c%2e%2e/some-dir/file.xml')
+        then:
+        thrown IllegalArgumentException
+    }
+
+    def 'fail if contains . path travelsal after decoding'() {
+        when:
+        normalizeUri('/some/path/%2e/some-dir/file.xml')
+        then:
+        thrown IllegalArgumentException
     }
 }

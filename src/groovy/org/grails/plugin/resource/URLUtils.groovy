@@ -37,12 +37,26 @@ class URLUtils {
         return url ==~ externalURLPattern
     }
     
+    /**
+     * Normalizes and decodes uri once.
+     * Check if result contains \ , /../ or /./ after decoding and throws IllegalArgumentException in that case
+     * 
+     * @param uri
+     * @return
+     */
     static String normalizeUri(String uri) {
         if (uri == null) return null
+        
         String normalized = RequestUtil.normalize(uri)
         if (normalized == null) {
             throw new IllegalArgumentException("illegal uri ${uri}")
         }
-        normalized
+        
+        String decoded = URLDecoder.decode(normalized, "UTF-8")
+        if(decoded.contains('\\') || decoded.contains('/./') || decoded.contains('/../')) {
+            throw new IllegalArgumentException("illegal uri ${uri}")
+        }
+        
+        decoded
     }
 }
