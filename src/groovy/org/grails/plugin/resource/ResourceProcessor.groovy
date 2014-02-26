@@ -82,7 +82,7 @@ class ResourceProcessor implements InitializingBean {
     boolean processingEnabled
 
     List adHocIncludes
-    List adHocExcludes
+    List adHocExcludesLowerCase
 
     List optionalDispositions
 
@@ -94,8 +94,13 @@ class ResourceProcessor implements InitializingBean {
         adHocIncludes = getConfigParamOrDefault('adhoc.includes', DEFAULT_ADHOC_INCLUDES)
         adHocIncludes = adHocIncludes.collect { it.startsWith('/') ? it : '/' + it }
 
-        adHocExcludes = getConfigParamOrDefault('adhoc.excludes', DEFAULT_ADHOC_EXCLUDES)
-        adHocExcludes = adHocExcludes.collect { it.startsWith('/') ? it : '/' + it }
+        adHocExcludesLowerCase = getConfigParamOrDefault('adhoc.excludes', DEFAULT_ADHOC_EXCLUDES)
+        adHocExcludesLowerCase = adHocExcludesLowerCase.collect { 
+            String result = it.toString() 
+            if(!result.startsWith('/')) 
+                result = '/' + result
+            result.toLowerCase() 
+        }
 
         optionalDispositions = getConfigParamOrDefault('optional.dispositions', ['inline', 'image'])
 
@@ -201,7 +206,8 @@ class ResourceProcessor implements InitializingBean {
         log.debug "Legacy resource ${uri} matched includes? ${included}"
 
         if (included) {
-            included = !(adHocExcludes.find { PATH_MATCHER.match(it, uri) || PATH_MATCHER.match(it.toLowerCase(), uri.toLowerCase()) })
+            def uriLower = uri.toLowerCase()
+            included = !(adHocExcludesLowerCase.find { PATH_MATCHER.match(it, uriLower) })
             log.debug "Legacy resource ${uri} passed excludes? ${included}"
         }
 
