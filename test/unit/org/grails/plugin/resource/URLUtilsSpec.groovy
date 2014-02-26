@@ -27,7 +27,7 @@ class URLUtilsSpec extends Specification {
         normalizeUri('/parentdir/a%20b%20c.xml') == '/parentdir/a b c.xml'
     }
     
-    def 'fail if contains .. path travelsal after decoding'() {
+    def 'fail if contains .. path traversal after decoding'() {
         when:
         normalizeUri('/some/path/%2e%2e/some-dir/file.xml')
         then:
@@ -41,7 +41,7 @@ class URLUtilsSpec extends Specification {
         thrown IllegalArgumentException
     }
 
-    def 'fail if contains . path travelsal after decoding'() {
+    def 'fail if contains . path traversal after decoding'() {
         when:
         normalizeUri('/some/path/%2e/some-dir/file.xml')
         then:

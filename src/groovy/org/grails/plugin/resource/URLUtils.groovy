@@ -39,7 +39,7 @@ class URLUtils {
     
     /**
      * Normalizes and decodes uri once.
-     * Check if result contains \ , /../ or /./ after decoding and throws IllegalArgumentException in that case
+     * Check if result contains \ , /../ , /./ or // after decoding and throws IllegalArgumentException in that case
      * 
      * @param uri
      * @return
@@ -53,7 +53,7 @@ class URLUtils {
         }
         
         String decoded = URLDecoder.decode(normalized, "UTF-8")
-        if(decoded.contains('\\') || decoded.contains('/./') || decoded.contains('/../')) {
+        if(decoded.contains('\\') || decoded.contains('/./') || decoded.contains('/../') || decoded.contains('//')) {
             throw new IllegalArgumentException("illegal uri ${uri}")
         }
         
