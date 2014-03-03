@@ -16,7 +16,7 @@ class ResourcesGrailsPlugin {
     static DEFAULT_URI_PREFIX = 'static'
     static DEFAULT_ADHOC_PATTERNS = ["/images/*", "*.css", "*.js"].asImmutable()
 
-    def version = "1.2.6"
+    def version = "1.2.7"
     def grailsVersion = "1.3 > *"
 
     def loadAfter = ['logging'] // retained to ensure correct loading under Grails < 2.0
@@ -55,7 +55,7 @@ class ResourcesGrailsPlugin {
     ]
     def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPRESOURCES" ]
     def scm = [ url: "https://github.com/grails-plugins/grails-resources" ]
-    
+
     def getWebXmlFilterOrder() {
         def FilterManager = getClass().getClassLoader().loadClass('grails.plugin.webxml.FilterManager')
         [   DeclaredResourcesPluginFilter: FilterManager.DEFAULT_POSITION - 300,
@@ -66,24 +66,24 @@ class ResourcesGrailsPlugin {
     def getResourcesConfig(application) {
         application.config.grails.resources
     }
-    
+
     def getUriPrefix(application) {
         def prf = getResourcesConfig(application).uri.prefix
         prf instanceof String ? prf : DEFAULT_URI_PREFIX
     }
-    
+
     def getAdHocPatterns(application) {
         def patterns = getResourcesConfig(application).adhoc.patterns
         patterns instanceof List ? patterns : DEFAULT_ADHOC_PATTERNS
     }
-    
+
     def doWithSpring = { ->
         if (!springConfig.containsBean('grailsLinkGenerator')) {
             grailsLinkGenerator(HalfBakedLegacyLinkGenerator) {
                 pluginManager = ref('pluginManager')
             }
         }
-        
+
         grailsResourceProcessor(org.grails.plugin.resource.ResourceProcessor) {
             grailsLinkGenerator = ref('grailsLinkGenerator')
             if (springConfig.containsBean('grailsResourceLocator')) {
@@ -91,21 +91,21 @@ class ResourcesGrailsPlugin {
             }
             grailsApplication = ref('grailsApplication')
         }
-        
+
         // Legacy service name
         springConfig.addAlias "resourceService", "grailsResourceProcessor"
     }
-    
+
     def doWithWebDescriptor = { webXml ->
         def adHocPatterns = getAdHocPatterns(application)
 
-        def declaredResFilter = [   
-                name:'DeclaredResourcesPluginFilter', 
+        def declaredResFilter = [
+                name:'DeclaredResourcesPluginFilter',
                 filterClass:"org.grails.plugin.resource.ProcessingFilter",
                 urlPatterns:["/${getUriPrefix(application)}/*"]
         ]
-        def adHocFilter = [   
-            name:'AdHocResourcesPluginFilter', 
+        def adHocFilter = [
+            name:'AdHocResourcesPluginFilter',
             filterClass:"org.grails.plugin.resource.ProcessingFilter",
             params: [adhoc:true],
             urlPatterns: adHocPatterns
@@ -117,14 +117,14 @@ class ResourcesGrailsPlugin {
         }
 
         if ( Environment.current == Environment.DEVELOPMENT) {
-            filtersToAdd << [   
-                name:'ResourcesDevModeFilter', 
+            filtersToAdd << [
+                name:'ResourcesDevModeFilter',
                 filterClass:"org.grails.plugin.resource.DevModeSanityFilter",
                 urlPatterns:['/*'],
                 dispatchers:['REQUEST']
             ]
         }
-        
+
         log.info("Adding servlet filters")
         def filters = webXml.filter[0]
         filters + {
@@ -142,7 +142,7 @@ class ResourcesGrailsPlugin {
                 }
             }
         }
-        def mappings = webXml.'filter-mapping'[0] 
+        def mappings = webXml.'filter-mapping'[0]
         mappings + {
             filtersToAdd.each { f ->
                 f.urlPatterns?.each { p ->
@@ -168,26 +168,26 @@ class ResourcesGrailsPlugin {
 
     static PATH_MATCHER = new AntPathMatcher()
     static RELOADABLE_RESOURCE_EXCLUDES = [
-        '**/.svn/**/*.*', 
+        '**/.svn/**/*.*',
         '**/.git/**/*.*',
         'WEB-INF/**/*.*',
         'META-INF/**/*.*'
     ]
-    
+
     boolean isResourceWeShouldProcess(File file) {
         // Make windows filenams safe for matching
         def fileName = file.canonicalPath.replaceAll('\\\\', '/').replaceAll('^.*?/web-app/', '')
         boolean shouldProcess = !(RELOADABLE_RESOURCE_EXCLUDES.any { PATH_MATCHER.match(it, fileName ) })
         return shouldProcess
     }
-    
+
     ScheduledThreadPoolExecutor delayedChangeThrottle = new ScheduledThreadPoolExecutor(1)
     ScheduledFuture reloadTask
     static final RELOAD_THROTTLE_DELAY = 500
-    
+
     void triggerReload(Closure reloader) {
         reloadTask?.cancel(false)
-        reloadTask = delayedChangeThrottle.schedule( { 
+        reloadTask = delayedChangeThrottle.schedule( {
             try {
                 reloader()
             } catch (Throwable t) {
@@ -196,7 +196,7 @@ class ResourcesGrailsPlugin {
             }
         }, RELOAD_THROTTLE_DELAY, TimeUnit.MILLISECONDS)
     }
-    
+
     def onChange = { event ->
         if (event.application?.mainContext?.grailsResourceProcessor) {
             if (event.source instanceof FileSystemResource) {
@@ -234,7 +234,7 @@ class ResourcesGrailsPlugin {
                     }
                 }
             }
-                        
+
             true
         } else {
             false
