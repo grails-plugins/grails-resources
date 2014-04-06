@@ -16,11 +16,7 @@ class ResourcesGrailsPlugin {
     static DEFAULT_URI_PREFIX = 'static'
     static DEFAULT_ADHOC_PATTERNS = ["/images/*", "*.css", "*.js"].asImmutable()
 
-<<<<<<< HEAD
-    def version = "1.2.2-SNAPSHOT"
-=======
-    def version = "1.2.7"
->>>>>>> refs/heads/main-master
+    def version = "1.2.8-SNAPSHOT"
     def grailsVersion = "1.3 > *"
 
     def loadAfter = ['logging'] // retained to ensure correct loading under Grails < 2.0
