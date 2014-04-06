@@ -1,18 +1,12 @@
 package org.grails.plugin.resource
 
-import grails.test.*
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 
 import org.grails.plugin.resource.mapper.ResourceMapper
 
-class ResourceMapperTests extends GrailsUnitTestCase {
-    protected void setUp() {
-        super.setUp()
-    }
-
-    protected void tearDown() {
-        super.tearDown()
-    }
-    
+@TestMixin(GrailsUnitTestMixin)
+class ResourceMapperTests {
     void testDefaultIncludesExcludes() {
         def artefact = new DummyMapper()
         artefact.defaultExcludes = ['**/*.jpg', '**/*.png']

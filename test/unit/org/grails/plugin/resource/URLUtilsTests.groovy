@@ -1,8 +1,10 @@
 package org.grails.plugin.resource
 
-import grails.test.GrailsUnitTestCase
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 
-class URLUtilsTests extends GrailsUnitTestCase {
+@TestMixin(GrailsUnitTestMixin)
+class URLUtilsTests {
 
     void testRelativeCSSUris() {
         assertEquals "images/bg_fade.png", URLUtils.relativeURI('css/main.css', '../images/bg_fade.png')
@@ -41,6 +43,15 @@ class URLUtilsTests extends GrailsUnitTestCase {
 
     void testIsRelativeForAbsoluteUrls() {
         assertFalse URLUtils.isRelativeURL("http://www.example.org/absolute/path")
+    }
+
+    void testIsExternalUrl() {
+        assertTrue URLUtils.isExternalURL('http://images.examples.com')
+        assertTrue URLUtils.isExternalURL('https://images.examples.com')
+        assertTrue URLUtils.isExternalURL('//images.examples.com')
+        
+        assertFalse URLUtils.isExternalURL('/images/exapmles.com')
+        assertFalse URLUtils.isExternalURL('://images.examples.com')
     }
 
 }

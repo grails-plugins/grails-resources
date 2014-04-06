@@ -1,15 +1,17 @@
 package org.grails.plugin.resource
-import grails.test.GrailsUnitTestCase
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 
-class CSSLinkProcessorTests extends GrailsUnitTestCase {
+@TestMixin(GrailsUnitTestMixin)
+class CSSLinkProcessorTests {
     @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder()
     File temporarySubfolder
     def mockResSvc
     
-    void setUp() {
-        super.setUp()
+    @org.junit.Before
+    void setupTest() {
         temporarySubfolder = temporaryFolder.newFolder('test-tmp')
         mockResSvc = [
             config : [ rewrite: [css: true] ]

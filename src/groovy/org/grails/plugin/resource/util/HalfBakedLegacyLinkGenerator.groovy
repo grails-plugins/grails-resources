@@ -1,6 +1,7 @@
 package org.grails.plugin.resource.util
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.codehaus.groovy.grails.plugins.support.aware.GrailsApplicationAware
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import grails.util.Environment
 
 /**
@@ -9,9 +10,10 @@ import grails.util.Environment
  *
  * NOTE this is a lame implementation that NEVER adds servletContextPath!
  */
-class HalfBakedLegacyLinkGenerator {
+class HalfBakedLegacyLinkGenerator implements GrailsApplicationAware {
     
     def pluginManager
+    GrailsApplication grailsApplication
     
     String resource(Map args) {
         getResourceUrl(args)
@@ -23,7 +25,7 @@ class HalfBakedLegacyLinkGenerator {
      * Copied from ApplicationTagLib
      */
     String makeServerURL() {
-        def u = ConfigurationHolder.config?.grails?.serverURL
+        def u = grailsApplication.config?.grails?.serverURL
         if (!u) {
             // Leave it null if we're in production so we can throw
             if (Environment.current != Environment.PRODUCTION) {

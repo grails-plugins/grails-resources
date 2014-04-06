@@ -1,17 +1,19 @@
 package org.grails.plugin.resource
 
-import grails.test.GrailsUnitTestCase
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 
-class CSSPreprocessorResourceMapperTests extends GrailsUnitTestCase {
+@TestMixin(GrailsUnitTestMixin)
+class CSSPreprocessorResourceMapperTests {
     @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder()
     File temporarySubfolder
 
-    void setUp() {
-        super.setUp()
+    @org.junit.Before
+    void setupTest() {
         temporarySubfolder = temporaryFolder.newFolder('test-tmp')
-        mockLogging(org.grails.plugin.resource.CSSPreprocessorResourceMapper)
+        //mockLogging(org.grails.plugin.resource.CSSPreprocessorResourceMapper)
     }
     /**
      * This simulates a test where the image resources are moved to a new flat dir

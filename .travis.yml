@@ -1,0 +1,8 @@
+language: groovy
+
+jdk:
+  - openjdk7
+  - openjdk6
+  - oraclejdk7
+
+script: ./grailsw clean; ./grailsw "test-app" 

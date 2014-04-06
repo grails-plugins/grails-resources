@@ -1,9 +1,11 @@
 package org.grails.plugin.resource
 
 import org.springframework.util.AntPathMatcher
-import grails.test.*
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 
-class PathMatcherTests extends GrailsUnitTestCase {
+@TestMixin(GrailsUnitTestMixin)
+class PathMatcherTests {
     static final PATH_MATCHER = new AntPathMatcher()
 
     void testDeepMatching() {

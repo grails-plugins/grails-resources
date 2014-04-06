@@ -41,10 +41,11 @@ class ResourceProcessor implements InitializingBean {
     static SYNTHETIC_MODULE = "__@synthetic-files@__"   // The placeholder for all the generated (i.e. aggregate) resources
 
     static DEFAULT_ADHOC_INCLUDES = [
-            '**/*.*'
+        '/images/**', '/css/**', '/js/**', '/plugins/**'
     ]
 
     static DEFAULT_ADHOC_EXCLUDES = [
+        '**/WEB-INF/**', '**/META-INF/**', '**/*.class', '**/*.jar', '**/*.properties', '**/*.groovy', '**/*.gsp', '**/*.java'
     ]
 
     static DEFAULT_MODULE_SETTINGS = [
@@ -81,7 +82,7 @@ class ResourceProcessor implements InitializingBean {
     boolean processingEnabled
 
     List adHocIncludes
-    List adHocExcludes
+    List adHocExcludesLowerCase
 
     List optionalDispositions
 
@@ -93,8 +94,13 @@ class ResourceProcessor implements InitializingBean {
         adHocIncludes = getConfigParamOrDefault('adhoc.includes', DEFAULT_ADHOC_INCLUDES)
         adHocIncludes = adHocIncludes.collect { it.startsWith('/') ? it : '/' + it }
 
-        adHocExcludes = getConfigParamOrDefault('adhoc.excludes', DEFAULT_ADHOC_EXCLUDES)
-        adHocExcludes = adHocExcludes.collect { it.startsWith('/') ? it : '/' + it }
+        adHocExcludesLowerCase = getConfigParamOrDefault('adhoc.excludes', DEFAULT_ADHOC_EXCLUDES)
+        adHocExcludesLowerCase = adHocExcludesLowerCase.collect { 
+            String result = it.toString() 
+            if(!result.startsWith('/')) 
+                result = '/' + result
+            result.toLowerCase() 
+        }
 
         optionalDispositions = getConfigParamOrDefault('optional.dispositions', ['inline', 'image'])
 
@@ -189,7 +195,7 @@ class ResourceProcessor implements InitializingBean {
 
     def extractURI(request, adhoc) {
         def uriStart = (adhoc ? request.contextPath : request.contextPath + staticUrlPrefix).size()
-        return uriStart < request.requestURI.size() ? request.requestURI[uriStart..-1] : ''
+        URLUtils.normalizeUri(uriStart < request.requestURI.size() ? request.requestURI[uriStart..-1] : '')
     }
 
     boolean canProcessLegacyResource(uri) {
@@ -200,7 +206,8 @@ class ResourceProcessor implements InitializingBean {
         log.debug "Legacy resource ${uri} matched includes? ${included}"
 
         if (included) {
-            included = !(adHocExcludes.find { PATH_MATCHER.match(it, uri) })
+            def uriLower = uri.toLowerCase()
+            included = !(adHocExcludesLowerCase.find { PATH_MATCHER.match(it, uriLower) })
             log.debug "Legacy resource ${uri} passed excludes? ${included}"
         }
 
@@ -263,7 +270,7 @@ class ResourceProcessor implements InitializingBean {
     void redirectToActualUrl(ResourceMeta res, HttpServletRequest request, HttpServletResponse response) {
         // Now redirect the client to the processed url
         String url
-        if (res.linkUrl.contains("://")) {
+        if (URLUtils.isExternalURL(res.linkUrl)) {
             url = res.linkUrl
 
         } else {
@@ -393,7 +400,7 @@ class ResourceProcessor implements InitializingBean {
     ResourceMeta getExistingResourceMeta(uri) {
         resourceInfo[uri]
     }
-
+    
     /**
      * Get the existing or create a new ad-hoc ResourceMeta for the URI.
      * @returns The resource instance - which may have a null processedFile if the resource cannot be found
@@ -1088,7 +1095,9 @@ class ResourceProcessor implements InitializingBean {
     void addModuleDispositionsToRequest(request, String moduleName) {
         log.debug "Adding module dispositions for module [${moduleName}]"
 
-        def moduleNamesRequired = getAllModuleNamesRequired([moduleName])
+        Boolean mandatory = request.resourceModuleTracker[moduleName] != Boolean.FALSE
+        def moduleNamesRequired = getAllModuleNamesRequired(["$moduleName":mandatory])
+
         moduleNamesRequired.each { name ->
             def module = modulesByName[name]
             if (module) {

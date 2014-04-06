@@ -1,17 +1,19 @@
 package org.grails.plugin.resource
-import grails.test.GrailsUnitTestCase
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 
-class AggregatedResourceMetaTests extends GrailsUnitTestCase {
+@TestMixin(GrailsUnitTestMixin)
+class AggregatedResourceMetaTests {
     @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder()
     File temporarySubfolder
     
     def mockResSvc
     def module 
     
-    void setUp() {
-        super.setUp()
+    @org.junit.Before
+    void setupTest() {
         temporarySubfolder = temporaryFolder.newFolder('test-tmp')
 
         module = new ResourceModule()

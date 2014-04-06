@@ -6,7 +6,8 @@ import javax.servlet.FilterChain
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.mock.web.MockHttpServletRequest
 
-class ProcessingFilterTests extends GroovyTestCase {
+class ProcessingFilterTests {
+    @org.junit.Test
     void testResourceIsNotProcessedByBothFiltersIfHandledByFirst() {
         def filter = new ProcessingFilter()
         filter.adhoc = false

@@ -1,23 +1,20 @@
 package org.grails.plugin.resource
 
-import grails.test.*
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 
 import org.grails.plugin.resource.module.*
 
-class ResourceModuleTests extends GrailsUnitTestCase {
+@TestMixin(GrailsUnitTestMixin)
+class ResourceModuleTests {
     def svc
     
-    protected void setUp() {
-        super.setUp()
-        
+    @org.junit.Before
+    void setupTest() {
         svc = new Expando()
         svc.getDefaultSettingsForURI = { uri, type ->
             [:]
         }
-    }
-
-    protected void tearDown() {
-        super.tearDown()
     }
     
     void testDefaultBundleFalse() {

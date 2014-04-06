@@ -1,14 +1,16 @@
 package org.grails.plugin.resource
 
-import grails.test.*
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 
 import org.grails.plugin.resource.module.*
 
-class ResourceModulesBuilderTests extends GrailsUnitTestCase {
+@TestMixin(GrailsUnitTestMixin)
+class ResourceModulesBuilderTests {
     def svc
     
-    protected void setUp() {
-        super.setUp()
+    @org.junit.Before
+    void setupTest() {
         
         svc = new Expando()
         svc.getDefaultSettingsForURI = { uri, type ->
@@ -16,10 +18,6 @@ class ResourceModulesBuilderTests extends GrailsUnitTestCase {
         }
     }
 
-    protected void tearDown() {
-        super.tearDown()
-    }
-    
     void testModuleOverrides() {
         def modules = []
         def bld = new ModulesBuilder(modules)

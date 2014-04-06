@@ -1,21 +1,21 @@
 package org.grails.plugin.resource
 
-import grails.test.GrailsUnitTestCase
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletResponse
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 
-class ResourceProcessorTests extends GrailsUnitTestCase {
+@TestMixin(GrailsUnitTestMixin)
+class ResourceProcessorTests {
     @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder()
     File temporarySubfolder
     ResourceProcessor processor
 
-    @Override
-    void setUp() {
-        super.setUp()
-
-        mockLogging(ResourceProcessor, true)
+    @org.junit.Before
+    void setupTest() {
+        //mockLogging(ResourceProcessor, true)
         temporarySubfolder = temporaryFolder.newFolder('test-tmp')
         processor = new ResourceProcessor()
         
@@ -89,7 +89,7 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
     void testProcessLegacyResourceIncludesExcludes() {
         
         processor.adHocIncludes = ['/**/*.css', '/**/*.js', '/images/**']
-        processor.adHocExcludes = ['/**/*.exe', '/**/*.gz', '/unsafe/**/*.css']
+        processor.adHocExcludesLowerCase = ['/**/*.exe', '/**/*.gz', '/unsafe/**/*.css']
 
         def testData = [
             [requestURI: '/css/main.css', expected:true],
@@ -120,7 +120,7 @@ class ResourceProcessorTests extends GrailsUnitTestCase {
     void testProcessLegacyResourceIncludesExcludesSpecificFile() {
         
         processor.adHocIncludes = ['/**/*.js']
-        processor.adHocExcludes = ['/**/js/something.js']
+        processor.adHocExcludesLowerCase = ['/**/js/something.js']
 
         def testData = [
             [requestURI: '/js/other.js', expected:true],
