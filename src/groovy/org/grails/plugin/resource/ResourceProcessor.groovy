@@ -1,9 +1,9 @@
 package org.grails.plugin.resource
 
 import grails.util.Environment
+import grails.util.Holders
 import groovy.util.logging.Commons
 import org.apache.commons.io.FilenameUtils
-import org.codehaus.groovy.grails.plugins.PluginManagerHolder
 import org.grails.plugin.resource.mapper.ResourceMapper
 import org.grails.plugin.resource.mapper.ResourceMappersFactory
 import org.grails.plugin.resource.module.ModuleDeclarationsFactory
@@ -190,7 +190,7 @@ class ResourceProcessor implements InitializingBean {
         // The plugin manager bean configured in integration testing is not the real thing and causes errors.
         // Using the pluginManager from the holder means that we always get a legit instance.
         // http://jira.codehaus.org/browse/GRAILSPLUGINS-2712
-        PluginManagerHolder.pluginManager
+        Holders.getPluginManager()
     }
 
     def extractURI(request, adhoc) {
