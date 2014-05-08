@@ -2,7 +2,8 @@
 
 [![Build Status](https://api.travis-ci.org/gpc/grails-mail.png)](http://travis-ci.org/grails-plugins/grails-resources)
 
-=== Grails Resources framework.
+Grails Resources framework.
+===========================
 
 Grails resources provides a DSL for declaring static resources in plugins and in apps, and a mapper artefact that allows other plugins to provide processing of static resources to e.g. minify / zip them.
 
