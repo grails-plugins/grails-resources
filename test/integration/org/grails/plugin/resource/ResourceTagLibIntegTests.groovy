@@ -3,6 +3,8 @@ package org.grails.plugin.resource
 import grails.test.GroovyPagesTestCase
 import grails.test.mixin.integration.IntegrationTestMixin
 import grails.test.mixin.TestMixin
+import org.grails.plugin.resources.stash.StashManager
+import org.grails.plugin.resources.stash.StashWriter
 import org.junit.Before
 
 @TestMixin(IntegrationTestMixin)
@@ -182,7 +184,8 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
 
         String result = applyTemplate(template)
 
-        assertEquals "<script type=\"text/javascript\">script stash1;script stash2;</script>", result.trim()
+        String expected = "<script type=\"text/javascript\">script stash1;</script><script type=\"text/javascript\">script stash2;</script>"
+        assertEquals expected, result.trim()
     }
 
     void testStashOfTypeStyle() {
@@ -210,13 +213,7 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
 
     void testStashOfACustomType() {
         String type = "custom-stash"
-        ResourceTagLib.STASH_WRITERS[type] = { out, stash ->
-            out << "<ul>"
-            for (s in stash) {
-                out << "<li>" << s << "</li>"
-            }
-            out << "</ul>"
-        }
+        StashManager.STASH_WRITERS[type] = new FakeStashWriter()
         String template = """
             <r:stash type="${type}" disposition="${type}_stash_disposition">${type} stash</r:stash>
             <r:layoutResources disposition="${type}_stash_disposition"/>
@@ -224,20 +221,14 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
 
         String result = applyTemplate(template)
         // cleanup
-        ResourceTagLib.STASH_WRITERS.remove(type)
+        StashManager.STASH_WRITERS.remove(type)
 
         assertEquals "<ul><li>custom-stash stash</li></ul>", result.trim()
     }
 
     void testStashOfACustomTypeWithMultipleEntries() {
         String type = "custom-stash"
-        ResourceTagLib.STASH_WRITERS[type] = { out, stash ->
-            out << "<ul>"
-            for (s in stash) {
-                out << "<li>" << s << "</li>"
-            }
-            out << "</ul>"
-        }
+        StashManager.STASH_WRITERS[type] = new FakeStashWriter()
         String template = """
             <r:stash type="${type}" disposition="${type}_stash_disposition">${type} stash1;</r:stash>
             <r:stash type="${type}" disposition="${type}_stash_disposition">${type} stash2;</r:stash>
@@ -246,9 +237,20 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
 
         String result = applyTemplate(template)
         // cleanup
-        ResourceTagLib.STASH_WRITERS.remove(type)
+        StashManager.STASH_WRITERS.remove(type)
 
         assertEquals "<ul><li>custom-stash stash1;</li><li>custom-stash stash2;</li></ul>", result.trim()
+    }
+
+    class FakeStashWriter implements StashWriter {
+        @Override
+        void write(Writer out, List<String> stash) throws IOException {
+            out << "<ul>"
+            for (final String fragment in stash) {
+                out << "<li>" << fragment << "</li>"
+            }
+            out << "</ul>"
+        }
     }
 
 }
