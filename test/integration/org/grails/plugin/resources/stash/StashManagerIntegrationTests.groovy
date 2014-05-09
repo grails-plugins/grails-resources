@@ -4,13 +4,14 @@ import org.junit.Test
 import org.springframework.mock.web.MockHttpServletRequest
 
 import javax.servlet.http.HttpServletRequest
+import static org.junit.Assert.*
 
 /**
  * Integration tests for {@link StashManager}.
  *
  * @author Patrick Jungermann
  */
-class StashManagerIntegrationTests extends GroovyTestCase {
+class StashManagerIntegrationTests  {
 
     @Test
     void shouldBeInitializedWithStashWriterForScripts() {
@@ -184,19 +185,20 @@ class StashManagerIntegrationTests extends GroovyTestCase {
         StashManager.unstashPageFragments(writer, null, disposition)
     }
 
-    class CustomTypeStashWriter implements StashWriter {
 
-        @Override
-        void write(Writer out, List<String> stash) throws IOException {
-            out << "<ul>"
-            for (String fragment in stash) {
-                out << "<li>"
-                out << fragment
-                out << "</li>"
-            }
-            out << "</ul>"
+
+}
+class CustomTypeStashWriter implements StashWriter {
+
+    @Override
+    void write(Writer out, List<String> stash) throws IOException {
+        out << "<ul>"
+        for (String fragment in stash) {
+            out << "<li>"
+            out << fragment
+            out << "</li>"
         }
-
+        out << "</ul>"
     }
 
 }

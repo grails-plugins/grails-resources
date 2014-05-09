@@ -241,16 +241,14 @@ class ResourceTagLibIntegTests extends GroovyPagesTestCase {
 
         assertEquals "<ul><li>custom-stash stash1;</li><li>custom-stash stash2;</li></ul>", result.trim()
     }
-
-    class FakeStashWriter implements StashWriter {
-        @Override
-        void write(Writer out, List<String> stash) throws IOException {
-            out << "<ul>"
-            for (final String fragment in stash) {
-                out << "<li>" << fragment << "</li>"
-            }
-            out << "</ul>"
+}
+class FakeStashWriter implements StashWriter {
+    @Override
+    void write(Writer out, List<String> stash) throws IOException {
+        out << "<ul>"
+        for (final String fragment in stash) {
+            out << "<li>" << fragment << "</li>"
         }
+        out << "</ul>"
     }
-
 }
