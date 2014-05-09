@@ -5,13 +5,21 @@ rm -rf *.zip
 ./grailsw test-app --non-interactive
 ./grailsw package-plugin --non-interactive
 ./grailsw doc --pdf --non-interactive
-if [[ $TRAVIS_BRANCH == 'master' && $TRAVIS_REPO_SLUG == 'grails-plugins/grails-resources' && $TRAVIS_PULL_REQUEST == 'false' ]]; then
+
+filename=$(find . -name "grails-*.zip" | head -1)
+filename=$(basename $filename)
+plugin=${filename:7}
+plugin=${plugin/.zip/}
+plugin=${plugin/-SNAPSHOT/}
+version="${plugin#*-}"; 
+plugin=${plugin/"-$version"/}
+
+if [[ $TRAVIS_BRANCH == 'master' && $TRAVIS_REPO_SLUG == "grails-plugins/$plugin" && $TRAVIS_PULL_REQUEST == 'false' ]]; then
   git config --global user.name "$GIT_NAME"
   git config --global user.email "$GIT_EMAIL"
   git config --global credential.helper "store --file=~/.git-credentials"
   echo "https://$GH_TOKEN:@github.com" > ~/.git-credentials
-  filename=$(find . -name "grails-*.zip" | head -1)
-  filename=$(basename $filename)
+
 
   if [[ $filename != *-SNAPSHOT* ]]
   then
