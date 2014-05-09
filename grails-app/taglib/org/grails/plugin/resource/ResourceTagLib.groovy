@@ -4,6 +4,7 @@ import grails.util.GrailsUtil
 import org.apache.commons.io.FilenameUtils
 import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
 import org.grails.plugin.resource.util.DispositionsUtils
+import org.grails.plugin.resources.stash.StashManager
 
 /**
  * This taglib handles creation of all the links to resources, including the smart de-duping of them.
@@ -16,29 +17,9 @@ import org.grails.plugin.resource.util.DispositionsUtils
 class ResourceTagLib {
 	
     static namespace = "r"
-    
-    static REQ_ATTR_PREFIX_PAGE_FRAGMENTS = 'resources.plugin.page.fragments'
+
     static REQ_ATTR_PREFIX_AUTO_DISPOSITION = 'resources.plugin.auto.disposition'
-    
-    static STASH_WRITERS = [
-        'script': { out, stash ->
-            out << "<script type=\"text/javascript\">"
-            for (s in stash) {
-                out << s
-            }
-            out << "</script>"
 
-        },
-        'style': { out, stash ->
-            out << "<style type=\"text/css\">"
-            for (s in stash) {
-                out << s
-            }
-            out << "</style>"
-
-        }
-    ]
-    
     static writeAttrs( attrs, output) {
         // Output any remaining user-specified attributes
         attrs.each { k, v ->
@@ -306,7 +287,6 @@ class ResourceTagLib {
         
         needsResourceLayout()
         
-        def trk = request.resourceModuleTracker
         def mandatory = attrs.strict == null ? true : attrs.strict.toString() != 'false'
         def moduleNames
         if (attrs.module) {
@@ -329,32 +309,6 @@ class ResourceTagLib {
             }
             declareModuleRequiredByPage(name, mandatory)
         }
-    }
-    
-    private stashPageFragment(String type, String disposition, def fragment) {
-        if (log.debugEnabled) {
-            log.debug "stashing request script for disposition [${disposition}]: ${ fragment}"
-        }
-
-        needsResourceLayout()
-        
-        def trkName = ResourceTagLib.makePageFragmentKey(type, disposition)
-        DispositionsUtils.addDispositionToRequest(request, disposition, '-page-fragments-')
-
-        def trk = request[trkName]
-        if (!trk) {
-            trk = []
-            request[trkName] = trk
-        }
-        trk << fragment
-    }
-    
-    private static String makePageFragmentKey(String type, String disposition) {
-        "${REQ_ATTR_PREFIX_PAGE_FRAGMENTS}:${type}:${disposition}"
-    }
-    
-    private List consumePageFragments(String type, String disposition) {
-        return (List) request[ResourceTagLib.makePageFragmentKey(type, disposition)] ?: Collections.EMPTY_LIST
     }
     
     private static String makeAutoDispositionKey( String disposition) {
@@ -427,7 +381,7 @@ class ResourceTagLib {
             log.debug "Rendering page fragments for disposition: ${dispositionToRender}"
         }
 
-        layoutPageStash(dispositionToRender)
+        StashManager.unstashPageFragments(out, request, dispositionToRender)
 
         if (log.debugEnabled) {
             log.debug "Removing outstanding request disposition: ${dispositionToRender}"
@@ -436,32 +390,27 @@ class ResourceTagLib {
         DispositionsUtils.doneDispositionResources(request, dispositionToRender)
     }
 
-    private layoutPageStash(final String disposition) {
-        final Set<String> fragmentTypes = STASH_WRITERS.keySet()
-        for (final String type in fragmentTypes) {
-            final List stash = consumePageFragments(type, disposition)
-            if (stash) {
-                STASH_WRITERS[type](out, stash)
-            }
+    def script = { attributes, body ->
+        attributes.type = "script"
+        if (!attributes.disposition) {
+            attributes.disposition = DispositionsUtils.DISPOSITION_DEFER
         }
-    }
 
-    /**
-     * For inline javascript that needs to be executed in the <head> section after all dependencies
-     * @todo Later, we implement ESP hooks here and add scope="user" or scope="shared"
-     */
-    def script = { attrs, body ->
-        final String disposition = attrs.remove('disposition') ?: 'defer'
-        stashPageFragment('script', disposition, body())
+        stash(attributes, body)
     }
 
     def style = { attributes, body ->
-        final String disposition = attributes.remove("disposition") ?: DispositionsUtils.DISPOSITION_HEAD
-        stashPageFragment("style", disposition, body())
+        attributes.type = "style"
+        if (!attributes.disposition) {
+            attributes.disposition = DispositionsUtils.DISPOSITION_HEAD
+        }
+
+        stash(attributes, body)
     }
 
-    def stash = { attrs, body ->
-        stashPageFragment(attrs.type, attrs.disposition, body())
+    def stash = { attributes, body ->
+        needsResourceLayout()
+        StashManager.stashPageFragment(request, (String) attributes.type, (String) attributes.disposition, (String) body())
     }
     
     protected getModuleByName(name) {
