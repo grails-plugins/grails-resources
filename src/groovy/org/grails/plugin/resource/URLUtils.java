@@ -72,7 +72,7 @@ class URLUtils {
             
             String normalized = doNormalizeUri(currentUri);
             String decoded = doDecodeUri(normalized, uri);
-            processOnceMore = (normalized != decoded || currentUri != decoded); // object reference comparison is ok here
+            processOnceMore = normalized != decoded; // object reference comparison is ok here
             currentUri = decoded;
         }
         return currentUri;
