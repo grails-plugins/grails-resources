@@ -45,18 +45,34 @@ class URLUtils {
      * @return
      */
     static String normalizeUri(String uri) {
+        String current = uri
+        int counter=0
+        boolean changed = true
+        // handle double-encoding
+        while (changed) {
+            if (counter++ > MAX_NORMALIZE_ITERATIONS) {
+                throw new IllegalArgumentException("unable to normalize input uri ${uri}")
+            }
+            String normalized = doNormalizeUri(current)
+            changed = (current != normalized)
+            current = normalized
+        }
+        current
+    }
+
+    private static doNormalizeUri(String uri) {
         if (uri == null) return null
-        
+
         String normalized = RequestUtil.normalize(uri)
         if (normalized == null) {
             throw new IllegalArgumentException("illegal uri ${uri}")
         }
-        
+
         String decoded = URLDecoder.decode(normalized, "UTF-8")
         if(decoded.contains('\\') || decoded.contains('/./') || decoded.contains('/../') || decoded.contains('//')) {
             throw new IllegalArgumentException("illegal uri ${uri}")
         }
-        
+
         decoded
     }
 }
