@@ -12,6 +12,8 @@ import java.util.regex.Pattern;
 class URLUtils {
     
     public static Pattern externalURLPattern = Pattern.compile("^((https?:?)?//).*");
+    private static Pattern invalidUriPartsPattern = Pattern.compile("\\\\|/\\./|/\\.\\.|\\.\\./|//");
+    
     private static final int MAX_NORMALIZE_ITERATIONS = 3;
 
     /**
@@ -87,7 +89,7 @@ class URLUtils {
         catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
-        if(decoded.contains("\\") || decoded.contains("/./") || decoded.contains("/../") || decoded.contains("//")) {
+        if(invalidUriPartsPattern.matcher(decoded).find()) {
             throw new IllegalArgumentException("illegal uri " + uri);
         }
 

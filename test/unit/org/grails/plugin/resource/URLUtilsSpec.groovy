@@ -2,6 +2,7 @@
 package org.grails.plugin.resource
 
 import spock.lang.Specification
+import spock.lang.Unroll;
 import static URLUtils.normalizeUri
 
 class URLUtilsSpec extends Specification {
@@ -49,11 +50,17 @@ class URLUtilsSpec extends Specification {
         thrown IllegalArgumentException
     }
     
-    def 'fail if contains double encoded path traversal'() {
+    @Unroll
+    def 'fail if contains double encoded path traversal going beyond root - #uri'() {
         when:
-        def uri = normalizeUri('/test1/static/css/..%252fc..%252f..%252f c.txt')
+        normalizeUri(uri)
         then:
         thrown IllegalArgumentException
+        where:
+        uri|_
+        '/static/css/..%252f..%252f..%252fsecrets.txt'|_
+        '/static/css/some..%252fa..%252fb..%252fsecrets.txt'|_
+        '/static/css/..a%252f..b%252f..c%252fsecrets.txt'|_
     }
     
     def 'double url encoded should get normalized'() {
