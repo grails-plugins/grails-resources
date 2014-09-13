@@ -59,19 +59,23 @@ class URLUtils {
      * @return
      */
     public static String normalizeUri(String uri) {
-        String current = uri;
+        String currentUri = uri;
         int counter=0;
-        boolean changed = true;
+        boolean processOnceMore = true;
         // handle double-encoding
-        while (changed) {
+        while (processOnceMore) {
+            if(currentUri == null) return null;
+            
             if (counter++ > MAX_NORMALIZE_ITERATIONS) {
                 throw new IllegalArgumentException("unable to normalize input uri " + uri);
             }
-            String normalized = doNormalizeUri(current);
-            changed = (!current.equals(normalized));
-            current = normalized;
+            
+            String normalized = doNormalizeUri(currentUri);
+            String decoded = doDecodeUri(normalized, uri);
+            processOnceMore = (normalized != decoded || currentUri != decoded); // object reference comparison is ok here
+            currentUri = decoded;
         }
-        return current;
+        return currentUri;
     }
 
     private static String doNormalizeUri(String uri) {
@@ -82,17 +86,20 @@ class URLUtils {
             throw new IllegalArgumentException("illegal uri " + uri);
         }
 
+        return normalized;
+    }
+
+    private static String doDecodeUri(String uri, String originalUri) {
         String decoded;
         try {
-            decoded = URLDecoder.decode(normalized, "UTF-8");
+            decoded = URLDecoder.decode(uri, "UTF-8");
         }
         catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
         if(invalidUriPartsPattern.matcher(decoded).find()) {
-            throw new IllegalArgumentException("illegal uri " + uri);
+            throw new IllegalArgumentException("illegal uri " + originalUri);
         }
-
         return decoded;
     }
 }
