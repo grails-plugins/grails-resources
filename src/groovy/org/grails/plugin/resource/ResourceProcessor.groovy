@@ -3,6 +3,14 @@ package org.grails.plugin.resource
 import grails.util.Environment
 import grails.util.Holders
 import groovy.util.logging.Commons
+
+import java.util.concurrent.ConcurrentHashMap
+
+import javax.servlet.ServletContext
+import javax.servlet.ServletRequest
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
+
 import org.apache.commons.io.FilenameUtils
 import org.grails.plugin.resource.mapper.ResourceMapper
 import org.grails.plugin.resource.mapper.ResourceMappersFactory
@@ -13,12 +21,8 @@ import org.grails.plugin.resource.util.ResourceMetaStore
 import org.grails.plugin.resource.util.StatsManager
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.util.AntPathMatcher
+import org.springframework.web.context.ServletContextAware
 import org.springframework.web.util.WebUtils
-
-import javax.servlet.ServletRequest
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Primary service facade to actions on resources.
@@ -30,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @author Luke Daley (ld@ldaley.com)
  */
 @Commons
-class ResourceProcessor implements InitializingBean {
+class ResourceProcessor implements InitializingBean, ServletContextAware {
 
     static transactional = false
 
@@ -77,7 +81,9 @@ class ResourceProcessor implements InitializingBean {
 
     def resourceMappers
 
-    @Lazy servletContext = { grailsApplication.mainContext.servletContext }()
+    ServletContext servletContext
+    
+    String rootUrlNormalized
 
     boolean processingEnabled
 
@@ -104,6 +110,7 @@ class ResourceProcessor implements InitializingBean {
 
         optionalDispositions = getConfigParamOrDefault('optional.dispositions', ['inline', 'image'])
 
+        rootUrlNormalized = urlToNormalizedFormat(resolveUriToURL('/'))
     }
 
     /**
@@ -213,7 +220,21 @@ class ResourceProcessor implements InitializingBean {
 
         return included
     }
+    
+    boolean isServingURLAllowed(URL url) {
+        if(url == null) return null
+        String urlAsString = urlToNormalizedFormat(url)
+        if(urlAsString==null || rootUrlNormalized == null || !urlAsString.startsWith(rootUrlNormalized)) {
+            return false;
+        }
+        String relativePath = urlAsString.substring(rootUrlNormalized.length()-1)
+        return canProcessLegacyResource(relativePath)
+    }
 
+    static String urlToNormalizedFormat(URL url) {
+        url != null ? url.toURI().normalize().toASCIIString() : null
+    }
+    
     /**
      * Process a legacy URI that points to a normal resource, not produced with our
      * own tags, and likely not referencing a declared resource.
@@ -505,14 +526,29 @@ class ResourceProcessor implements InitializingBean {
      *
      */
     URL getOriginalResourceURLForURI(uri) {
+        URL url = resolveUriToURL(uri)
+        if (url == null) {
+            return null
+        }
+        if (isServingURLAllowed(url)) {
+            return url
+        } else {
+            log.warn("Serving url ${url} isn't allowed.")
+            return null
+        }
+    }
+
+    private URL resolveUriToURL(uri) {
+        URL url = null
         if (grailsResourceLocator != null) {
             def res = grailsResourceLocator.findResourceForURI(uri)
             if (res != null) {
-                return res.URL
+                url = res.URL
             }
         } else {
-            servletContext.getResource(uri)
+            url = servletContext.getResource(uri)
         }
+        return url
     }
 
     /**

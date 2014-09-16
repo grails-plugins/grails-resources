@@ -46,6 +46,7 @@ environments {
     
     test {
         grails.resources.adhoc.excludes = ['/**/js/core.js']
+        grails.resources.adhoc.includes = ['/GPRESOURCES-*/**', '/images/**', '/css/**', '/js/**', '/plugins/**'] 
     }
 }
 

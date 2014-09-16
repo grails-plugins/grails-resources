@@ -1,11 +1,12 @@
 package org.grails.plugin.resource
 
+import java.net.URL;
+
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.core.io.UrlResource
 import org.apache.commons.io.FilenameUtils
 import org.springframework.core.io.FileSystemResource
-
 import org.grails.plugin.resource.mapper.ResourceMapper
 
 /**
@@ -155,7 +156,7 @@ class ResourceMeta {
     void updateContentLength() {
         if (processedFile) {
             this.@contentLength = processedFile.size().toInteger()
-        } else if (originalResource?.URL.protocol in ['jndi', 'file']) { 
+        } else if (originalResource && originalResource.URL.protocol in ['jndi', 'file']) { 
             this.@contentLength = getOriginalResourceLength()
         } else {
             this.@contentLength = 0
@@ -163,11 +164,15 @@ class ResourceMeta {
     }
 
     long getOriginalResourceLength() {
-        if (originalResource && (originalResource instanceof FileSystemResource)) {
-            return originalResource.file.size()
+        if(originalResource) {
+            if (originalResource instanceof FileSystemResource) {
+                return originalResource.file.size()
+            } else {
+                // This may not close the connection in a timely manner if non-HTTP URL
+                return originalResource.URL.openConnection().contentLength
+            }
         } else {
-            // This may not close the connection in a timely manner if non-HTTP URL
-            return originalResource?.URL.openConnection().contentLength        
+            return 0
         }
     }
 
@@ -262,10 +267,18 @@ class ResourceMeta {
             }
 
         } else {
-            setOriginalResource(new UrlResource(this.sourceUrl))
-            setActualUrl(this.sourceUrl)
-
-            log.warn "Skipping mappers for ${this.actualUrl} because its an absolute URL."
+            def sourceUrlAsUrl = new URL(uri) 
+            if(sourceUrlAsUrl.protocol in ['http', 'https']) {
+                def urlResource = new UrlResource(sourceUrlAsUrl)
+    
+                setOriginalResource()
+                setActualUrl(uri)
+    
+                log.warn "Skipping mappers for ${this.actualUrl} because its an absolute URL."
+                
+            } else {
+                throw new FileNotFoundException("Cannot locate resource [$uri]") 
+            }
         }
     }
     

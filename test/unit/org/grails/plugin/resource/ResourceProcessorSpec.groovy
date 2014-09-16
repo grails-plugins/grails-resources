@@ -4,6 +4,7 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
+import org.springframework.mock.web.MockServletContext;
 
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -21,19 +22,15 @@ class ResourceProcessorSpec extends Specification {
         config = new ConfigObject()
         File temporarySubfolder = temporaryFolder.newFolder('test-tmp')
         config.grails.resources.work.dir = temporarySubfolder.getAbsolutePath()
+        def servletContext = new MockServletContext()
         resourceProcessor.grailsApplication = [
             config : config,
-            mainContext : [servletContext:[
-                getResource: { uri ->
-                    null
-                },
-                getMimeType: { uri -> 
-                    null
-                }
-            ]]
+            mainContext : [servletContext: servletContext]
         ]
+        resourceProcessor.servletContext = servletContext
         resourceProcessor.afterPropertiesSet()
-        request = new MockHttpServletRequest()
+        resourceProcessor.rootUrlNormalized = '/'
+        request = new MockHttpServletRequest(servletContext)
         request.contextPath = '/'
         response = new MockHttpServletResponse()
     }   

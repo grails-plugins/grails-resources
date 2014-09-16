@@ -1,10 +1,15 @@
 package org.grails.plugin.resource
 
+import static org.junit.Assert.*;
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
+
+import javax.servlet.ServletContext
+
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletResponse
 import org.junit.Rule
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder
 
 @TestMixin(GrailsUnitTestMixin)
@@ -19,18 +24,23 @@ class ResourceProcessorTests {
         temporarySubfolder = temporaryFolder.newFolder('test-tmp')
         processor = new ResourceProcessor()
         
-        processor.grailsApplication = [
-            config : [grails:[resources:[work:[dir:temporarySubfolder.getAbsolutePath()]]]],
-            mainContext : [servletContext:[
+        def servletContext = [
                 getResource: { uri -> 
                     assertTrue uri.indexOf('#') < 0
                     new URL('file:./test/test-files'+uri) 
                 },
                 getMimeType: { uri -> "test/nothing" }
-            ]]
+            ] as ServletContext
+        processor.grailsApplication = [
+            config : [grails:[resources:[work:[dir:temporarySubfolder.getAbsolutePath()]]]],
+            mainContext : [servletContext:servletContext]
         ]
+        processor.servletContext = servletContext
+        processor.afterPropertiesSet()
+        processor.adHocIncludes += '/somehack.xml'
     }
 
+    @Test
     void testPrepareURIWithHashFragment() {
         def r = new ResourceMeta()
         r.sourceUrl = '/somehack.xml#whatever'
@@ -41,6 +51,7 @@ class ResourceProcessorTests {
         assertEquals '/somehack.xml#whatever', meta.linkUrl
     }
 
+    @Test
     void testPrepareAbsoluteURLWithQueryParams() {
         def r = new ResourceMeta()
         r.sourceUrl = 'http://crackhouse.ck/css/somehack.css?x=y#whatever'
@@ -52,6 +63,7 @@ class ResourceProcessorTests {
     }
 
     // GRESOURCES-116
+    @Test
     void testPrepareAbsoluteURLWithMissingExtension() {
         def r = new ResourceMeta()
         r.workDir = new File('/tmp/test')
@@ -66,6 +78,7 @@ class ResourceProcessorTests {
         assertEquals([type: 'js'], meta.tagAttributes)
     }
 
+    @Test
     void testBuildResourceURIForGrails1_4() {
         def r = new ResourceMeta()
         r.sourceUrl = '/somehack.xml#whatever'
@@ -76,6 +89,7 @@ class ResourceProcessorTests {
         assertEquals '/somehack.xml#whatever', meta.linkUrl
     }
 
+    @Test
     void testBuildResourceURIForGrails1_3AndLower() {
         def r = new ResourceMeta()
         r.sourceUrl = '/somehack.xml#whatever'
@@ -86,6 +100,7 @@ class ResourceProcessorTests {
         assertEquals '/somehack.xml#whatever', meta.linkUrl
     }
 
+    @Test
     void testProcessLegacyResourceIncludesExcludes() {
         
         processor.adHocIncludes = ['/**/*.css', '/**/*.js', '/images/**']
@@ -117,6 +132,7 @@ class ResourceProcessorTests {
         }
     }
 
+    @Test
     void testProcessLegacyResourceIncludesExcludesSpecificFile() {
         
         processor.adHocIncludes = ['/**/*.js']
@@ -146,6 +162,7 @@ class ResourceProcessorTests {
         }
     }
     
+    @Test
     void testDependencyOrdering() {
         processor.modulesByName = [
             a: [name:'a', dependsOn:['b']],
@@ -183,6 +200,7 @@ class ResourceProcessorTests {
         assertTrue pos('f') > pos('d')
     }
     
+    @Test
     void testWillNot404OnAdhocResourceWhenAccessedDirectlyFromStaticUrl() {
 		processor.adHocIncludes = ["/**/*.xml"]
 		processor.staticUrlPrefix = "/static"
@@ -200,6 +218,7 @@ class ResourceProcessorTests {
         assert response.contentLength > 0
     }
 
+    @Test
     void testRedirectToActualUrlWithAbsoluteLinkUrlRedirectedToThatUrl() {
         processor.staticUrlPrefix = "/static"
 
