@@ -16,7 +16,7 @@ plugin=${plugin/"-$version"/}
 
 echo "Publishing plugin $plugin with version $version"
 
-if [[ $TRAVIS_BRANCH == 'master' && $TRAVIS_REPO_SLUG == "grails-plugins/grails-$plugin" && $TRAVIS_PULL_REQUEST == 'false' ]]; then
+if [[ $TRAVIS_BRANCH == 'master' && $TRAVIS_REPO_SLUG == "grails-plugins/grails-$plugin" && $TRAVIS_PULL_REQUEST == 'false' && $TRAVIS_JOB_NUMBER =~ ^[0-9]+(\.1)?$ ]]; then
   git config --global user.name "$GIT_NAME"
   git config --global user.email "$GIT_EMAIL"
   git config --global credential.helper "store --file=~/.git-credentials"
