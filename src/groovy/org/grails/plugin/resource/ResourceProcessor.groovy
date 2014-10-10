@@ -238,6 +238,7 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
     }
 
     boolean canProcessLegacyResource(uri) {
+        if(uri == null) return false
         Boolean result = resourceAllowedCache.get(uri)
         if(result == null) {
             result = doCanProcessLegacyResource(uri)
@@ -263,6 +264,7 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
     }
     
     boolean isServingURLAllowed(String uri, URL url) {
+        if(url == null) return false
         Boolean result = servingAllowedCache.get(uri)
         if(result == null) {
             result = doIsServingURLAllowed(uri, url)
@@ -272,7 +274,6 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
     }
     
     boolean doIsServingURLAllowed(String uri, URL url) {
-        if(url == null) return null
         if(serveUnderRootPathOnly) {
             String urlAsString = urlToNormalizedFormat(url)
             if(urlAsString==null || rootUrlNormalized == null || !urlAsString.startsWith(rootUrlNormalized)) {
@@ -593,6 +594,7 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
     }
 
     private URL resolveUriToURL(uri) {
+        if(uri == null) return null
         URL url = null
         if (resourceLocatorEnabled && grailsResourceLocator != null) {
             def res = grailsResourceLocator.findResourceForURI(uri)
