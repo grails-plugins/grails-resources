@@ -5,3 +5,4 @@ org.grails.plugin.resource.module
 org.grails.plugin.resource.test
 org.grails.plugin.resource.util
 org.grails.plugin.resources.artefacts
+org.grails.plugin.resources.stash
