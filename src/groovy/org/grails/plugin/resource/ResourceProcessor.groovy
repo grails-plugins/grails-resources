@@ -5,6 +5,7 @@ import grails.util.Holders
 import groovy.util.logging.Commons
 
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 
 import javax.servlet.ServletContext
 import javax.servlet.ServletRequest
@@ -23,6 +24,8 @@ import org.springframework.beans.factory.InitializingBean
 import org.springframework.util.AntPathMatcher
 import org.springframework.web.context.ServletContextAware
 import org.springframework.web.util.WebUtils
+
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap
 
 /**
  * Primary service facade to actions on resources.
@@ -91,11 +94,26 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
     List adHocExcludesLowerCase
 
     List optionalDispositions
+    
+    boolean resourceLocatorEnabled
+    boolean serveUnderRootPathOnly
+    
+    ConcurrentMap<String, Boolean> servingAllowedCache
+    ConcurrentMap<String, Boolean> resourceAllowedCache
+    
+    protected ConcurrentLinkedHashMap<String, Boolean> createDefaultAuthorizationCache() {
+        return new ConcurrentLinkedHashMap.Builder<String, Boolean>()
+                                .maximumWeightedCapacity(5000)
+                                .build();
+    }
 
     /**
      * Initialize bean after properties have been set.
      */
     void afterPropertiesSet() {
+        servingAllowedCache = createDefaultAuthorizationCache()
+        resourceAllowedCache = createDefaultAuthorizationCache()
+        
         processingEnabled = getConfigParamOrDefault('processing.enabled', true)
         adHocIncludes = getConfigParamOrDefault('adhoc.includes', DEFAULT_ADHOC_INCLUDES)
         adHocIncludes = adHocIncludes.collect { it.startsWith('/') ? it : '/' + it }
@@ -111,6 +129,10 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
         optionalDispositions = getConfigParamOrDefault('optional.dispositions', ['inline', 'image'])
 
         rootUrlNormalized = urlToNormalizedFormat(resolveUriToURL('/'))
+        
+        boolean developmentMode = Environment.getCurrent().isDevelopmentMode()
+        resourceLocatorEnabled = getConfigParamOrDefault('resourceLocatorEnabled', developmentMode)
+        serveUnderRootPathOnly = getConfigParamOrDefault('serveUnderRootPathOnly', (resourceLocatorEnabled==false))
     }
 
     /**
@@ -206,6 +228,15 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
     }
 
     boolean canProcessLegacyResource(uri) {
+        Boolean result = resourceAllowedCache.get(uri)
+        if(result == null) {
+            result = doCanProcessLegacyResource(uri)
+            resourceAllowedCache.put(uri, result)
+        }
+        result
+    }
+    
+    boolean doCanProcessLegacyResource(uri) {
         // Apply our own url filtering rules because servlet mapping uris are too lame
         boolean included = adHocIncludes.find { p ->
             PATH_MATCHER.match(p, uri)
@@ -221,16 +252,29 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
         return included
     }
     
-    boolean isServingURLAllowed(URL url) {
-        if(url == null) return null
-        String urlAsString = urlToNormalizedFormat(url)
-        if(urlAsString==null || rootUrlNormalized == null || !urlAsString.startsWith(rootUrlNormalized)) {
-            return false;
+    boolean isServingURLAllowed(String uri, URL url) {
+        Boolean result = servingAllowedCache.get(uri)
+        if(result == null) {
+            result = doIsServingURLAllowed(uri, url)
+            servingAllowedCache.put(uri, result)
         }
-        String relativePath = urlAsString.substring(rootUrlNormalized.length()-1)
-        return canProcessLegacyResource(relativePath)
+        result
     }
-
+    
+    boolean doIsServingURLAllowed(String uri, URL url) {
+        if(url == null) return null
+        if(serveUnderRootPathOnly) {
+            String urlAsString = urlToNormalizedFormat(url)
+            if(urlAsString==null || rootUrlNormalized == null || !urlAsString.startsWith(rootUrlNormalized)) {
+                return false
+            }
+            String relativePath = urlAsString.substring(rootUrlNormalized.length()-1)
+            return canProcessLegacyResource(relativePath)
+        } else {
+            return canProcessLegacyResource(uri)
+        }
+    }
+    
     static String urlToNormalizedFormat(URL url) {
         url != null ? url.toURI().normalize().toASCIIString() : null
     }
@@ -530,7 +574,7 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
         if (url == null) {
             return null
         }
-        if (isServingURLAllowed(url)) {
+        if (isServingURLAllowed(uri, url)) {
             return url
         } else {
             log.warn("Serving url ${url} isn't allowed.")
@@ -540,7 +584,7 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
 
     private URL resolveUriToURL(uri) {
         URL url = null
-        if (grailsResourceLocator != null) {
+        if (resourceLocatorEnabled && grailsResourceLocator != null) {
             def res = grailsResourceLocator.findResourceForURI(uri)
             if (res != null) {
                 url = res.URL
