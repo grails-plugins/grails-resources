@@ -6,6 +6,7 @@ import groovy.util.logging.Commons
 
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
+import java.util.concurrent.atomic.AtomicReference
 
 import javax.servlet.ServletContext
 import javax.servlet.ServletRequest
@@ -100,7 +101,7 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
     
     ConcurrentMap<String, Boolean> servingAllowedCache
     ConcurrentMap<String, Boolean> resourceAllowedCache
-    ConcurrentMap<String, Boolean> uriToUrlCache=null
+    ConcurrentMap<String, AtomicReference<URL>> uriToUrlCache=null
     
     protected ConcurrentLinkedHashMap<String, Boolean> createDefaultAuthorizationCache() {
         return new ConcurrentLinkedHashMap.Builder<String, Boolean>()
@@ -108,7 +109,7 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
                                 .build();
     }
 
-    protected ConcurrentLinkedHashMap<String, URL> createDefaultUriToUrlCache() {
+    protected ConcurrentLinkedHashMap<String, AtomicReference<URL>> createDefaultUriToUrlCache() {
         return new ConcurrentLinkedHashMap.Builder<String, URL>()
                                 .maximumWeightedCapacity(5000)
                                 .build();
@@ -602,12 +603,14 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
                 url = res.URL
             }
         } else {
-            url = uriToUrlCache?.get(uri) 
-            if(url == null) {
+            AtomicReference<URL> cachedUrl = uriToUrlCache?.get(uri)
+            if(cachedUrl == null) {
                 url = servletContext.getResource(uri)
                 if(uriToUrlCache != null) {
-                    uriToUrlCache.put(uri, url)
+                    uriToUrlCache.put(uri, new AtomicReference<URL>(url))
                 }
+            } else {
+                url = cachedUrl.get()
             }
         }
         return url
