@@ -100,9 +100,16 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
     
     ConcurrentMap<String, Boolean> servingAllowedCache
     ConcurrentMap<String, Boolean> resourceAllowedCache
+    ConcurrentMap<String, Boolean> uriToUrlCache=null
     
     protected ConcurrentLinkedHashMap<String, Boolean> createDefaultAuthorizationCache() {
         return new ConcurrentLinkedHashMap.Builder<String, Boolean>()
+                                .maximumWeightedCapacity(5000)
+                                .build();
+    }
+
+    protected ConcurrentLinkedHashMap<String, URL> createDefaultUriToUrlCache() {
+        return new ConcurrentLinkedHashMap.Builder<String, URL>()
                                 .maximumWeightedCapacity(5000)
                                 .build();
     }
@@ -111,8 +118,12 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
      * Initialize bean after properties have been set.
      */
     void afterPropertiesSet() {
+        boolean developmentMode = Environment.getCurrent().isDevelopmentMode()
         servingAllowedCache = createDefaultAuthorizationCache()
         resourceAllowedCache = createDefaultAuthorizationCache()
+        if(getConfigParamOrDefault('uriToUrlCacheEnabled', (developmentMode==false))) {
+            uriToUrlCache = createDefaultUriToUrlCache()
+        }
         
         processingEnabled = getConfigParamOrDefault('processing.enabled', true)
         adHocIncludes = getConfigParamOrDefault('adhoc.includes', DEFAULT_ADHOC_INCLUDES)
@@ -130,7 +141,6 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
 
         rootUrlNormalized = urlToNormalizedFormat(resolveUriToURL('/'))
         
-        boolean developmentMode = Environment.getCurrent().isDevelopmentMode()
         resourceLocatorEnabled = getConfigParamOrDefault('resourceLocatorEnabled', developmentMode)
         serveUnderRootPathOnly = getConfigParamOrDefault('serveUnderRootPathOnly', (resourceLocatorEnabled==false))
     }
@@ -590,7 +600,13 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
                 url = res.URL
             }
         } else {
-            url = servletContext.getResource(uri)
+            url = uriToUrlCache?.get(uri) 
+            if(url == null) {
+                url = servletContext.getResource(uri)
+                if(uriToUrlCache != null) {
+                    uriToUrlCache.put(uri, url)
+                }
+            }
         }
         return url
     }
