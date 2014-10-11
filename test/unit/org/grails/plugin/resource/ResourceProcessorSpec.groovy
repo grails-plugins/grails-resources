@@ -29,7 +29,6 @@ class ResourceProcessorSpec extends Specification {
         ]
         resourceProcessor.servletContext = servletContext
         resourceProcessor.afterPropertiesSet()
-        resourceProcessor.rootUrlNormalized = '/'
         request = new MockHttpServletRequest(servletContext)
         request.contextPath = '/'
         response = new MockHttpServletResponse()

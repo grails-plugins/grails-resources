@@ -87,8 +87,6 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
 
     ServletContext servletContext
     
-    String rootUrlNormalized
-
     boolean processingEnabled
 
     List adHocIncludes
@@ -97,7 +95,6 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
     List optionalDispositions
     
     boolean resourceLocatorEnabled
-    boolean serveUnderRootPathOnly
     
     ConcurrentMap<String, Boolean> servingAllowedCache
     ConcurrentMap<String, Boolean> resourceAllowedCache
@@ -140,10 +137,7 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
 
         optionalDispositions = getConfigParamOrDefault('optional.dispositions', ['inline', 'image'])
 
-        rootUrlNormalized = urlToNormalizedFormat(resolveUriToURL('/'))
-        
         resourceLocatorEnabled = getConfigParamOrDefault('resourceLocatorEnabled', developmentMode)
-        serveUnderRootPathOnly = getConfigParamOrDefault('serveUnderRootPathOnly', (resourceLocatorEnabled==false))
     }
 
     /**
@@ -275,20 +269,25 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
     }
     
     boolean doIsServingURLAllowed(String uri, URL url) {
-        if(serveUnderRootPathOnly) {
-            String urlAsString = urlToNormalizedFormat(url)
-            if(urlAsString==null || rootUrlNormalized == null || !urlAsString.startsWith(rootUrlNormalized)) {
-                return false
-            }
-            String relativePath = urlAsString.substring(rootUrlNormalized.length()-1)
-            return canProcessLegacyResource(relativePath)
-        } else {
-            return canProcessLegacyResource(uri)
+        String urlAsString = null
+        try {
+            urlAsString = urlToNormalizedFormat(url)
+        } catch (Exception e) {
+            log.warn("uri $uri is invalid. as url $url", e)
         }
+        
+        if(urlAsString==null) {
+            return false
+        }
+        // only allow urls that end with the uri given as input
+        if(!urlAsString.endsWith(uri)) {
+            return false
+        }
+        return canProcessLegacyResource(uri)
     }
     
     static String urlToNormalizedFormat(URL url) {
-        url != null ? url.toURI().normalize().toASCIIString() : null
+        url != null ? url.toURI().normalize() : null
     }
     
     /**
