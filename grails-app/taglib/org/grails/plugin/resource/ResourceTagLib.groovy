@@ -390,25 +390,31 @@ class ResourceTagLib {
         DispositionsUtils.doneDispositionResources(request, dispositionToRender)
     }
 
-    def script = { attributes, body ->
+    def script = { attributesAsParam, body ->
+        def attributes = [:] + attributesAsParam
         attributes.type = "script"
         if (!attributes.disposition) {
             attributes.disposition = DispositionsUtils.DISPOSITION_DEFER
         }
 
-        stash(attributes, body)
+        doStash(attributes, body)
     }
 
-    def style = { attributes, body ->
+    def style = { attributesAsParam, body ->
+        def attributes = [:] + attributesAsParam
         attributes.type = "style"
         if (!attributes.disposition) {
             attributes.disposition = DispositionsUtils.DISPOSITION_HEAD
         }
 
-        stash(attributes, body)
+        doStash(attributes, body)
+    }
+    
+    def stash = { attributes, body ->
+        doStash(attributes, body)
     }
 
-    def stash = { attributes, body ->
+    private def doStash(attributes, body) {
         needsResourceLayout()
         StashManager.stashPageFragment(request, (String) attributes.type, (String) attributes.disposition, (String) body())
     }
