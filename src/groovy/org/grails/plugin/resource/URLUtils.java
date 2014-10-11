@@ -26,14 +26,10 @@ class URLUtils {
      * certainly not my finest moment. Sorry. Rely on the MenuTagTests.
      *
      * It's quite ugly in there.
+     * @throws URISyntaxException 
      */
-    public static String relativeURI(String base, String target) {
-         try {
-            return new URI(base).resolve(new URI(target)).normalize().toString();
-        }
-        catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+    public static String relativeURI(String base, String target) throws URISyntaxException {
+        return new URI(base).resolve(new URI(target)).normalize().toString();
     }
     
     /**
