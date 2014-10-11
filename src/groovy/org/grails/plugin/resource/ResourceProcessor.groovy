@@ -6,7 +6,6 @@ import groovy.util.logging.Commons
 
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
-import java.util.concurrent.atomic.AtomicReference
 
 import javax.servlet.ServletContext
 import javax.servlet.ServletRequest
@@ -98,7 +97,8 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
     
     ConcurrentMap<String, Boolean> servingAllowedCache
     ConcurrentMap<String, Boolean> resourceAllowedCache
-    ConcurrentMap<String, AtomicReference<URL>> uriToUrlCache=null
+    ConcurrentMap<String, UriUrlCacheEntry> uriToUrlCache=null
+    long uriToUrlCacheTimeout = -1
     
     protected ConcurrentLinkedHashMap<String, Boolean> createDefaultAuthorizationCache() {
         return new ConcurrentLinkedHashMap.Builder<String, Boolean>()
@@ -106,10 +106,25 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
                                 .build();
     }
 
-    protected ConcurrentLinkedHashMap<String, AtomicReference<URL>> createDefaultUriToUrlCache() {
-        return new ConcurrentLinkedHashMap.Builder<String, URL>()
+    protected ConcurrentLinkedHashMap<String, UriUrlCacheEntry> createDefaultUriToUrlCache() {
+        return new ConcurrentLinkedHashMap.Builder<String, UriUrlCacheEntry>()
                                 .maximumWeightedCapacity(5000)
                                 .build();
+    }
+    
+    private static class UriUrlCacheEntry {
+        URL url
+        long created = System.currentTimeMillis()
+        long timeout = 0
+        
+        UriUrlCacheEntry(URL url, long timeout) {
+            this.url = url
+            this.timeout = timeout
+        }
+        
+        boolean isExpired() {
+            timeout > 0 && System.currentTimeMillis() - created > timeout
+        }
     }
 
     /**
@@ -119,9 +134,16 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
         boolean developmentMode = Environment.getCurrent().isDevelopmentMode()
         servingAllowedCache = createDefaultAuthorizationCache()
         resourceAllowedCache = createDefaultAuthorizationCache()
-        if(getConfigParamOrDefault('uriToUrlCacheEnabled', (developmentMode==false))) {
-            uriToUrlCache = createDefaultUriToUrlCache()
+        
+        long defaultTimeout = 30000L // 30 seconds default timeout
+        if(developmentMode) {
+            defaultTimeout = 0 // no caching
+        } else if (Environment.getCurrent().isReloadEnabled()) {
+            defaultTimeout = 5000L // 5 seconds
         }
+        
+        uriToUrlCacheTimeout = getConfigParamOrDefault('uriToUrlCacheTimeout', defaultTimeout)
+        uriToUrlCache = defaultTimeout != 0 ? createDefaultUriToUrlCache() : null
         
         processingEnabled = getConfigParamOrDefault('processing.enabled', true)
         adHocIncludes = getConfigParamOrDefault('adhoc.includes', DEFAULT_ADHOC_INCLUDES)
@@ -602,14 +624,14 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
                 url = res.URL
             }
         } else {
-            AtomicReference<URL> cachedUrl = uriToUrlCache?.get(uri)
+            UriUrlCacheEntry cachedUrl = uriToUrlCache?.get(uri)
             if(cachedUrl == null) {
                 url = servletContext.getResource(uri)
                 if(uriToUrlCache != null) {
-                    uriToUrlCache.put(uri, new AtomicReference<URL>(url))
+                    uriToUrlCache.put(uri, new UriUrlCacheEntry(url, uriToUrlCacheTimeout))
                 }
             } else {
-                url = cachedUrl.get()
+                url = cachedUrl.url
             }
         }
         return url
