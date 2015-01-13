@@ -302,7 +302,7 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
             return false
         }
         // only allow urls that end with the uri given as input
-        if(!urlAsString.endsWith(uri)) {
+        if(!resourceLocatorEnabled && !urlAsString.endsWith(uri)) {
             return false
         }
         return canProcessLegacyResource(uri)
