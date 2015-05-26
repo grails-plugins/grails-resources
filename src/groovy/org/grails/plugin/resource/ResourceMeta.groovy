@@ -373,7 +373,7 @@ class ResourceMeta {
     
     String getActualUrlParent() {
         def lastSlash = actualUrl.lastIndexOf('/')
-        if (lastSlash >= 0) {
+        if (lastSlash > 0) {
             return actualUrl[0..lastSlash-1]
         } else {
             return ''
@@ -416,6 +416,9 @@ class ResourceMeta {
      * All resource URLs must be app-relative with no ../ or ./
      */
     String relativeTo(ResourceMeta base) {
+        if (base.is(this)){
+            return actualUrl
+        }
         if (actualAbsolute) {
             return actualUrl
         }
