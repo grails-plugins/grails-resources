@@ -416,7 +416,7 @@ class ResourceMeta {
      * All resource URLs must be app-relative with no ../ or ./
      */
     String relativeTo(ResourceMeta base) {
-        if (base.is(this)){
+        if (base.is(this)) {
             return actualUrl
         }
         if (actualAbsolute) {
