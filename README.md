@@ -14,4 +14,4 @@ Built-in mappers included in the plugin:
 * CSS rewriter (two mappers required, happens automatically)
 * Bundler (combines multiple css or js files into one)
 
-See docs at http://grails.org/plugin/resources
+See docs at http://grails-plugins.github.io/grails-resources/
