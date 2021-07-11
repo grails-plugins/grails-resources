@@ -567,7 +567,7 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
     File makeFileForURI(String uri) {
         def splitPoint = uri.lastIndexOf('/')
         def fileSystemDir = splitPoint > 0 ? makeFileSystemPathFromURI(uri[0..splitPoint - 1]) : ''
-        def fileSystemFile = makeFileSystemPathFromURI(uri[splitPoint + 1..-1])
+        def fileSystemFile = uri.length() <= splitPoint+1? '': makeFileSystemPathFromURI(uri[splitPoint + 1..-1])
         def staticDir = new File(getWorkDir(), fileSystemDir)
 
         // force the structure
@@ -583,7 +583,7 @@ class ResourceProcessor implements InitializingBean, ServletContextAware {
         log.debug "Creating file object for URI [$uri] from [${staticDir}] and [${fileSystemFile}]"
         File f = new File(staticDir, fileSystemFile)
         // Delete the existing file - it may be from previous release, we cannot tell.
-        if (f.exists()) {
+        if (f.exists() && f.isFile()) {
             assert f.delete()
         }
         return f
